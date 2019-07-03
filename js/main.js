@@ -23,16 +23,17 @@ function randString(id) {
     var dataSet = $(id).attr('data-character').split(',');
     var possible = '';
     if ($.inArray('a-z', dataSet) >= 0) {
-        possible += 'abcdefghijklmnopqrstuvwxyz';
+        possible += 'abcdefghkmnprstuvwxyz';
     }
     if ($.inArray('A-Z', dataSet) >= 0) {
-        possible += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        possible += 'ABCDEFGHJKLMNPRSTUVWXYZ';
     }
     if ($.inArray('0-9', dataSet) >= 0) {
-        possible += '0123456789';
+        possible += '123456789';
     }
     if ($.inArray('#', dataSet) >= 0) {
-        possible += '![]{}()%&*$#^<>~@|';
+        //possible += '![]{}()%&*$#^<>~@|';
+        possible += '!.-?';
     }
     var text = '';
     for (var i = 0; i < $(id).attr('data-size'); i++) {
@@ -164,6 +165,7 @@ $(".input-name").click(nameSmall);
 $(".input-status").click(nameSmall);
 
 function nameSmall(e) {
+    e.preventDefault();
     $(e.target).parent().find("input").focus();
 }
 
@@ -190,14 +192,12 @@ function checkInputs() {
 }
 
 // activate current menu item
-var pathName = window.location.pathname;
-pathName = decodeURIComponent(pathName);
-pathName = pathName.replace("/", "");
-pathName = pathName.charAt(0).toUpperCase() + pathName.slice(1);
-
 $(document).ready(activate);
 
 function activate() {
+    var pathName = window.location.pathname;
+    pathName = decodeURIComponent(pathName).substr(1);
+    pathName = pathName.charAt(0).toUpperCase() + pathName.slice(1);
     if (pathName == "") {
         var activate = $(".sidebar-item span:contains('Übersicht')");
     } else {
