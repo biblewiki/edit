@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
 
-<?php echo file_get_contents('html/head.html'); ?>
+<head>
+    <?php echo file_get_contents('html/head.html'); ?>
+
+    <title>Übersicht | BibleWiki</title>
+</head>
 
 <body>
     <!-- Navbar -->

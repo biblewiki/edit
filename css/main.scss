@@ -1,0 +1,541 @@
+// ------------ VARIABLES ------------
+
+@function v($var) {
+    @return var(--#{$var});
+}
+
+// breakpoints
+$breakpoint-tablet: 1024px;
+$breakpoint-mobile: 600px;
+
+:root {
+    // setting
+    --theme-color: #32c132; // https://www.color-hex.com/color/32c132
+
+    // size
+    --nav-height: 80px;
+    --side-width: 300px;
+    --content-width: calc(100% - 300px);
+    --input-margin: 10px;
+    --input-height: 80px;
+    --input-width: calc(50% - calc(var(--input-margin) / 1));
+
+    // z-index and time
+    --zindex-nav-menu: 99;
+    --time-1: .7s;
+
+    // align
+    --side-text-align: left;
+
+    // font-size
+    --side-font-size: 30px;
+    --h1-font-size: 50px;
+    --h2-font-size: 40px;
+    --input-font-size: 30px;
+
+    // background-color
+    --grey-bg-0: #f7f7f7;
+    --grey-bg-1: #e4e4e4;
+    --grey-bg-2: #ebebeb;
+    --accent-bg-0: #99e099; //lighten(var(--theme-color), 10%)
+    --accent-bg-1: var(--theme-color);
+    --accent-bg-2: #00b200;
+    --green-signal-1: #007f00;
+    --yellow-signal-1: #ffc00f;
+    --red-signal-1: #cc0000;
+
+    // text-color
+    --grey-text-0: #929292;
+    --grey-text-1: #5f5f5f;
+    --grey-text-2: #3a3a3a;
+
+    --accent-text-0: #006a00;
+    --accent-text-1: #005f00;
+    --accent-text-2: #003900
+}
+
+@media screen and (max-width: $breakpoint-tablet) {
+    :root {
+        // size
+        --nav-height: 70px;
+        --side-width: 250px;
+        --content-width: calc(100% - 250px);
+        --input-height: 70px;
+        --input-width: calc(100% - var(--input-margin));
+
+        // font-size
+        --side-font-size: 25px;
+        --h1-font-size: 40px;
+        --h2-font-size: 33px;
+        --input-font-size: 25px;
+    }
+}
+
+@media screen and (max-width: $breakpoint-mobile) {
+    :root {
+        // size
+        --nav-height: 60px;
+        --side-width: 0;
+        --content-width: 100%;
+        --input-height: 60px;
+
+        // align
+        --side-text-align: center;
+
+        // font-size
+        --side-font-size: 0;
+        --h1-font-size: 35px;
+        --h2-font-size: 25px;
+        --input-font-size: 22px;
+    }
+}
+
+// **************************************************************************** --> FOR ALL PAGES
+// ------------ THEME ------------
+html, body {
+    font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
+}
+.noselect {
+    cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+* {
+    transition: all v(time-1);
+    color: v(grey-text-1);
+}
+.capitalize {
+    text-transform: capitalize;
+    font-variant: small-caps;
+}
+h1 {
+    font-size: v(h1-font-size);
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: v(h2-font-size);
+}
+
+// ------------ BUTTONS ------------
+.button {
+    color: v(grey-text-2);
+}
+.button-accent {
+    color: #fff;
+}
+.button-active {
+    color: v(grey-text-2);
+}
+
+// ------------ INPUTS ------------
+form {
+   font-size: 0; 
+}
+.input-item {
+    position: relative;
+    float: left;
+    width: v(input-width);
+    height: v(input-height);
+    margin: 0 v(input-margin) v(input-margin) 0;
+}
+input {
+    width: 100%;
+    height: 100%;
+    padding: calc(var(--input-height) / 6.7) var(--input-height) calc(var(--input-height) / 6.7) calc(var(--input-height) / 4);
+    box-sizing: border-box;
+    border: none;
+    background-color: v(grey-bg-0);
+    color: v(grey-text-1);
+    font-size: v(input-font-size);
+    box-shadow: none;
+}
+input:focus {
+    background-color: v(grey-bg-1);
+    color: v(grey-text-2);
+}
+.input-item.username {
+    width: calc(100% - var(--input-margin));
+}
+.input-item.username input {
+    color: v(grey-text-0);
+}
+.input-item.password input {
+    padding-right: calc(var(--input-height) * 2);
+}
+.input-name {
+    position: absolute;
+    z-index: 8;
+    top: calc(var(--input-height) / 6.7 + 6px);
+    left: calc(var(--input-height) / 4);
+    font-size: v(input-font-size);
+    color: v(grey-text-0);
+    transition: background-color .2s .1s, all .5s;
+}
+.input-name.name-small, .input-item:focus-within .input-name {
+    z-index: 10;
+    top: calc(-1 * var(--input-font-size) / 3);
+    left: calc(var(--input-height) / 8);
+    padding: calc(var(--input-height) / 40) calc(var(--input-height) / 8);
+    font-size: calc(var(--input-font-size) / 2);
+    color: v(grey-text-1);
+    background-color: #fff;
+}
+.input-info, .input-source {
+    cursor: pointer;
+    position: absolute;
+    display: table;
+    z-index: 10;
+    height: calc(var(--input-height) / 3.1);
+    width: calc(var(--input-height) / 3.1);
+    top: calc(-1 * var(--input-font-size) / 3);
+    font-size: calc(var(--input-font-size) / 2);
+    text-align: center;
+    color: v(grey-text-1);
+    background-color: #fff;
+}
+.input-info {
+    right: calc(var(--input-height) / 4 - 10px);
+}
+.input-source {
+    right: calc(var(--input-height) / 4 + var(--input-height) / 3.1);
+}
+.input-info:hover, .input-source:hover {
+    color: v(grey-text-2);
+}
+.input-info i, .input-source i {
+    display: table-cell;
+    vertical-align: middle;
+}
+.input-info-text {
+    position: absolute;
+    display: table;
+    z-index: 9;
+    height: v(input-height);
+    width: 0;
+    top: 0;
+    right: 0;
+    padding: 0;
+    font-size: 0;
+    background: v(grey-bg-2);
+}
+.input-info-text span {
+    display: table-cell;
+    vertical-align: middle;
+    color: v(grey-text-1);
+}
+.input-info:hover ~ .input-info-text, .input-info-text:hover {
+    width: 100%;
+    padding: 0 calc(var(--input-height) / 3);
+    font-size: calc(var(--input-font-size) / 1.5);
+}
+.input-status, .input-visible {
+    position: absolute;
+    height: v(input-height);
+    width: v(input-height);
+    top: 0;
+    text-align: center;
+    font-size: calc(var(--input-font-size) * 2);
+}
+.input-status {
+    cursor: text;
+    display: table;
+    right: 0;
+}
+.input-visible {
+    cursor: pointer;
+    display: none;
+    right: v(input-height);
+}
+.input-status .fas, .input-visible .fas {
+    vertical-align: middle;
+}
+.input-status .fa-check {
+    cursor: default;
+    display: none;
+    color: v(green-signal-1);
+}
+.input-status .fa-exclamation {
+    cursor: default;
+    display: none;
+    color: v(yellow-signal-1);
+}
+.input-status .fa-times {
+    cursor: default;
+    display: none;
+    color: v(red-signal-1);
+}
+.input-visible .fa-eye, .input-visible .fa-eye-slash {
+    display: table-cell;
+}
+.email-or-tel {
+    cursor: pointer;
+    height: calc(var(--input-height) * 2 + var(--input-margin));
+    background-color: v(grey-bg-0);
+    color: v(grey-text-1);
+    font-size: v(input-font-size);
+}
+.email-or-tel .button-email-tel {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    display: table;
+    text-align: center;
+}
+.button-email-tel:hover, .button-email-tel:active {
+    background-color: v(grey-bg-1);
+    color: v(grey-text-2);
+}
+.email-or-tel .button-email {
+    left: 0;
+}
+.email-or-tel .button-tel {
+    right: 0;
+}
+.email-or-tel .button-email-tel span {
+    display: table-cell;
+    vertical-align: middle;
+}
+.button-area {
+    cursor: pointer;
+    display: table;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background-color: v(grey-bg-0);
+    color: v(grey-text-1);
+    font-size: v(input-font-size);
+}
+.button-area:hover, .button-area:active {
+    background-color: v(grey-bg-1);
+    color: v(grey-text-2);
+}
+.button-area span {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.input-item.ok input ~ .input-visible {
+    display: table;
+}
+.input-item.ok input:focus:invalid/*, .input-item.invalid.ok input*/ {
+    color: v(red-signal-1);
+}
+.input-item.ok input:focus:valid/*, .input-item.valid.ok input*/ {
+    color: v(green-signal-1);
+}
+.input-item.ok input:invalid ~ .input-status .fa-times/*, .input-item.invalid.ok input ~ .input-status .fa-times*/ {
+    display: table-cell;
+}
+.input-item.ok input:valid ~ .input-status .fa-check/*, .input-item.valid.ok input ~ .input-status .fa-check*/ {
+    display: table-cell;
+}
+/* korrektur für email und nummer*/
+.input-item.email.ok:not(.verified) input:focus:valid, .input-item.tel.ok:not(.verified) input:focus:valid {
+    color: v(yellow-signal-1);
+}
+.input-item.email.ok:not(.verified) input:valid ~ .input-status .fa-check, .input-item.tel.ok:not(.verified) input:valid ~ .input-status .fa-check {
+    display: none;
+}
+.input-item.email.ok:not(.verified) input:valid ~ .input-status .fa-exclamation, .input-item.tel.ok:not(.verified) input:valid ~ .input-status .fa-exclamation {
+    display: table-cell;
+}
+
+// ------------ NAVBAR ------------
+.navbar-top {
+    position: fixed;
+    z-index: v(zindex-nav-menu);
+    height: v(nav-height);
+    width: 100%;
+    background-color: v(theme-color);
+}
+.navbar-menu {
+    position: absolute;
+    display: table;
+    left: 0;
+    cursor: pointer;
+    height: v(nav-height);
+    width: v(nav-height);
+    text-align: center;
+    font-size: calc(var(--nav-height) / 8 * 5);
+}
+.navbar-menu i {
+    display: table-cell;
+    vertical-align: middle;
+    color: #fff;
+}
+.navbar-menu:hover {
+    background-color: v(accent-bg-0);
+}
+.navbar-logo {
+    position: absolute;
+    cursor: pointer;
+    left: v(nav-height);
+    padding: calc(var(--nav-height) / 8);
+    width: v(nav-height);
+    height: v(nav-height);
+}
+.navbar-logo img {
+    width: calc(var(--nav-height) - (var(--nav-height) / 4));
+    height: calc(var(--nav-height) - (var(--nav-height) / 4));
+}
+.navbar-profile {
+    position: absolute;
+    display: table;
+    right: 0;
+    text-align: right;
+    cursor: pointer;
+    padding: 0 calc(var(--nav-height) / 4);
+    height: v(nav-height);
+}
+.navbar-profile:hover {
+    background-color: v(accent-bg-0);
+}
+.navbar-profile-post {
+    display: table-cell;
+    vertical-align: middle;
+}
+.navbar-name {
+    display: block;
+    font-size: calc(var(--nav-height) / 8 * 3);
+    line-height: calc(var(--nav-height) / 4);
+    color: #fff;
+}
+.navbar-role {
+    display: block;
+    font-size: calc(var(--nav-height) / 8 * 1.5);
+    line-height: calc(var(--nav-height) / 4);
+    color: #fff;
+}
+
+// ------------ SIDEBAR ------------
+.sidebar {
+    position: fixed;
+    z-index: v(zindex-nav-menu);
+    top: v(nav-height);
+    left: 0;
+    width: v(side-width);
+    height: calc(100vh - var(--nav-height));
+    background-color: v(theme-color);
+}
+.sidebar-scroll {
+    overflow: auto;
+    height: calc(100% - (var(--side-font-size) / 2 + 20px));
+}
+.sidebar-left {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.sidebar-left .sidebar-item {
+    cursor: pointer;
+    display: table;
+    height: v(nav-height);
+    width: 100%;
+    padding: 0 calc(var(--side-width) / 10);
+    font-size: v(side-font-size);
+    text-align: v(side-text-align);
+    transition: background-color .1s, color .1s;
+}
+.sidebar-left .sidebar-item span {
+    display: table-cell;
+    vertical-align: middle;
+    color: #fff;
+}
+.active/*:hover*/, .sidebar-left .sidebar-item:hover {
+    background-color: v(accent-bg-0);
+}
+/*.active {
+    background-color: v(accent-bg-1);
+}*/
+.active span {
+    color: #fff !important;
+}
+.sidebar-copyright {
+    position: absolute;
+    color: #fff;
+    bottom: 10px;
+    right: 15px;
+    font-size: calc(var(--side-font-size) / 2);
+}
+
+// ------------ CONTENT ------------
+.content {
+    position: relative;
+    float: right;
+    margin-top: v(nav-height);
+    margin-bottom: v(nav-height);
+    padding: 20px 20px 20px 30px;
+    min-height: calc(100vh - (var(--nav-height) * 2));
+    width: v(content-width);
+    background-color: #fff;
+}
+/*.content-post {
+
+}*/
+
+// ------------ BOTTOMBAR ------------
+.bottombar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: calc(var(--zindex-nav-menu) - 1);
+    height: v(nav-height);
+    width: v(content-width);
+    background-color: v(grey-bg-0);
+}
+.bottombar-button {
+    position: relative;
+    display: table;
+    float: right;
+    cursor: pointer;
+    height: v(nav-height);
+    padding: 0 calc(var(--nav-height) / 4);
+    font-size: calc(var(--nav-height) / 2.5);
+}
+.bottombar-button:hover {
+    color: v(grey-text-2);
+    background-color: v(grey-bg-1);
+}
+.bottombar-button span {
+    display: table-cell;
+    vertical-align: middle;
+    color: v(grey-text-1);
+}
+
+// **************************************************************************** --> FOR SINGLE PAGE
+// ------------ ÜBERSICHT ------------
+.content-statistics {
+    margin-bottom: 20px;
+}
+.content-diagram {
+    overflow: auto;
+    height: 500px;
+    padding: 50px;
+}
+.diagram-lines {
+    min-width: 1000px;
+    position: relative;
+    height: 100%;
+    border: solid 2px;
+}
+.diagram-bar {
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    width: 50px;
+    height: 50%;
+    text-align: canter;
+    color: #fff;
+    background: #818181;
+}
+.content-persons {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+// ------------ PROFILE ------------
