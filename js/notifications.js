@@ -3,7 +3,11 @@ $(function() {
     var login = getUrlVars()["login"];
 
     if (typeof login !== 'undefined') {
-        notification(login, 'login');
+        if (login != 'error' && login != 'success' && login != 'warning' && login != 'info') {
+            notification('info', 'login_' + login);
+        } else {
+            notification(login, 'login');
+        }
     }
 });
 
