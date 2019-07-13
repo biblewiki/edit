@@ -29,6 +29,8 @@ function eraseCookie(name) {
     createCookie(name, "", -1);
 }
 
+
+// TEMPORARY FOR TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 $('document').ready(function() {
     console.log('Eingeloggt: ' + readCookie('LOGGEDIN'));
     console.log('ID: ' + readCookie('ID'));

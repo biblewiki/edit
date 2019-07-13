@@ -1,12 +1,22 @@
 $(function() {
-
-    var login = getUrlVars()["login"];
+    var urlVars = getUrlVars();
+    var login = urlVars["login"];
 
     if (typeof login !== 'undefined') {
         if (login != 'error' && login != 'success' && login != 'warning' && login != 'info') {
             notification('info', 'login_' + login);
         } else {
             notification(login, 'login');
+        }
+    }
+
+    var logout = urlVars["logout"];
+
+    if (typeof logout !== 'undefined') {
+        if (logout != 'error' && logout != 'success' && logout != 'warning' && logout != 'info') {
+            notification('info', 'logout_' + logout);
+        } else {
+            notification(logout, 'logout');
         }
     }
 });
@@ -17,6 +27,9 @@ function getUrlVars() {
     var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
         vars[key] = value;
     });
+
+    //GET-Paramter löschen
+    window.history.pushState("", "", '/');
 
     return vars;
 }
@@ -37,7 +50,7 @@ function notification(type, code) {
                 "extendedTimeout": "0"
             });
         } else {
-            //Notification anzeigen. Wird nicht von selbst ausgeblendet
+            //Notification anzeigen. Wird von selbst ausgeblendet
             toastr[type](notification.text, notification.title);
         }
 

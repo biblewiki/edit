@@ -1,3 +1,7 @@
+<?php
+require_once('async/auth.php');
+?>
+
 <!DOCTYPE html>
 <html lang="de">
 
