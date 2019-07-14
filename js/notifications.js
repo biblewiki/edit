@@ -19,6 +19,18 @@ $(function() {
             notification(logout, 'logout');
         }
     }
+
+    var confirmed = urlVars["email_confirmed"];
+
+    if (typeof confirmed !== 'undefined') {
+        if (confirmed != 'error' && confirmed != 'success' && confirmed != 'warning' && confirmed != 'info') {
+            notification('info', 'confirmed_' + confirmed);
+        } else {
+            notification(confirmed, 'confirmed');
+        }
+    }
+
+
 });
 
 // URL Parameter auslesen
