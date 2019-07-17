@@ -20,16 +20,25 @@ $(function() {
         }
     }
 
-    var confirmed = urlVars["email_confirmed"];
+    var email_confirmed = urlVars["email_confirmed"];
 
-    if (typeof confirmed !== 'undefined') {
-        if (confirmed != 'error' && confirmed != 'success' && confirmed != 'warning' && confirmed != 'info') {
-            notification('info', 'confirmed_' + confirmed);
+    if (typeof email_confirmed !== 'undefined') {
+        if (email_confirmed != 'error' && email_confirmed != 'success' && email_confirmed != 'warning' && email_confirmed != 'info') {
+            notification('info', 'email_confirmed_' + email_confirmed);
         } else {
-            notification(confirmed, 'confirmed');
+            notification(email_confirmed, 'email_confirmed');
         }
     }
 
+    var password_reset = urlVars["password_reset"];
+
+    if (typeof password_reset !== 'undefined') {
+        if (password_reset != 'error' && password_reset != 'success' && password_reset != 'warning' && password_reset != 'info') {
+            notification('info', 'password_reset_' + password_reset);
+        } else {
+            notification(password_reset, 'password_reset');
+        }
+    }
 
 });
 
