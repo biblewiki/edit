@@ -59,6 +59,8 @@ require_once('async/auth.php');
     </main>
 
     <?php echo file_get_contents('html/script.html'); ?>
+    <?php include('html/footer.html'); ?>
+    
 </body>
 
 </html>
