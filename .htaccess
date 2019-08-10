@@ -1,6 +1,0 @@
-<If "req('Host') = 'edit.josua.biblewiki.one' || req('Host') = 'edit.michael.biblewiki.one'">
-    Authtype Basic
-    AuthName "user and password"
-    AuthUserFile /home/mwepf1gm/www/biblewiki.one/michael/.htpasswd
-    Require valid-user
-</If>
