@@ -1,9 +1,13 @@
+//Require valid-user
+//AuthType Basic
+//AuthName 'user and password'
+//AuthUserFile /home/mwepf1gm/www/biblewiki.one/michael/.htpasswd
+
 <If "req('Host') = 'edit.josua.biblewiki.one'|| req('Host') = 'edit.joel.biblewiki.one'">
-  Require valid-user
-  AuthType Basic
-  AuthName 'user and password'
-  AuthUserFile /home/mwepf1gm/www/biblewiki.one/michael/.htpasswd
 </If>
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+#@__HCP_END__@#
+# Anything after the comment above is left alone
