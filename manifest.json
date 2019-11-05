@@ -1,14 +1,11 @@
 {
     "name": "BibleWiki",
+    "short_name": "BibleWiki",
     "icons": [
         {
             "src": "/images/biblewiki_logo_128x128.png",
             "type": "image/png",
             "sizes": "128x128"
-        },{
-            "src": "/images/biblewiki_logo_256x256.png",
-            "type": "image/png",
-            "sizes": "256x256"
         },{
             "src": "/images/biblewiki_logo_512x512.png",
             "type": "image/png",
@@ -18,5 +15,6 @@
     "start_url": "index.php?source=webapp",
     "background_color": "#3367D6",
     "display": "standalone",
-    "theme_color": "#fff"
+    "theme_color": "#fff",
+    "orientation": "portrait"
 }

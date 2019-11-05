@@ -1,7 +1,7 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="dashboard">
+            <a class="nav-link" href="../dashboard">
                 <i class="ti-home menu-icon"></i>
                 <span class="menu-title">Dashboard</span>
             </a>
@@ -217,6 +217,19 @@
                     <li class="nav-item"> <a class="nav-link" href="pages/samples/search-results.html"> Search Results
                         </a></li>
                     <li class="nav-item"> <a class="nav-link" href="pages/samples/portfolio.html"> Portfolio </a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="collapse" href="#persons-pages" aria-expanded="false" aria-controls="persons-pages">
+                <i class="ti-user menu-icon"></i>
+                <span class="menu-title">Personen</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="persons-pages">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/persons/overview"> Übersicht </a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/persons/newRecord"> Neuer Eintrag </a></li>
                 </ul>
             </div>
         </li>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        @charset "utf-8";
+
+        div.main {
+            background: #0264d6;
+            /* Old browsers */
+            background: -moz-radial-gradient(center, ellipse cover, #0264d6 1%, #1c2b5a 100%);
+            /* FF3.6+ */
+            background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(1%, #0264d6), color-stop(100%, #1c2b5a));
+            /* Chrome,Safari4+ */
+            background: -webkit-radial-gradient(center, ellipse cover, #0264d6 1%, #1c2b5a 100%);
+            /* Chrome10+,Safari5.1+ */
+            background: -o-radial-gradient(center, ellipse cover, #0264d6 1%, #1c2b5a 100%);
+            /* Opera 12+ */
+            background: -ms-radial-gradient(center, ellipse cover, #0264d6 1%, #1c2b5a 100%);
+            /* IE10+ */
+            background: radial-gradient(ellipse at center, #0264d6 1%, #1c2b5a 100%);
+            /* W3C */
+            filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#0264d6', endColorstr='#1c2b5a', GradientType=1);
+            /* IE6-9 fallback on horizontal gradient */
+            height: calc(100vh);
+            width: 100%;
+        }
+
+        [class*="fontawesome-"]:before {
+            font-family: 'FontAwesome', sans-serif;
+        }
+
+
+        /* ---------- GENERAL ---------- */
+
+        * {
+            box-sizing: border-box;
+            margin: 0px auto;
+        }
+
+        body {
+            color: #606468;
+            font: 87.5%/1.5em 'Open Sans', sans-serif;
+            margin: 0;
+        }
+
+        a {
+            color: #eee;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #999;
+            text-decoration: underline;
+        }
+
+        input {
+            border: none;
+            font-family: 'Open Sans', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5em;
+            padding: 0;
+            -webkit-appearance: none;
+        }
+
+        p {
+            line-height: 1.5em;
+        }
+
+        h3 {
+            color: white;
+        }
+
+        .container {
+            left: 50%;
+            position: fixed;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+
+
+        /* ---------- LOGIN ---------- */
+
+        #left {
+            color: white;
+        }
+
+        #left,
+        .logo {
+            display: inline-block;
+            width: 40%;
+        }
+
+        #left {
+            border-right: 1px solid #fff;
+            padding: 0px 22px;
+            width: 59%;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 50px;
+            line-height: 125px;
+        }
+
+        .middle {
+            display: flex;
+            width: 600px;
+        }
+    </style>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+
+    <title>Offline | BibleWiki</title>
+
+</head>
+
+<body>
+
+    <div class="main">
+        <div class="container">
+            <center>
+                <div class="middle">
+                    <div id="left">
+                        <p>Die Seite ist momentan leider offline. Versuche es später nocheinmal.</p>
+                        
+                    </div>
+                    <!-- Zweite Spalte Logo -->
+                    <div class="logo">
+                        <img src="../images/logo-white.svg" height="300vw">
+                    </div>
+                </div>
+            </center>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

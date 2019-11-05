@@ -9,14 +9,14 @@
 <body class="sidebar-dark">
     <div class="container-scroller">
         <!-- partial:partials/_navbar.html -->
-        <?php include('html/navbar.html'); ?>
+        <?php include('php/template/navbar.php'); ?>
         <!-- partial -->
         <div class="container-fluid page-body-wrapper">
             <!-- partial:partials/_settings-panel.html -->
             <?php include('html/settings_panel.html'); ?>
             <!-- partial -->
             <!-- partial:partials/_sidebar.html -->
-            <?php include('html/sidebar.html'); ?>
+            <?php include('php/template/sidebar.php'); ?>
             <!-- partial -->
             <div class="main-panel">
                 <div class="content-wrapper">
