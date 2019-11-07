@@ -6,5 +6,3 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/php/settings.php');
 require(SCRIPT_PATH.'/php/auth.php');
 
 header('LOCATION: dashboard');
-
-?>

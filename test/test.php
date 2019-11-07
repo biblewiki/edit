@@ -18,9 +18,9 @@
         Geburtsdatum:<br>
         <input type="text" name="description"><input type="checkbox" name="beforeChristBirth" value=true><br>
         Christ:<br>
-        <input type="checkbox" name="belevier" value=true><br>
+        <input type="checkbox" name="believer" value=1><br>
         Nur Stammbaum:<br>
-        <input type="checkbox" name="familyTreeOnly" value=true><br>
+        <input type="checkbox" name="familyTreeOnly" value=1><br>
         Text:<br>
         <textarea name="text" rows="4" cols="50">
 At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.
@@ -35,8 +35,8 @@ At w3schools.com you will learn how to make a website. We offer free tutorials i
             event.preventDefault(); //prevent default action 
             var post_url = $(this).attr("action"); //get form action url
             var request_method = $(this).attr("method"); //get form GET/POST method
-            var form_data = $(this).serialize(); //Encode form elements for submission
-
+            var form_data = $(this).serializeArray(); //Encode form elements for submission
+console.log(form_data);
             $.ajax({
                 url: post_url,
                 type: request_method,

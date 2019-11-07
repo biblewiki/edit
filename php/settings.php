@@ -1,4 +1,11 @@
 <?php
+
+const HOST_DOMAIN = '';
+const EDIT_HOST = '';
+const LOGIN_HOST = '';
+const SCRIPT_URL = '';
+const SCRIPT_PATH = '';
+
 // Domain without https:// and Subdomain !!!
 define(HOST_DOMAIN, "biblewiki.one");
 
