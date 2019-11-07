@@ -32,7 +32,7 @@ class SaveData {
     // -------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------
-    public function __construct(App $app, string $userId, string $tableName) { echo 'test';
+    public function __construct(App $app, string $userId, string $tableName) {
         $this->app = $app;
         $this->userId = $userId;
         $this->tableName = $tableName;
@@ -67,6 +67,14 @@ class SaveData {
             if ($row['Key'] === 'PRI') {
                 $field = $this->getField($row, $formPacket);
                 $this->primaryKeys[] = $field;
+
+                if (!$field->value) {
+                    if($field->name === 'version') {
+                        $this->getNextVersion($formPacket);
+                    } else {
+                        $this->getNextPrimaryKey($field, $formPacket);
+                    }
+                }
                 if (!$field->oldValue) {
                     $oldValueExist = false;
                 }
@@ -78,15 +86,10 @@ class SaveData {
                 }
             }
         }
-
+        
         // Ermitteln ob die changeInfos-Felder existieren
-        $this->hasChangeInfoFields = false;
-        foreach ($this->rows as $row) {
-            if ($row['Field'] === 'createId') {
-                $this->hasChangeInfoFields = true;
-                break;
-            }
-        }
+        $this->hasChangeInfoFields = $this->hasField('createId');
+
 
         // Überprüfen, ob der Datensatz in der Zwischenzeit von einem anderen
         // Benutzer geändert oder gelöscht wurde
@@ -201,7 +204,7 @@ class SaveData {
         if ($row) {
             $currentTimestamp = strtotime($row['changeDate']);
             $currentId = $row['changeId'];
-            $timestampOnOpen = strtotime($formPacket['kiOpenTS']);
+            $timestampOnOpen = strtotime($formPacket['openTS']);
 
             // Wurde der Datensatz geändert?
             if ($currentTimestamp > $timestampOnOpen) {
@@ -217,30 +220,67 @@ class SaveData {
     }
 
 
+    private function getNextPrimaryKey(\stdClass $primaryKey, array &$formPacket): void{
+        
+        // Höchsten Primarykey auslesen
+        $st = $this->app->getDb()->query('SELECT MAX(' . $primaryKey->name . ') FROM `' . $this->tableName . '`');
+        $key = $st->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $formPacket[$primaryKey->name] = $key[0]['MAX(' . $primaryKey->name . ')'] + 1;
+        //return $key[0]['MAX(' . $column . ')'] + 1;
+    }
+
+
+    private function getNextVersion(array &$formPacket): void{
+        $where = '';
+        
+        foreach ($this->primaryKeys as $primaryKey) {
+            if ($primaryKey->name !== 'version' && $primaryKey->value){
+                if ($where) {
+                    $where .= ' AND ';
+                } else {
+                    $where .= ' WHERE ';
+                }
+                $where .= $primaryKey->name . ' = ' . $primaryKey->value;
+            }
+        }
+
+        if ($where) {
+            // Höchsten Primarykey auslesen
+            $st = $this->app->getDb()->query('SELECT MAX(version) FROM `' . $this->tableName . '`' . $where);
+            $version = $st->fetchAll(\PDO::FETCH_ASSOC);
+
+            $formPacket['version'] = $version[0]['MAX(version)'] + 1;
+        } else {
+            $formPacket['version'] = 1;
+        }
+    }
+
+
     private function getField(array $row, array &$formPacket): \stdClass {
         $ret = new \stdClass();
 
         $ret->restoreMode = false;
         $ret->forceInsert = false;
-        if (\array_key_exists('kiRestore_operation', $formPacket)) {
+        if (\array_key_exists('restore_operation', $formPacket)) {
 
             // IS = Insert Same ID, IN = Insert New ID, U = Update
-            $ret->restoreMode = \in_array($formPacket['kiRestore_operation'], ['IS', 'IN', 'U'], true);
+            $ret->restoreMode = \in_array($formPacket['restore_operation'], ['IS', 'IN', 'U'], true);
 
             // Bei Insert Same und Insert New wird immer ein Insert gemacht
-            if ($formPacket['kiRestore_operation'] === 'IS' || $formPacket['kiRestore_operation'] === 'IN') {
+            if ($formPacket['restore_operation'] === 'IS' || $formPacket['restore_operation'] === 'IN') {
                 $ret->forceInsert = true;
             }
 
             // Bei einem Update die ID ins OldVal Schreiben
-            if ($formPacket['kiRestore_operation'] === 'U' || $formPacket['kiRestore_operation'] === 'IS') {
-                if (\array_key_exists("kiOldVal_" . $row['Field'], $formPacket)) {
-                    $formPacket["kiOldVal_" . $row['Field']] = $formPacket['kiRestore_xId'];
+            if ($formPacket['restore_operation'] === 'U' || $formPacket['restore_operation'] === 'IS') {
+                if (\array_key_exists("oldVal_" . $row['Field'], $formPacket)) {
+                    $formPacket["oldVal_" . $row['Field']] = $formPacket['kiRestore_xId'];
                 }
             }
 
             // Die ID als Wert ins Feld Schreiben
-            if ($row['Key'] === 'PRI' && $formPacket['kiRestore_operation'] === 'IS') {
+            if ($row['Key'] === 'PRI' && $formPacket['restore_operation'] === 'IS') {
                 $formPacket[$row['Field']] = $formPacket['kiRestore_xId'];
             }
         }
@@ -249,7 +289,7 @@ class SaveData {
         $ret->isPrimaryKey = ($row['Key'] === 'PRI');
         $ret->isAutoIncrement = (mb_strpos($row['Extra'], "auto_increment") !==false);
         $ret->isSet = \array_key_exists($row['Field'], $formPacket) ? 1 : 0;
-        $ret->oldValue = $formPacket["kiOldVal_" . $row['Field']] ?? null;
+        $ret->oldValue = $formPacket["oldVal_" . $row['Field']] ?? null;
 
         // Datentyp ermitteln
         $val = $formPacket[$row['Field']];
@@ -393,14 +433,16 @@ class SaveData {
 
         $update = '';
         foreach ($this->rows as $row) {
-            $fld = $this->getField($row, $formPacket);
-            // Auto-Increment-Felder und nicht übermittelte Felder nie aktualisieren
-            if (!$fld->isAutoIncrement && $fld->isSet) {
-                if ($update) {
-                    $update.= ', ';
+            if ($row['Field'] !== 'createId' && $row['Field'] !== 'createDate') {
+                $fld = $this->getField($row, $formPacket);
+                // Auto-Increment-Felder und nicht übermittelte Felder nie aktualisieren
+                if (!$fld->isAutoIncrement && $fld->isSet) {
+                    if ($update) {
+                        $update.= ', ';
+                    }
+                    $update .= '`' . $fld->name . '` = :'.$fld->name;
+                    $this->app->getDb()->prepareParam(':'.$fld->name, $fld->value, $fld->type);
                 }
-                $update .= '`' . $fld->name . '` = :'.$fld->name;
-                $this->app->getDb()->prepareParam(':'.$fld->name, $fld->value, $fld->type);
             }
         }
 

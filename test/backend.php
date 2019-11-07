@@ -9,8 +9,11 @@ require_once './autoload.php';
 
 //var_dump(json_decode($_POST, true));
 $formPacket = $_POST;
-$formPacket['personId'] = null;
-$formPacket['version'] = 1;
+$formPacket['personId'] = 5;
+$formPacket['oldVal_personId'] = 5;
+$formPacket['oldVal_version'] = 5;
+$formPacket['openTS'] = date('Y-m-d H:i:s');
+$formPacket['version'] = 5;
 $formPacket['dayBirth'] = 5;
 $formPacket['monthBirth'] = 7;
 $formPacket['yearBirth'] = 9;
