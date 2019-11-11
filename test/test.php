@@ -22,9 +22,7 @@
         Nur Stammbaum:<br>
         <input type="checkbox" name="familyTreeOnly" value=1><br>
         Text:<br>
-        <textarea name="text" rows="4" cols="50">
-At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.
-        </textarea><br>
+        <textarea name="text" rows="4" cols="50">At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.</textarea><br>
         <button type="submit" vname="save">Speichern</button>
 
 
@@ -36,7 +34,7 @@ At w3schools.com you will learn how to make a website. We offer free tutorials i
             var post_url = $(this).attr("action"); //get form action url
             var request_method = $(this).attr("method"); //get form GET/POST method
             var form_data = $(this).serializeArray(); //Encode form elements for submission
-console.log(form_data);
+
             $.ajax({
                 url: post_url,
                 type: request_method,

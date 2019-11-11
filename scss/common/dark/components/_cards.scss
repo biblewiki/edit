@@ -99,7 +99,7 @@
       @extend .d-flex;
       @extend .justify-content-end;
       &::before{
-        content: url('../../images/dashboard/shape-4.svg');
+        content: url('../../../images/dashboard/shape-4.svg');
         position: absolute;
       }
       i {

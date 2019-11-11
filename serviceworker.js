@@ -2,7 +2,7 @@
 // previously cached resources to be updated from the network.
 const OFFLINE_VERSION = 1;
 // Customize this with a different URL if needed.
-const offlineUrl = 'html/offline.html';
+const offlineUrl = 'core/html/offline.html';
 
 self.addEventListener('install', (event) => {
   caches.delete('BibleWiki Offline');
