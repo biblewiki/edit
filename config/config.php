@@ -9,6 +9,8 @@ $biwi_config = [
     // ------------------------------------------
     'database'  => [
         'dsn' => 'mysql:host=mwepf1gm.mysql.db.hostpoint.ch;dbname=mwepf1gm_biblewikicontent',
+        'host' => 'mwepf1gm.mysql.db.hostpoint.ch',
+        'db' => 'mwepf1gm_biblewikicontent',
         'user' => 'mwepf1gm_biwico',
         'password' => 'SNkDfoNX'
     ],

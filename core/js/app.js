@@ -19,7 +19,7 @@ app = class app {
             console.log('exist');
         } else {
             //this.writeTxtFile(text, language);
-            console.log(text + ' not translated in ' + language);
+            //console.log('"' + text + '" not translated in ' + language);
         }
 
         return text;

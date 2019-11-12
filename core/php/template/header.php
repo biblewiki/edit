@@ -1,6 +1,6 @@
 <?php
 // Config einbinden
-require_once('../core/php/config.php');
+require_once('../config/config.php');
 
 // Authentifizierungsscript einbinden
 require('../core/php/auth.php');
@@ -23,11 +23,12 @@ require('../core/php/auth.php');
 <link rel="stylesheet" href="../core/vendors/summernote/dist/summernote-bs4.css">
 <link rel="stylesheet" href="../core/vendors/quill/quill.snow.css">
 <link rel="stylesheet" href="../core/vendors/simplemde/simplemde.min.css">
+<link rel="stylesheet" href="../core/vendors/ion-rangeslider/css/ion.rangeSlider.css">
 <!-- End plugin css for this page -->
 <!-- inject:css -->
 <link rel="stylesheet" href="../core/css/vertical-layout-light/style.css">
 <!-- endinject -->
-<link rel="shortcut icon" href="../core/images/favicon.png" />
+<link rel="shortcut icon" href="../images/favicon.png" />
 <!-- Webapp Manifest -->
 <link rel="manifest" href="../manifest.json" crossorigin="use-credentials">
 
