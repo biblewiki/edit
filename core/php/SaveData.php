@@ -1,7 +1,5 @@
 <?php
 
-require_once './autoload.php';
-
 class SaveData {
     /**
      * @var ki\App
@@ -32,7 +30,7 @@ class SaveData {
     // -------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------
-    public function __construct(App $app, string $userId, string $tableName) {
+    public function __construct(App $app, int $userId, string $tableName) {
         $this->app = $app;
         $this->userId = $userId;
         $this->tableName = $tableName;

@@ -1,19 +1,24 @@
 
 $("#biwi-form").submit(function(event) {
     event.preventDefault(); //prevent default action 
-    var post_url = $(this).attr("action"); //get form action url
-    var request_method = $(this).attr("method"); //get form GET/POST method
-    var form_data = $(this).serializeArray(); //Encode form elements for submission
+    let func = $(this).attr("action"); //get form action url
+    let requestMethod = $(this).attr("method"); //get form GET/POST method
+    let formData = $(this).serializeArray(); //Encode form elements for submission
+
+    let requestData = {
+        function: func,
+        args: {formPacket: formData}
+    };
 
     $.ajax({
-        url: post_url,
-        type: request_method,
-        data: form_data,
+        url: '../core/php/RequestHandler.php',
+        type: requestMethod,
+        data: JSON.stringify(requestData),
+        //data: formData,
         success:function(data) {
-            console.log(data);
+            console.log(JSON.parse(data).success);
         }
-    }).done(function(response) { //
-        $("#server-results").html(response);
-            console.log(response);
+    }).done(function(response) {
+            //console.log(response);
     });
 });

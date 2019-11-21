@@ -28,7 +28,7 @@ require('../core/php/auth.php');
 <!-- inject:css -->
 <link rel="stylesheet" href="../core/css/vertical-layout-light/style.css">
 <!-- endinject -->
-<link rel="shortcut icon" href="../images/favicon.png" />
+<link rel="shortcut icon" href="../ressources/images/favicon.png" />
 <!-- Webapp Manifest -->
 <link rel="manifest" href="../manifest.json" crossorigin="use-credentials">
 

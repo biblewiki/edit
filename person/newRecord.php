@@ -27,7 +27,7 @@
                                     <div class="card-body">
                                         <h4 class="card-title"><script>document.write(app.getText('Person'));</script></h4>
                                         <p class="card-description">Personendetails erfassen</p>
-                                        <form id="biwi-form" action="../core/php/person.php" method="POST">
+                                        <form id="biwi-form" action="Person.saveForm" method="POST">
                                             <div class="form-group row">
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Name'));</script></label>
@@ -103,7 +103,7 @@
                                             <div class="form-group row">
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Beruf'));</script></label>
-                                                    <input type="text" class="form-control" name=""/>
+                                                    <input type="text" class="form-control" name="proficiency"/>
                                                 </div>
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Menschengruppe'));</script></label>
@@ -140,8 +140,8 @@
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col">
-                                                    <label><script>document.write(app.getText('Beziehung mit'));</script></label>
-                                                    <select class="js-example-basic-single w-100">
+                                                    <label><script>document.write(app.getText('Beziehung mit'));</script></label><br>
+                                                    <select class="js-example-basic-single w-50">
                                                         <option value="AL">Alabama</option>
                                                         <option value="WY">Wyoming</option>
                                                         <option value="AM">America</option>
@@ -150,62 +150,90 @@
                                                     </select>
                                                 </div>
                                                 <div class="col">
-                                                    <div class="form-group">
-                                                        <label><script>document.write(app.getText('Beziehungsart'));</script></label>
-                                                        <select class="js-example-basic-single w-100">
-                                                            <option value="AL">Alabama</option>
-                                                            <option value="WY">Wyoming</option>
-                                                            <option value="AM">America</option>
-                                                            <option value="CA">Canada</option>
-                                                            <option value="RU">Russia</option>
-                                                        </select>
-                                                    </div>
+                                                    <label><script>document.write(app.getText('Beziehungsart'));</script></label><br>
+                                                    <select class="js-example-basic-single w-50">
+                                                        <option value="AL">Alabama</option>
+                                                        <option value="WY">Wyoming</option>
+                                                        <option value="AM">America</option>
+                                                        <option value="CA">Canada</option>
+                                                        <option value="RU">Russia</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col">                                            
-                                                    <label><script>document.write(app.getText('Geburt'));</script></label>
+                                                    <label><script>document.write(app.getText('Geburt') + ' ' + app.getText('Tag'));</script></label>
                                                     <input type="text" class="form-control" name="dayBirth" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Monat'));</script></label>
                                                     <input type="text" class="form-control" name="monthBirth" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Jahr'));</script></label>
                                                     <input type="text" class="form-control" name="yearBirth" />
                                                     <div class="form-check form-check-flat form-check-primary">
-                                                    <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" name="beforeChristBirth" />
-                                                        Vor Christi Geburt
-                                                    </label>
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristBirth" />
+                                                            Vor Christi Geburt
+                                                        </label>
                                                     </div>
                                                 </div>
                                                 <div class="col">                                            
-                                                    <label><script>document.write(app.getText('Tod'));</script></label>
+                                                    <label><script>document.write(app.getText('Tod') + ' ' + app.getText('Tag'));</script></label>
                                                     <input type="text" class="form-control" name="dayDeath" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Monat'));</script></label>
                                                     <input type="text" class="form-control" name="monthDeath" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Jahr'));</script></label>
                                                     <input type="text" class="form-control" name="yearDeath" />
-                                                    <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" name="beforeChristDeath" />
-                                                        Vor Christi Geburt
-                                                    </label>
+                                                    <div class="form-check form-check-flat form-check-primary">
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristDeath" />
+                                                            Vor Christi Geburt
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col">                                            
-                                                    <label><script>document.write(app.getText('Beginn Wirkung'));</script></label>
+                                                    <label><script>document.write(app.getText('Beginn Wirkung') + ' ' + app.getText('Tag'));</script></label>
                                                     <input type="text" class="form-control" name="dayProfessionStart" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Monat'));</script></label>
                                                     <input type="text" class="form-control" name="monthProfessionStart" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Jahr'));</script></label>
                                                     <input type="text" class="form-control" name="yearProfessionStart" />
-                                                    <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" name="beforeChristProfStart" />
-                                                        Vor Christi Geburt
-                                                    </label>
+                                                    <div class="form-check form-check-flat form-check-primary">
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfStart" />
+                                                            Vor Christi Geburt
+                                                        </label>
+                                                    </div>
                                                 </div>
                                                 <div class="col">                                            
-                                                    <label><script>document.write(app.getText('Ende Wirkung'));</script></label>
+                                                    <label><script>document.write(app.getText('Ende Wirkung') + ' ' + app.getText('Tag'));</script></label>
                                                     <input type="text" class="form-control" name="dayProfessionEnd" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Monat'));</script></label>
                                                     <input type="text" class="form-control" name="monthProfessionEnd" />
+                                                </div>
+                                                <div class="col">
+                                                    <label><script>document.write(app.getText('Jahr'));</script></label>
                                                     <input type="text" class="form-control" name="yearProfessionEnd" />
-                                                    <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" name="beforeProfEnd" />
-                                                        Vor Christi Geburt
-                                                    </label>
+                                                    <div class="form-check form-check-flat form-check-primary">
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfEnd" />
+                                                            Vor Christi Geburt
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -301,7 +329,7 @@
         <script src="../core/js/file-upload.js"></script>
         <script src="../core/js/typeahead.js"></script>
         <script src="../core/js/select2.js"></script>
-        <script src="../core/js/newPerson.js"></script>
+        <script src="../core/js/person.js"></script>
         <script src="../core/js/submitForm.js"></script>
         <!-- End custom js for this page-->
     </body>

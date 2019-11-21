@@ -132,17 +132,17 @@ gulp.task('injectLayoutStyles', function () {
 /*replace image path and linking after injection*/
 gulp.task('replacePath', function(){
     var replacePath1 = gulp.src(['./demo/*/pages/*/*.html'], { base: "./" })
-        .pipe(replace('="images/', '="../../../../images/'))
+        .pipe(replace('="images/', '="../../../../ressources/images/'))
         .pipe(replace('href="pages/', 'href="../../pages/'))
         .pipe(replace('href="index.html"', 'href="../../index.html"'))
         .pipe(gulp.dest('.'));
     var replacePath2 = gulp.src(['./demo/*/pages/*.html'], { base: "./" })
-        .pipe(replace('="images/', '="../../../images/'))
+        .pipe(replace('="images/', '="../../../ressources/images/'))
         .pipe(replace('"pages/', '"../pages/'))
         .pipe(replace('href="index.html"', 'href="../index.html"'))
         .pipe(gulp.dest('.'));
     var replacePath3 = gulp.src(['./demo/*/index.html'], { base: "./" })
-        .pipe(replace('="images/', '="../../images/'))
+        .pipe(replace('="images/', '="../../ressources/images/'))
         .pipe(gulp.dest('.'));
     return merge(replacePath1 , replacePath2, replacePath3);
 });

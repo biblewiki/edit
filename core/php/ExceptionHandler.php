@@ -583,7 +583,7 @@ class ExceptionHandler {
                 }
             }
         }
-        $html .= "<img class='logo' src='../images/logo.svg' alt='Logo' width='80' height='80'>";
+        $html .= "<img class='logo' src='../ressources/images/logo.svg' alt='Logo' width='80' height='80'>";
         $html .= "<div style='clear: right;'></div>";
         $html .= "</div></div>";
         $html .= "</body></html>";

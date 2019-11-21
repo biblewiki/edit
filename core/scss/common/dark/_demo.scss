@@ -290,17 +290,17 @@
         }
         &.icon-a {
           &::before {
-            content: url('../../../images/dashboard/shape-1.svg');
+            content: url('../../../ressources/images/dashboard/shape-1.svg');
           }
         }
         &.icon-b {
           &::before {
-            content: url('../../../images/dashboard/shape-1.svg');
+            content: url('../../../ressources/images/dashboard/shape-1.svg');
           }
         }
         &.icon-c {
           &::before {
-            content: url('../../../images/dashboard/shape-3.svg');
+            content: url('../../../ressources/images/dashboard/shape-3.svg');
           }
         }
       }
@@ -356,7 +356,7 @@
       content: '';
       width: 1px;
       height: 174px;
-      background: #b5bccb;
+      background: #b1b1b5;
       position: absolute;
       right: -1rem;
       top: 15%;
@@ -370,7 +370,7 @@
         top: 1.3rem;
         width: 1.875rem;
         height: 1.875rem;
-        background: #ecedf2;
+        border: 1px solid $border-color;
         border-radius: 0.375rem;
         opacity: 1;
         &:hover {
@@ -414,16 +414,6 @@
     background: transparent;
     .progress-bar {
       border-radius: 11px;
-    }
-  }
-}
-
-.show {
-  > .btn-out-line-light {
-    .dropdown-toggle {
-      &:focus {
-        box-shadow: none;
-      }
     }
   }
 }

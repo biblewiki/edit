@@ -3,11 +3,14 @@
 #AuthName 'user and password'
 #AuthUserFile /home/mwepf1gm/www/biblewiki.one/michael/.htpasswd
 
-<If "req('Host') = 'edit.josua.biblewiki.one'|| req('Host') = 'edit.joel.biblewiki.one'">
-</If>
+#<If "req('Host') = 'edit.josua.biblewiki.one'|| req('Host') = 'edit.joel.biblewiki.one'">
+#</If>
+
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.+)$ $1.php [L]
 
 #@__HCP_END__@#
 # Anything after the comment above is left alone

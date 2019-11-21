@@ -19876,15 +19876,15 @@ code {
 }
 
 .performance-overview-carousel .carousel-inner .item .icon.icon-a::before {
-  content: url("../../../images/dashboard/shape-1.svg");
+  content: url("../../../ressources/images/dashboard/shape-1.svg");
 }
 
 .performance-overview-carousel .carousel-inner .item .icon.icon-b::before {
-  content: url("../../../images/dashboard/shape-1.svg");
+  content: url("../../../ressources/images/dashboard/shape-1.svg");
 }
 
 .performance-overview-carousel .carousel-inner .item .icon.icon-c::before {
-  content: url("../../../images/dashboard/shape-3.svg");
+  content: url("../../../ressources/images/dashboard/shape-3.svg");
 }
 
 .performance-overview-carousel .carousel-control-prev,
@@ -21820,7 +21820,7 @@ code {
 }
 
 .data-icon-card-primary .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21839,7 +21839,7 @@ code {
 }
 
 .data-icon-card-secondary .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21858,7 +21858,7 @@ code {
 }
 
 .data-icon-card-success .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21877,7 +21877,7 @@ code {
 }
 
 .data-icon-card-info .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21896,7 +21896,7 @@ code {
 }
 
 .data-icon-card-warning .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21915,7 +21915,7 @@ code {
 }
 
 .data-icon-card-danger .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21934,7 +21934,7 @@ code {
 }
 
 .data-icon-card-light .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -21953,7 +21953,7 @@ code {
 }
 
 .data-icon-card-dark .background-icon::before {
-  content: url("../../../images/dashboard/shape-4.svg");
+  content: url("../../../ressources/images/dashboard/shape-4.svg");
   position: absolute;
 }
 
@@ -26500,7 +26500,7 @@ body.avgrund-active {
 
 /* Js-grid */
 .jsgrid .jsgrid-button {
-  background-image: url(../../images/sprites/jsgrid-icons.png);
+  background-image: url(../../ressources/images/sprites/jsgrid-icons.png);
 }
 
 .jsgrid .jsgrid-grid-header {
@@ -27904,17 +27904,17 @@ div.tagsinput span.tag a {
 /* === Landing screens === */
 /* Auth */
 .auth .login-half-bg {
-  background: url("../../images/auth/login-bg.jpg");
+  background: url("../../ressources/images/auth/login-bg.jpg");
   background-size: cover;
 }
 
 .auth .register-half-bg {
-  background: url("../../images/auth/register-bg.jpg");
+  background: url("../../ressources/images/auth/register-bg.jpg");
   background-size: cover;
 }
 
 .auth.lock-full-bg {
-  background: url("../../images/auth/lockscreen-bg.jpg");
+  background: url("../../ressources/images/auth/lockscreen-bg.jpg");
   background-size: cover;
 }
 
