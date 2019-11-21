@@ -29,8 +29,8 @@
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h4 class="card-title">Basic Table</h4>
-                                        <p class="card-description">A basic example of js-grid</p>
+                                        <h4 class="card-title">Personen</h4>
+                                        <p class="card-description">Alle erfassten Personen</p>
                                         <div id="js-grid" class="pt-3"></div>
                                     </div>
                                 </div>

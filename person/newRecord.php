@@ -174,7 +174,7 @@
                                                     <input type="text" class="form-control" name="yearBirth" />
                                                     <div class="form-check form-check-flat form-check-primary">
                                                         <label class="form-check-label">
-                                                            <input type="checkbox" class="form-check-input" name="beforeChristBirth" />
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristBirth" value="1"/>
                                                             Vor Christi Geburt
                                                         </label>
                                                     </div>
@@ -192,7 +192,7 @@
                                                     <input type="text" class="form-control" name="yearDeath" />
                                                     <div class="form-check form-check-flat form-check-primary">
                                                         <label class="form-check-label">
-                                                            <input type="checkbox" class="form-check-input" name="beforeChristDeath" />
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristDeath" value="1"/>
                                                             Vor Christi Geburt
                                                         </label>
                                                     </div>
@@ -212,7 +212,7 @@
                                                     <input type="text" class="form-control" name="yearProfessionStart" />
                                                     <div class="form-check form-check-flat form-check-primary">
                                                         <label class="form-check-label">
-                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfStart" />
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfStart" value="1"/>
                                                             Vor Christi Geburt
                                                         </label>
                                                     </div>
@@ -230,7 +230,7 @@
                                                     <input type="text" class="form-control" name="yearProfessionEnd" />
                                                     <div class="form-check form-check-flat form-check-primary">
                                                         <label class="form-check-label">
-                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfEnd" />
+                                                            <input type="checkbox" class="form-check-input" name="beforeChristProfEnd" value="1"/>
                                                             Vor Christi Geburt
                                                         </label>
                                                     </div>
@@ -330,7 +330,7 @@
         <script src="../core/js/typeahead.js"></script>
         <script src="../core/js/select2.js"></script>
         <script src="../core/js/person.js"></script>
-        <script src="../core/js/submitForm.js"></script>
+        <script src="../core/js/form/form.js"></script>
         <!-- End custom js for this page-->
     </body>
 </html>
