@@ -15,15 +15,15 @@ self.addEventListener('install', (event) => {
     caches.open('BibleWiki Logos').then(function(cache) {
       return cache.addAll(
         [
-          '/images/biblewiki_logo_32x32.png',
-          '/images/biblewiki_logo_64x64.png',
-          '/images/biblewiki_logo_128x128.png',
-          '/images/biblewiki_logo_256x256.png',
-          '/images/biblewiki_logo_512x512.png',
-          '/images/logo.svg',
-          '/images/logo-mini.svg',
-          '/images/logo-white.svg',
-          '/images/favicon.png'
+          '/ressources/images/biblewiki_logo_32x32.png',
+          '/ressources/images/biblewiki_logo_64x64.png',
+          '/ressources/images/biblewiki_logo_128x128.png',
+          '/ressources/images/biblewiki_logo_256x256.png',
+          '/ressources/images/biblewiki_logo_512x512.png',
+          '/ressources/images/logo.svg',
+          '/ressources/images/logo-mini.svg',
+          '/ressources/images/logo-white.svg',
+          '/ressources/images/favicon.png'
         ]
       );
     })

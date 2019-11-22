@@ -10,9 +10,11 @@ class Person {
         $qryBld = new SqlSelector('person');
         $qryBld->addSelectElement('person.personId');
         $qryBld->addSelectElement('person.version');
-        $qryBld->addSelectElement('person.name as name');
-        $qryBld->addSelectElement('person.believer');
-        
+        $qryBld->addSelectElement('person.name');
+        $qryBld->addSelectElement('person.description');
+        $qryBld->addSelectElement('person.state');
+        $qryBld->addSelectElement('person.changeId');
+        $qryBld->addSelectElement('person.changeDate');
         
         //$qryBld->addFromElement('LEFT JOIN produkt_zuweisung_text AS text_it ON produkt_zuweisung.produktZuweisungId = text_it.produktZuweisungId AND text_it.languageId = \'it\'');
         $qryBld->addFromElement('INNER JOIN (
@@ -24,6 +26,7 @@ class Person {
             GROUP BY
                 personId) as version ON person.personId = version.personId
 	AND person.version = version.maxVersion');
+
         
         //$qryBld->addWhereElement('person.name IS NOT NULL');
         //$qryBld->addParam(':produktZuweisungId', $produktZuweisungId, \PDO::PARAM_INT);
@@ -33,30 +36,18 @@ class Person {
             if ($value === false || $value === true) {
                 $qryBld->addWhereElement("person.`$column` = '$value'");
             } else if ($value != '') {
-                $qryBld->addWhereElement("person.`$column` LIKE '$value%'");
+                $qryBld->addWhereElement("person.`$column` LIKE '%$value%'");
             }
         }
         
-        
-        
         $rows = $qryBld->execute($app->getDb());
         
-//        $st = $this->app->getDb()->prepare('
-//            SELECT (
-//                SELECT COUNT(*)
-//                FROM `produkt_zuweisung`
-//                WHERE `produkt_zuweisung`.`produktId` = :produktId
-//                AND `produkt_zuweisung`.`status` IN (20, 40)
-//            ) AS `usageZuweisung`,
-//            (
-//                SELECT COUNT(*)
-//                FROM `produkt2preisRezept`
-//                WHERE `produkt2preisRezept`.`produktId` = :produktId
-//            ) `usageRezept`');
-//        $st->bindParam(':produktId', $produktId, \PDO::PARAM_INT);
-//        $st->execute();
-//        $row = $st->fetch(\PDO::FETCH_ASSOC);
-//        $usageZuweisung = (int)$row['usageZuweisung'];
+        foreach($rows as &$row) {
+            $row['author'] = $app->getUser($row['changeId']);
+            $row['changeDate'] = gmdate("d.m.Y H:i", $row['changeDate']);
+        }
+        
+
         return ['rows' => $rows];
     }
 

@@ -31,7 +31,7 @@ $(document).ready( function () {
        if (key.includes('id')) {
            let cls = _capitalizeFLetter(key.replace('id', ''));
            let id = params[key];
-           console.log(cls);
+
            let requestData = {
                 function: cls + '.getFormData',
                 args: {id: id}
@@ -43,7 +43,6 @@ $(document).ready( function () {
                 data: JSON.stringify(requestData),
                 //data: formData,
                 success:function(data) {
-                    console.log(data);
                     _fillFormFromData("#biwi-form", JSON.parse(data).row);
                 }
             }).done(function(response) {

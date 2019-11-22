@@ -229,7 +229,7 @@
             <div class="collapse" id="person-pages">
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"> <a class="nav-link" href="../person/overview"> Übersicht </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="../person/newRecord"> Neuer Eintrag </a></li>
+                    <li class="nav-item"> <a class="nav-link" href="../person/entry"> Neuer Eintrag </a></li>
                 </ul>
             </div>
         </li>

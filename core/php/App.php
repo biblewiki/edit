@@ -92,4 +92,9 @@ class App {
     public function getText(string $key, string $variant='', $args = null, string $languageId = 'de'): string {
         return $key;//\KiLang::getText($key, $variant, $args, $languageId);
     }
+    
+    
+    public function getUser($userId) {
+        return 'Joel Kohler';
+    }
 }
