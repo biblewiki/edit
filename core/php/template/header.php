@@ -24,6 +24,7 @@ require('../core/php/auth.php');
 <link rel="stylesheet" href="../core/vendors/quill/quill.snow.css">
 <link rel="stylesheet" href="../core/vendors/simplemde/simplemde.min.css">
 <link rel="stylesheet" href="../core/vendors/ion-rangeslider/css/ion.rangeSlider.css">
+<link rel="stylesheet" href="../core/vendors/jquery-toast-plugin/jquery.toast.min.css">
 <!-- End plugin css for this page -->
 <!-- inject:css -->
 <link rel="stylesheet" href="../core/css/vertical-layout-light/style.css">
@@ -34,6 +35,11 @@ require('../core/php/auth.php');
 
 <!-- Include app.js-->
 <script src="../core/js/app.js"></script>
+<!-- Include Jquery -->
+<script src="../core/vendors/js/vendor.bundle.base.js"></script>
+<!-- Include Toast -->
+<script src="../core/vendors/jquery-toast-plugin/jquery.toast.min.js"></script>
+
 <script>
     if ('serviceWorker' in navigator) {
         // Register a service worker hosted at the root of the

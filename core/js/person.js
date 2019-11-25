@@ -1,44 +1,6 @@
 /* global app */
 
 (function ($) {
-    'use strict';
-
-    // -------------------------------------------------------
-    // Add new Person
-    // -------------------------------------------------------
-
-    /*Tinymce editor*/
-    if ($('#flowText').length) {
-        tinymce.init({
-            selector: '#flowText',
-            height: 500,
-            theme: 'silver',
-            plugins: [
-                'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-                'searchreplace wordcount visualblocks visualchars code fullscreen'
-            ],
-            toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-            toolbar2: 'print preview media | forecolor backcolor emoticons | codesample help',
-            image_advtab: true,
-            templates: [{
-                    title: 'Test template 1',
-                    content: 'Test 1'
-                },
-                {
-                    title: 'Test template 2',
-                    content: 'Test 2'
-                }
-            ],
-            content_css: []
-        });
-    }
-
-    if ($('#level').length) {
-        $('#level').ionRangeSlider({
-            min: 1,
-            max: 10
-        });
-    }
 
     // -------------------------------------------------------
     // Load Person Grid
@@ -86,10 +48,10 @@
                       return  data.promise();
                     }
                 },
-                rowDoubleClick: function(args) {
+                rowClick: function(args) {
                     let getData = args.item;
 
-                    window.location.replace('entry?personId=' + getData.personId + '&version=' + getData.version);
+                    window.location.href = 'entry?personId=' + getData.personId + '&version=' + getData.version;
                 },
                 fields: [
                     { name: 'personId', type: 'number', 'visible': false },
@@ -97,14 +59,14 @@
                     { name: 'name', title: app.getText('Name'), type: 'text' },
                     { name: 'description', title: app.getText('Beschreibung'), type: 'text' },
                     { name: 'state', title: app.getText('Status'), type: 'select', valueField: 'state', textField: 'name', items: [
-                        { name: '', state: 0 },
+                        { name: '', state: '' },
                         { name: 'In Bearbeitung', state: 10 },
                         { name: 'Zur Bearbeitung freigegeben', state: 20 },
                         { name: 'Freigegeben für Lektor', state: 30 },
                         { name: 'Wird kontrolliert', state: 40 },
                         { name: 'Freigegeben', state: 50 }
                     ]},
-                    { name: 'author', title: app.getText('Author'), type: 'text', filtering: false },
+                    { name: 'changeId', title: app.getText('Author'), type: 'text', filtering: false },
                     { name: 'changeDate', title: app.getText('Bearbeitet'), type: 'date' }
                 ]
             });

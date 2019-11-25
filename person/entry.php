@@ -31,6 +31,7 @@
                                             <div class="form-group row">
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Name'));</script></label>
+                                                    <input type="number" name="personId" hidden="false"/>
                                                     <input type="text" class="form-control" name="name"/><button><script>document.write(app.getText('Quelle'));</script></button>
                                                 </div>
                                                 <div class="col">
@@ -141,23 +142,11 @@
                                             <div class="form-group row">
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Beziehung mit'));</script></label><br>
-                                                    <select class="js-example-basic-single w-50">
-                                                        <option value="AL">Alabama</option>
-                                                        <option value="WY">Wyoming</option>
-                                                        <option value="AM">America</option>
-                                                        <option value="CA">Canada</option>
-                                                        <option value="RU">Russia</option>
-                                                    </select>
+                                                    <select id="personId" class="js-example-basic-single w-50" name=""></select>
                                                 </div>
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Beziehungsart'));</script></label><br>
-                                                    <select class="js-example-basic-single w-50">
-                                                        <option value="AL">Alabama</option>
-                                                        <option value="WY">Wyoming</option>
-                                                        <option value="AM">America</option>
-                                                        <option value="CA">Canada</option>
-                                                        <option value="RU">Russia</option>
-                                                    </select>
+                                                    <select id="relationshipPerson" class="js-example-basic-single w-50"></select>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
@@ -310,7 +299,7 @@
         </div>
         <!-- container-scroller -->
         <!-- plugins:js -->
-        <script src="../core/vendors/js/vendor.bundle.base.js"></script>
+        
         <!-- endinject -->
         <!-- Plugin js for this page -->
         <script src="../core/vendors/typeahead.js/typeahead.bundle.min.js"></script>

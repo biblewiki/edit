@@ -80,6 +80,10 @@ class App {
     }
     
     
+    public function getLanguage(string $language = null): string {
+        return 'de';
+    }
+    
     /**
      * Gibt den übersetzten Text zurück.
      *
