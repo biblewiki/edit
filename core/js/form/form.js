@@ -1,5 +1,6 @@
 /* global tinymce, app */
 
+let level = null;
 
 //Tinymce editor
 if ($('#flowText').length) {
@@ -19,58 +20,20 @@ if ($('#flowText').length) {
     });
 }
 
-// Levelbalken
-if ($('#level').length) {
-    $('#level').ionRangeSlider({
+/*
+ * Levelbalken
+ * Dokumentation: http://ionden.com/a/plugins/ion.rangeSlider/demo_interactions.html
+ */
+if ($('#levelSlider').length) {
+    $('#levelSlider').ionRangeSlider({
         min: 1,
-        max: 10
+        max: 10,
+        onFinish: function (data) {
+            level = data.from;
+        }
     });
 }
 
-
-// Dropdown Person
-if ($('#personId').length) {
-    let requestData = {
-        function: 'Person.getForCombo',
-        args: {}
-    };
-
-    $.ajax({
-        url: '../core/php/RequestHandler.php',
-        type: 'POST',
-        data: JSON.stringify(requestData)
-    }).done(function(data) {
-            let rows = JSON.parse(data).rows;
-            
-            $('#personId').append('<option value="">' + app.getText('Bitte auswählen...') + '</option>');
-            
-            rows.forEach(function(row) {
-                $('#personId').append('<option value=' + row.personId + '>' + row.name + '</option>');
-            });
-    });
-}
-
-// Dropdown Beziehungsart
-if ($('#relationshipPerson').length) {
-    let requestData = {
-        function: 'Person.getRelationshipForCombo',
-        args: {}
-    };
-
-    $.ajax({
-        url: '../core/php/RequestHandler.php',
-        type: 'POST',
-        data: JSON.stringify(requestData)
-    }).done(function(data) {
-            let rows = JSON.parse(data).rows;
-
-            $('#relationshipPerson').append('<option value="">' + app.getText('Bitte auswählen...') + '</option>');
-
-            rows.forEach(function(row) {
-                $('#relationshipPerson').append('<option value="' + row + '">' + row + '</option>');
-            });
-    });
-}
 
 // Formular übermitteln
 $("#biwi-form").submit(function(event) {
@@ -78,12 +41,23 @@ $("#biwi-form").submit(function(event) {
     let func = $(this).attr("action"); //get form action url
     let requestMethod = $(this).attr("method"); //get form GET/POST method
     let formData = $(this).serializeArray(); //Encode form elements for submission
+    let gridDataRelationship = $('#js-grid-relationship').jsGrid("option", "data");
+    
+    if ($('#levelSlider').length) {
+        formData.push({ name: 'level', value: $('#levelSlider').prop("value") });
+    }
+    if ($('#familyTreeOnly').length) {
+        formData.push({ name: 'familyTreeOnly', value: $('#familyTreeOnly').prop("checked") });
+    } 
 
     let requestData = {
         function: func,
-        args: { formPacket: formData }
+        args: { 
+            formPacket: formData,
+            gridDataRelationship: gridDataRelationship
+        }
     };
-
+console.log(gridDataRelationship);
     $.ajax({
         url: '../core/php/RequestHandler.php',
         type: requestMethod,
@@ -135,7 +109,6 @@ $(document).ready( function () {
        }
     });
 });
-
 
 /**
  * Private Funktionen
@@ -211,18 +184,36 @@ function _getAllUrlParams(url) {
 }
 
 function _fillFormFromData(frm, data) {
-    $.each(data, function(key, value) {  
-        let ctrl = $('[name='+key+']', frm);  
-        switch(ctrl.prop("type")) { 
-            case "radio": case "checkbox":   
-                ctrl.each(function() {
-                    if($(this).attr('value') == value) {$(this).attr("checked",value);}
-                });   
-                break;
-            case 'textarea':
-                tinymce.activeEditor.setContent(value);
+    $.each(data, function(key, value) {
+        
+        switch (key) {
+            case 'level':
+                if ($('#levelSlider').length) {
+                    $('#levelSlider').data("ionRangeSlider").update({
+                       from: value 
+                    });
+                }
+                break
+                
+            case 'familyTreeOnly':
+                if (value){
+                    $('#familyTreeOnly').attr('checked', true);
+                }
+            break;
+            
             default:
-                ctrl.val(value); 
-        }  
+                let ctrl = $('[name='+key+']', frm);  
+                switch(ctrl.prop("type")) { 
+                    case "radio": case "checkbox":   
+                        ctrl.each(function() {
+                            if($(this).attr('value') == value) {$(this).attr("checked",value);}
+                        });   
+                        break;
+                    case 'textarea':
+                        tinymce.activeEditor.setContent(value);
+                    default:
+                        ctrl.val(value); 
+                }
+        }
     });  
 }

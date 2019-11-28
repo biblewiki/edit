@@ -4,6 +4,11 @@
     <head>
         <title>Personen | BibleWiki</title>
         <?php include('../core/php/template/header.php'); ?>
+        
+        <!-- plugin css for this page -->
+        <link rel="stylesheet" href="../core/vendors/jsgrid/jsgrid.min.css">
+        <link rel="stylesheet" href="../core/vendors/jsgrid/jsgrid-theme.min.css">
+        <!-- End plugin css for this page -->
     </head>
 
     <body class="sidebar-dark">
@@ -113,16 +118,16 @@
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col">
-                                                    <label><script>document.write(app.getText('Vater'));</script></label>
-                                                    <input type="text" class="form-control" name=""/>
+                                                    <label><script>document.write(app.getText('Vater'));</script></label><br>
+                                                    <select id="father" class="js-example-basic-single w-50" name=""></select>
                                                 </div>
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Alter Vater'));</script></label>
                                                     <input type="text" class="form-control" name=""/>
                                                 </div>
                                                 <div class="col">
-                                                    <label><script>document.write(app.getText('Mutter'));</script></label>
-                                                    <input type="text" class="form-control" name=""/>
+                                                    <label><script>document.write(app.getText('Mutter'));</script></label><br>
+                                                    <select id="mother" class="js-example-basic-single w-50" name=""></select>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
@@ -142,11 +147,14 @@
                                             <div class="form-group row">
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Beziehung mit'));</script></label><br>
-                                                    <select id="personId" class="js-example-basic-single w-50" name=""></select>
+                                                    <select id="relationshipPerson" class="js-example-basic-single w-50" name=""></select>
                                                 </div>
                                                 <div class="col">
                                                     <label><script>document.write(app.getText('Beziehungsart'));</script></label><br>
-                                                    <select id="relationshipPerson" class="js-example-basic-single w-50"></select>
+                                                    <select id="relationshipType" class="js-example-basic-single w-50"></select>
+                                                </div>
+                                                <div class="col">
+                                                    <div id="js-grid-relationship"></div>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
@@ -245,7 +253,7 @@
                                             <table class="table">
                                                 <tbody>
                                                     <tr>
-                                                        <td><script>document.write(app.getText('Kaegorie'));</script></td>
+                                                        <td><script>document.write(app.getText('Kategorie'));</script></td>
                                                         <td><script>document.write(app.getText('Personen'));</script></td>
                                                         <td></td>
                                                     </tr>
@@ -274,11 +282,11 @@
                                         </div>
                                         <div class="slider-wrap">
                                             <label><script>document.write(app.getText('Sichtbarkeitslevel'));</script></label>
-                                            <input type="text" id="level" name="level" value="" />
+                                            <input type="text" id="levelSlider" name="level"/>
                                         </div>
                                         <div class="form-check form-check-flat form-check-primary">
                                             <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input">
+                                                <input type="checkbox" id="familyTreeOnly" name="familyTreeOnly" class="form-check-input">
                                                 Nur in Stammbaum
                                             </label>
                                         </div>
@@ -306,6 +314,7 @@
         <script src="../core/vendors/select2/select2.min.js"></script>
         <script src="../core/vendors/tinymce/tinymce.min.js"></script>
         <script src="../core/vendors/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
+        <script src="../core/vendors/jsgrid/jsgrid.min.js"></script>
         <!-- End plugin js for this page -->
         <!-- inject:js -->
         <script src="../core/js/off-canvas.js"></script>

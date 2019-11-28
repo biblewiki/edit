@@ -25,6 +25,11 @@ class SaveData {
      * @var bool
      */
     protected $hasChangeInfoFields;
+    /**
+     * @var int
+     */
+    protected $version;
+
 
 
     // -------------------------------------------------------
@@ -47,6 +52,10 @@ class SaveData {
 
     public function getPrimaryKeys(): array {
         return $this->primaryKeys;
+    }
+    
+    public function getVersion(): int {
+        return $this->version;
     }
 
 
@@ -248,10 +257,12 @@ class SaveData {
             $st = $this->app->getDb()->query('SELECT MAX(version) FROM `' . $this->tableName . '`' . $where);
             $version = $st->fetchAll(\PDO::FETCH_ASSOC);
 
-            $formPacket['version'] = $version[0]['MAX(version)'] + 1;
+            $this->version = $version[0]['MAX(version)'] + 1;
+            
         } else {
-            $formPacket['version'] = 1;
+            $this->version = 1;
         }
+        $formPacket['version'] = $this->version;
     }
 
 
