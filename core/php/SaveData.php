@@ -48,12 +48,12 @@ class SaveData {
     public function getPrimaryKey(): ?\stdClass {
         return $this->primaryKeys[0] ?? null;
     }
-    
+
 
     public function getPrimaryKeys(): array {
         return $this->primaryKeys;
     }
-    
+
     public function getVersion(): int {
         return $this->version;
     }
@@ -68,7 +68,7 @@ class SaveData {
         $oldValueExist = true;
         $forceInsert = false;
         $restoreMode = false;
-        
+
         // Primary Key und Infos ermitteln
         foreach ($this->rows as $row) {
             if ($row['Key'] === 'PRI') {
@@ -93,7 +93,7 @@ class SaveData {
                 }
             }
         }
-        
+
         // Ermitteln ob die changeInfos-Felder existieren
         $this->hasChangeInfoFields = $this->hasField('createId');
 
@@ -111,7 +111,7 @@ class SaveData {
         if ($this->hasChangeInfoFields) {
             $this->updateChangeInfos($formPacket);
         }
-        
+
         // Bestehenden Datensatz aktualisieren
         if ($oldValueExist && !$forceInsert) {
             $this->updateRecord($formPacket);
@@ -181,7 +181,7 @@ class SaveData {
             if ($where) {
                 $where .= ' AND ';
             }
-            
+
             // Hier muss die oldValue genommen werden, da sie vielleicht geändert wurde
             $this->app->getDb()->prepareParam(':pk_'.$primaryKey->name, $primaryKey->oldValue, $primaryKey->type);
             $where .= '`' . $primaryKey->name . '` = :pk_'.$primaryKey->name;
@@ -228,11 +228,11 @@ class SaveData {
 
 
     private function getNextPrimaryKey(\stdClass $primaryKey, array &$formPacket): void{
-        
+
         // Höchsten Primarykey auslesen
         $st = $this->app->getDb()->query('SELECT MAX(' . $primaryKey->name . ') FROM `' . $this->tableName . '`');
         $key = $st->fetchAll(\PDO::FETCH_ASSOC);
-        
+
         $formPacket[$primaryKey->name] = $key[0]['MAX(' . $primaryKey->name . ')'] + 1;
         //return $key[0]['MAX(' . $column . ')'] + 1;
     }
@@ -240,14 +240,10 @@ class SaveData {
 
     private function getNextVersion(array &$formPacket): void{
         $where = '';
-        
+
         foreach ($this->primaryKeys as $primaryKey) {
             if ($primaryKey->name !== 'version' && $primaryKey->value){
-                if ($where) {
-                    $where .= ' AND ';
-                } else {
-                    $where .= ' WHERE ';
-                }
+                $where .= $where ? ' AND ' : ' WHERE ';
                 $where .= $primaryKey->name . ' = ' . $primaryKey->value;
             }
         }
@@ -258,7 +254,7 @@ class SaveData {
             $version = $st->fetchAll(\PDO::FETCH_ASSOC);
 
             $this->version = $version[0]['MAX(version)'] + 1;
-            
+
         } else {
             $this->version = 1;
         }
@@ -298,7 +294,7 @@ class SaveData {
         $ret->isPrimaryKey = ($row['Key'] === 'PRI');
         $ret->isAutoIncrement = (mb_strpos($row['Extra'], "auto_increment") !==false);
         $ret->isSet = \array_key_exists($row['Field'], $formPacket) ? 1 : 0;
-        $ret->oldValue = $formPacket["oldVal_" . $row['Field']] ?? null;
+        $ret->oldValue = $formPacket["old_" . $row['Field']] ?? null;
 
         // Datentyp ermitteln
         $val = $formPacket[$row['Field']];

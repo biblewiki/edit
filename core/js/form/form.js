@@ -1,7 +1,5 @@
 /* global tinymce, app */
 
-let level = null;
-
 //Tinymce editor
 if ($('#flowText').length) {
     tinymce.init({
@@ -27,10 +25,7 @@ if ($('#flowText').length) {
 if ($('#levelSlider').length) {
     $('#levelSlider').ionRangeSlider({
         min: 1,
-        max: 10,
-        onFinish: function (data) {
-            level = data.from;
-        }
+        max: 10
     });
 }
 
@@ -42,7 +37,7 @@ $("#biwi-form").submit(function(event) {
     let requestMethod = $(this).attr("method"); //get form GET/POST method
     let formData = $(this).serializeArray(); //Encode form elements for submission
     let gridDataRelationship = $('#js-grid-relationship').jsGrid("option", "data");
-    
+    console.log(gridDataRelationship);
     if ($('#levelSlider').length) {
         formData.push({ name: 'level', value: $('#levelSlider').prop("value") });
     }
@@ -57,7 +52,7 @@ $("#biwi-form").submit(function(event) {
             gridDataRelationship: gridDataRelationship
         }
     };
-console.log(gridDataRelationship);
+
     $.ajax({
         url: '../core/php/RequestHandler.php',
         type: requestMethod,
@@ -67,14 +62,14 @@ console.log(gridDataRelationship);
         if (data.success) {
             'use strict';
             $.toast({
-              heading: 'Gespeichert',
-              text: 'Erfolgreich gespeichert.',
-              showHideTransition: 'slide',
-              loader: false,
-              hideAfter: 8000,
-              icon: 'success',
-              position: 'top-right'
-            })
+                heading: 'Gespeichert',
+                text: 'Erfolgreich gespeichert.',
+                showHideTransition: 'slide',
+                loader: false,
+                hideAfter: 8000,
+                icon: 'success',
+                position: 'top-right'
+            });
         }
     });
 });
@@ -83,7 +78,7 @@ console.log(gridDataRelationship);
 
 
 $(document).ready( function () {
-    let params = _getAllUrlParams();
+    let params = getAllUrlParams();
 
     Object.keys(params).forEach(function(key) {
        if (key.includes('id')) {
@@ -99,18 +94,14 @@ $(document).ready( function () {
                 url: '../core/php/RequestHandler.php',
                 type: 'POST',
                 data: JSON.stringify(requestData),
-                //data: formData,
-                success:function(data) {
-                    _fillFormFromData("#biwi-form", JSON.parse(data).row);
-                }
             }).done(function(response) {
-                    //console.log(response);
+                    _fillFormFromData("#biwi-form", JSON.parse(response).row);
             });
        }
     });
 });
 
-/**
+/*
  * Private Funktionen
  */
 
@@ -118,7 +109,7 @@ function _capitalizeFLetter(str) {
     return str[0].toUpperCase() + str.slice(1); 
 }
   
-function _getAllUrlParams(url) {
+function getAllUrlParams(url) {
 
   // get query string from url (optional) or window
   let queryString = url ? url.split('?')[1] : window.location.search.slice(1);

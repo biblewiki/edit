@@ -97,7 +97,11 @@ class App {
         return $key;//\KiLang::getText($key, $variant, $args, $languageId);
     }
 
-    public function getUserName($userId) {
+    public function getUserId(): int {
+        return 1;
+    }
+    
+    public function getUserName(int $userId): string {
         return 'Joel Kohler';
     }
 }

@@ -121,6 +121,11 @@
                     relationships.push(row);
                 });
             });
+            
+            
+            let params = getAllUrlParams();
+            let id = params.personid ? params.personid : null;
+            console.log(id);
 
             $('#js-grid-relationship').jsGrid({
                 height: '500px',
@@ -147,7 +152,10 @@
                     loadData: function(filter) {
                         let requestData = {
                             function: 'Person.getRelationshipGridData',
-                            args: {filter: filter}
+                            args: {
+                                id: id,
+                                filter: filter
+                            }
                         };
                         let data = $.Deferred();
                         $.ajax({
@@ -161,11 +169,6 @@
                       return  data.promise();
                     }
                 },
-                rowClick: function(args) {
-                    let getData = args.item;
-
-                    window.location.href = 'entry?personId=' + getData.personId + '&version=' + getData.version;
-                },
                 fields: [
                     { name: 'secondPersonId', title: app.getText('Name'), type: 'select', valueField: 'personId', valueType: 'number', textField: 'name', items: persons },
                     { name: 'description', title: app.getText('Beschreibung'), type: 'text', editing: false, inserting: false },
@@ -173,6 +176,17 @@
                     { name: 'fatherAge', title: app.getText('Alter') + ' ' + app.getText('Vater'), type: 'number' },
                     { type: 'control' }
                 ]
+            });
+            
+            $("#js-grid-relationship").jsGrid({
+                onItemInserting: function(args) {
+                    console.log(args);
+                    
+                    if(args.item.name === "") {
+                        args.cancel = true;
+                        alert("Specify the name of the item!");
+                    }
+                }
             });
         }
     });
@@ -219,33 +233,33 @@
   
 
     // Dropdown Beziehungsart
-    $(function () {
-        let requestData = {
-            function: 'Person.getRelationship',
-            args: {}
-        };
-
-        $.ajax({
-            url: '../core/php/RequestHandler.php',
-            type: 'POST',
-            data: JSON.stringify(requestData)
-        }).done(function(data) {
-                let rows = JSON.parse(data).rows;
-                let options = [];
-
-                // Bitte auswählen Option hinzufügen
-                options.push('<option value="">' + app.getText('Bitte auswählen...') + '</option>');
-
-                // Alle Optionen zu Array hinzufügen
-                rows.forEach(function(row) {
-                    options.push('<option value="' + row + '">' + row + '</option>');
-                });
-
-                // Beziehungs Combo abfüllen
-                if ($('#relationshipType').length) {
-                    $('#relationshipType').append(options);
-                }
-        });
-    });
+//    $(function () {
+//        let requestData = {
+//            function: 'Person.getRelationship',
+//            args: {}
+//        };
+//
+//        $.ajax({
+//            url: '../core/php/RequestHandler.php',
+//            type: 'POST',
+//            data: JSON.stringify(requestData)
+//        }).done(function(data) {
+//                let rows = JSON.parse(data).rows;
+//                let options = [];
+//
+//                // Bitte auswählen Option hinzufügen
+//                options.push('<option value="">' + app.getText('Bitte auswählen...') + '</option>');
+//
+//                // Alle Optionen zu Array hinzufügen
+//                rows.forEach(function(row) {
+//                    options.push('<option value="' + row + '">' + row + '</option>');
+//                });
+//
+//                // Beziehungs Combo abfüllen
+//                if ($('#relationshipType').length) {
+//                    $('#relationshipType').append(options);
+//                }
+//        });
+//    });
     
 })(jQuery);
