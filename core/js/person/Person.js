@@ -155,28 +155,106 @@ biwi.Person = class biwi_Person extends kijs.gui.Container {
                 xtype: 'kijs.gui.Splitter',
                 targetPos: 'right'
             },
+            
             this._createFormPanel()
         ];
     }
 
     _createTablePanel() {
         return this._gridPanel = new kijs.gui.Panel({
-            caption: 'Tabelle',
+            caption: 'Person erfassen',
             cls: 'kijs-flexcolumn',
             style: {
                 flex: 1,
                 minWidth: '40px'
             },
-            elements: [{
-                xtype: 'kijs.gui.grid.Grid',
-                selectType: 'multi',
-                filterable: true,
-                facadeFnLoad: this._gridFnLoad,
-                rpc: this._app.rpc,
-                style: {
-                    flex: 1
-                }
-            }],
+            defaults: {
+                labelWidth: 120
+            },
+            elements: [
+                {
+                xtype: 'kijs.gui.field.Text',
+                label: 'Name'
+                },
+                {
+                xtype: 'kijs.gui.field.Text',
+                label: 'Eindeutigkeit'
+                },
+                {
+                    xtype: 'kijs.gui.Button',
+                    caption: 'Quelle',
+                    heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Männlich',
+                heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Weiblich',
+                heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Halbe-Halbe',
+                heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Ja',
+                heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Nein',
+                heigth: 20
+                },
+                {
+                xtype: 'kijs.gui.field.Checkbox',
+                caption: 'Unbekannt',
+                heigth: 20
+                },
+                {
+                    xtype: 'kijs.gui.field.Text',
+                    label: 'Beruf'
+                },
+                {
+                    xtype: 'kijs.gui.field.Text',
+                    label: 'Menschengruppe'
+                },
+                {
+                xtype: 'kijs.gui.field.Combo',
+                label: 'Personengruppe'
+                },
+                /*
+                {
+                xtype: 'kijs.gui.field.CheckboxGroup',
+
+                elements: [
+                    {
+                    xtype: 'kijs.gui.field.Checkbox',
+                    caption: 'Männlich',
+                    heigth: 20
+                    },
+                    {
+                        xtype: 'kijs.gui.field.Checkbox',
+                        caption: 'Weiblich',
+                        heigth: 20
+                    },
+                    {
+                        xtype: 'kijs.gui.field.Checkbox',
+                        caption: 'Halbe-Halbe',
+                        heigth: 20
+                    }
+                ]
+                },*/
+                {
+                xtype: 'kijs.gui.Button',
+                caption: 'Hinzufügen',
+                heigth: 20
+                },
+            ],
             headerElements: this._createHeaderElements()
         });
     }
