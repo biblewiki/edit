@@ -14,7 +14,7 @@ class App {
      * @var ExceptionHandler
      */
     private $exceptionHandler;
-    
+
     // -------------------------------------------------------------------
     // Public Functions
     // -------------------------------------------------------------------
@@ -26,10 +26,10 @@ class App {
      */
     public function __construct(array $config) {
         $this->config = $config;
-        
+
         // Exception-Handler initialisieren
         $this->exceptionHandler = new ExceptionHandler($this);
-            
+
         // DB öffnen
         try {
             $this->db = new Db(
@@ -44,6 +44,7 @@ class App {
             die($msg . PHP_EOL);echo $msg;
         }
     }
+
 
     /**
      * Gibt das Konfigurations-Array zurück
@@ -62,7 +63,8 @@ class App {
 
         return $cfg;
     }
-    
+
+
     /**
      * Gibt die App-Datenbank zurück
      *
@@ -71,19 +73,29 @@ class App {
     public function getDb(): ?Db {
         return $this->db;
     }
-    
+
+
     /**
      * @return ExceptionHandler
      */
     public function getExceptionHandler(): ExceptionHandler {
         return $this->exceptionHandler;
     }
-    
-    
+
+
     public function getLanguage(string $language = null): string {
         return 'de';
     }
-    
+
+
+    /**
+     * @return Session
+     */
+    public function getSession(): Session {
+        return $this->session;
+    }
+
+
     /**
      * Gibt den übersetzten Text zurück.
      *
@@ -97,11 +109,87 @@ class App {
         return $key;//\KiLang::getText($key, $variant, $args, $languageId);
     }
 
+
+    public function getTexts() {
+        $return = new stdClass();
+        $return->texts = [];
+        return $return;
+    }
+
+
     public function getUserId(): int {
         return 1;
     }
-    
+
+
     public function getUserName(int $userId): string {
         return 'Joel Kohler';
     }
+
+
+    /**
+     * Gibt zurück, ob der Benutzer eingeloggt ist
+     *
+     * @return bool
+     */
+    public function isLoggedIn(): bool {
+        return (bool)$this->getUserId();
+    }
+
+
+    /**
+     * Speichert eine Javascript-Fehlermeldung ins Error-Log.
+     * @param \stdClass $error
+     * @return void
+     */
+    public function jsErrorLog(\stdClass $error): void {
+
+        // Loggen?
+        //if (self::getConfig('exceptionHandling,logJavascriptErrors') !== true) {
+        //    return;
+        //}
+
+        $log = '';
+        $log .= 'Date  : ' . \date('d.m.Y H:i:s'). "\n";
+        //$log .= 'User  : ' . self::getSession()->userId . "\n";
+
+        if ($error->message) {
+            $log .= 'Msg   : ' . $error->message . "\n";
+        }
+        if ($error->filename) {
+            $log .= 'File  : ' . $error->filename . "\n";
+        }
+        if ($error->lineNumber) {
+            $log .= 'Line  : ' . $error->lineNumber . "\n";
+        }
+        if ($error->columnNumber) {
+            $log .= 'Column: ' . $error->columnNumber . "\n";
+        }
+        if ($error->stack) {
+            $log .= 'Stack : ' . "\n" . \trim($error->stack) . "\n";
+        }
+        $log .= "--------------------------------------\n";
+
+
+        if (\is_dir('log')) {
+            // Log-Datei erstellen
+            if (!\is_file('log/jsExceptions.log')) {
+                \file_put_contents('log/jsExceptions.log', '');
+            }
+
+            // Log-Datei schreiben
+            if (\is_file('log/jsExceptions.log') && \is_writable('log/jsExceptions.log')) {
+                \file_put_contents('log/jsExceptions.log', $log, \FILE_APPEND);
+            }
+        }
+    }
+
+
+    /**
+     * @param bool $ignoreWarnings
+     */
+    public function setIgnoreWarnings(bool $ignoreWarnings): void {
+        $this->ignoreWarnings = $ignoreWarnings;
+    }
+
 }
