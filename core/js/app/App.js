@@ -1,4 +1,3 @@
-
 /* global kijs, Babel, biwi */
 
 // --------------------------------------------------------------
@@ -62,7 +61,7 @@ biwi.app.App = class biwi_app_App {
         let isDirty = false;
         if (this._viewport) {
             kijs.Array.each(this._viewport.elements, function(element) {
-                if (element instanceof kg.app.MainPanel) {
+                if (element instanceof biwi.app.MainPanel) {
                     isDirty = element.isDirty;
                 }
             }, this);
@@ -157,6 +156,17 @@ biwi.app.App = class biwi_app_App {
      * @returns {undefined}
      */
     run() {
+
+
+        // TODO
+        this._config.isLoggedIn = true;
+        this._config.isUser = true;
+        this._config.isFachbereich = true;
+        this._config.isAdmin = true;
+
+
+
+
         // ViewPort erstellen
         this._viewport = new kijs.gui.ViewPort({
             cls: 'kijs-flexcolumn'
@@ -168,19 +178,20 @@ biwi.app.App = class biwi_app_App {
             this._texts = ret.texts;
 
             // start app
-            if (!this._config.isLoggedIn) {
-
-                // Login anzeigen
-                let loginWin = new kg.app.LoginWindow({
-                    authToken: this._authToken
-                });
-                loginWin.on('login', this._onLogin, this);
-                loginWin.show();
-
-                // App anzeigen
-            } else {
-                this._startApp(false);
-            }
+//            if (!this._config.isLoggedIn) {
+//
+//                // Login anzeigen
+//                let loginWin = new kg.app.LoginWindow({
+//                    authToken: this._authToken
+//                });
+//                loginWin.on('login', this._onLogin, this);
+//                loginWin.show();
+//
+//                // App anzeigen
+//            } else {
+//                this._startApp(false);
+//            }
+            this._startApp(false);
         }, this);
 
     }
@@ -237,7 +248,7 @@ biwi.app.App = class biwi_app_App {
         this._config.isAdmin = e.response.isAdmin;
 
         if (e.response.guiLanguageId === this.languageId) {
-            this._startApp(true);
+            this._startApp(false);
 
         } else {
 
@@ -301,9 +312,11 @@ biwi.app.App = class biwi_app_App {
      */
     _startApp(showSplashscreen) {
         if (this._config.isLoggedIn && this._config.isUser) {
-            this._splashScreen(showSplashscreen, function() {
-                this._viewport.add(new kg.app.MainPanel());
-            });
+//            this._splashScreen(showSplashscreen, function() {
+//                this._viewport.add(new biwi.app.MainPanel());
+//            });
+
+            this._viewport.add(new biwi.app.MainPanel());
 
         // Benutzer ist eingeloggt, hat aber keine Rechte auf das App.
         // An Suissetec Kontakt weiterleiten.

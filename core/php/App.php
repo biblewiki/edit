@@ -87,6 +87,154 @@ class App {
         return 'de';
     }
 
+    /**
+     * Gibt den navi-Baum zurück.
+     */
+    public function getNaviTree(): \Rpc\ResponseDefault {
+
+        $elements = [];
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Dashboard');
+        $btn->name = 'kg_dashboard_Dashboard';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Produkte');
+        $btn->name = 'kg_produkt_Produkt';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Produktimport');
+        $btn->name = 'kg_produkt_ImportQueue';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Zuweisungen');
+        $btn->name = 'kg_zuweisung_Zuweisung';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Preise');
+        $btn->name = 'kg_preisrezept_PreisRezept';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Log');
+        $btn->name = 'kg_log_Log';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = self::getText('Positionen');
+        $btn->name = 'kg_position_Position';
+        $elements[] = $btn;
+
+        // ****************************
+        // Stammdaten
+        // ****************************
+
+
+            $stammdaten = new \stdClass();
+            $stammdaten->caption = self::getText('Stammdaten');
+            $stammdaten->name = 'stammdaten';
+            $stammdaten->elements = [];
+            $elements[] = $stammdaten;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Artikelgruppen');
+            $btn->name = 'kg_stammdaten_Artikelgruppe';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Buchtexte');
+            $btn->name = 'kg_stammdaten_Buchtexte';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Ausführungen');
+            $btn->name = 'kg_stammdaten_Ausfuehrung';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Zeiten');
+            $btn->name = 'kg_stammdaten_Zeit';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Branchen');
+            $btn->name = 'kg_stammdaten_Branche';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Einheiten');
+            $btn->name = 'kg_stammdaten_Einheit';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Hilfsmaterialfaktor');
+            $btn->name = 'kg_stammdaten_Hilfsmaterialfaktor';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Kostenelement');
+            $btn->name = 'kg_stammdaten_Kostenelement';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Kosten');
+            $btn->name = 'kg_stammdaten_Kosten';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Icons');
+            $btn->name = 'kg_stammdaten_Icon';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Lieferanten');
+            $btn->name = 'kg_stammdaten_Lieferant';
+            $stammdaten->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Produktgruppen');
+            $btn->name = 'kg_stammdaten_Produktgruppe';
+            $stammdaten->elements[] = $btn;
+
+
+
+        // ****************************
+        // Administration
+        // ****************************
+
+
+            $administration = new \stdClass();
+            $administration->caption = self::getText('Administration');
+            $administration->name = 'administration';
+            $administration->elements = [];
+            $elements[] = $administration;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Kapitel');
+            $btn->name = 'kg_kapitel_Kapitel';
+            $administration->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Einzelpreise');
+            $btn->name = 'kg_dienstleistung_Einzelpreis';
+            $administration->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = self::getText('Email Config');
+            $btn->name = 'kg_email_Email';
+            $administration->elements[] = $btn;
+
+
+        // Response
+        $return = new \Rpc\ResponseDefault();
+        $return->elements = $elements;
+        return $return;
+    }
+
 
     /**
      * @return Session
