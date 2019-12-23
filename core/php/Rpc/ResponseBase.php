@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-//namespace ki\kgweb\ki\Rpc;
+namespace Rpc;
 
 /**
  * Die RpcResponse-Klasse dient zur Daten-Rückgabe vom Server an den Browser.

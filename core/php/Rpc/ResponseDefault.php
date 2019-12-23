@@ -1,14 +1,14 @@
 <?php
 declare(strict_types = 1);
 
-//namespace ki\kgweb\ki\Rpc;
+namespace Rpc;
 
 /**
  * Standard-RPC-Response für individuelle Rückgaben.
  * Es können dynamisch Attribute hinzugefügt werden, welche
  * ans Javascript übermittelt werden.
  */
-final class ResponseDefault extends Rpc\ResponseBase {
+final class ResponseDefault extends ResponseBase {
     private $parameters = [];
 
     // -------------------------------------------------------------------

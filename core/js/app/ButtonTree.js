@@ -31,7 +31,7 @@ biwi.app.ButtonTree = class biwi_app_ButtonTree extends kijs.gui.ContainerStack 
         }
 
         // Panels vom Server laden
-        this._app.rpc.do('app.getNaviTree', null, function(ret) {
+        this._app.rpc.do('app.getNaviTree', null, function(ret) {console.log(ret);
             this.generateButtonContainer(ret.elements);
 
             // Event
@@ -55,14 +55,6 @@ biwi.app.ButtonTree = class biwi_app_ButtonTree extends kijs.gui.ContainerStack 
             cls:'kijs-flexcolumn',
             defaults: {
                 xtype: 'kijs.gui.Button'
-            },
-            elements: {
-                xtype: 'kijs.gui.Button',
-                caption: 'test',
-                on: {
-                    click: this._onButtonClick,
-                    context: this
-                }
             }
         });
 

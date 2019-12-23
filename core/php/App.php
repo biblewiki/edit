@@ -90,7 +90,7 @@ class App {
     /**
      * Gibt den navi-Baum zurück.
      */
-    public function getNaviTree(): \Rpc\ResponseDefault {
+    public function getNaviTree(): Rpc\ResponseDefault {
 
         $elements = [];
 
@@ -230,7 +230,7 @@ class App {
 
 
         // Response
-        $return = new \Rpc\ResponseDefault();
+        $return = new Rpc\ResponseDefault();
         $return->elements = $elements;
         return $return;
     }
