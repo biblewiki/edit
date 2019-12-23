@@ -100,8 +100,8 @@ class App {
         $elements[] = $btn;
 
         $btn = new \stdClass();
-        $btn->caption = self::getText('Produkte');
-        $btn->name = 'kg_produkt_Produkt';
+        $btn->caption = self::getText('Personen');
+        $btn->name = 'biwi_person_Person';
         $elements[] = $btn;
 
         $btn = new \stdClass();

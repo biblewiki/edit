@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace ki\kgweb\ki\Rpc;
+namespace Rpc;
 
 /**
  * Klasse für ein RPC-Response an ein Formular

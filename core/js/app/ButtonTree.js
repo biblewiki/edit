@@ -1,4 +1,4 @@
-/* global this, kijs */
+/* global this, kijs, biwi */
 
 // --------------------------------------------------------------
 // biwi.app.ButtonTree

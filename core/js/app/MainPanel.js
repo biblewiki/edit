@@ -17,7 +17,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
 
         // Config generieren
         config = Object.assign({}, {
-            elements:this._createElements(),
+            elements: this._createElements(),
             cls: 'kijs-flexcolumn',
             style: {
                 flex: 1
@@ -33,7 +33,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
         if (kijs.isObject(config)) {
             this.applyConfig(config, true);
         }
-console.log(this.down('biwi-app-buttontreenav'));
+
         // Events: Klick auf ein Navi-Button
         this.down('biwi-app-buttontreenav').on('btnclick', function(e) {
             this.showPanel(e.raiseElement.name);
@@ -122,7 +122,7 @@ console.log(this.down('biwi-app-buttontreenav'));
                     toolTip: this._app.getText('Hilfe'),
                     on: {
                         click: function() {
-                            (new kg.app.AboutWindow()).show();
+                            (new biwi.app.AboutWindow()).show();
                         },
                         context: this
                     }
@@ -133,7 +133,7 @@ console.log(this.down('biwi-app-buttontreenav'));
                     toolTip: this._app.getText('Über kgweb'),
                     on: {
                         click: function() {
-                            (new kg.app.AboutWindow()).show();
+                            (new biwi.app.AboutWindow()).show();
                         },
                         context: this
                     }
@@ -193,7 +193,9 @@ console.log(this.down('biwi-app-buttontreenav'));
                         style: {
                             flex: 1
                         },
-                        elements: []
+                        elements: [{
+                            xtype: 'biwi.Person'
+                        }]
                     }
                 ]
             }]
