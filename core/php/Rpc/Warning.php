@@ -1,16 +1,16 @@
 <?php
 declare(strict_types = 1);
 
-namespace ki\kgweb\ki\Rpc;
+namespace biwi\edit\Rpc;
 
-use ki\kgweb\ki;
+use biwi\edit;
 
 /**
  * Die Warning zeigt auf dem UI eine Ok-Abbrechen-Meldung an.
  * Die Warnung darf nur geworfen werden, wenn ignoreWarnings im App
  * auf 'false' steht, ansonsten wird eine Exception geworfen.
  */
-class Warning extends ki\ExceptionNotice {
+class Warning extends edit\ExceptionNotice {
     protected $title = '';
 
     /**

@@ -10,7 +10,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
     // CONSTRUCTOR
     // --------------------------------------------------------------
     constructor(config={}) {
-        super();
+        super(false);
 
         this._app = new biwi.app.App();
         this._panelInstances = [];
@@ -193,9 +193,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
                         style: {
                             flex: 1
                         },
-                        elements: [{
-                            xtype: 'biwi.Person'
-                        }]
+                        elements: []
                     }
                 ]
             }]

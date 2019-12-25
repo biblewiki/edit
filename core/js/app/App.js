@@ -7,7 +7,6 @@ kijs.createNamespace('biwi.app');
 biwi.app.App = class biwi_app_App {
 
 
-
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
@@ -69,14 +68,14 @@ biwi.app.App = class biwi_app_App {
         return isDirty;
     }
 
-    get languageId() { return this._config.guiLanguageId; }
+    get languageId() { return 'de'; }//return this._config.guiLanguageId; }
     set languageId(val) { this._config.guiLanguageId = val; }
 
     get mainPanel() {
         let mainPanel;
         if (this._viewport) {
             kijs.Array.each(this._viewport.elements, function(element) {
-                if (element instanceof kg.app.MainPanel) {
+                if (element instanceof biwi.app.MainPanel) {
                     mainPanel = element;
                     return false;
                 }
@@ -124,7 +123,7 @@ biwi.app.App = class biwi_app_App {
         // Wenn Text nicht gefunden, den Key nehmen
         if (text === undefined) {
             if (languageId !== 'de') {
-                console.warn('Text "' + key + '" not found in translation "' + languageId + '"');
+                //console.warn('Text "' + key + '" not found in translation "' + languageId + '"');
             }
             text = key;
         }
@@ -340,7 +339,7 @@ biwi.app.App = class biwi_app_App {
         if (show) {
             let splash = new kijs.gui.Container({
                 cls : 'splashscreen',
-                html: '<img src="core/resources/img/splashscreen.svg" />'
+                html: '<img src="core/ressources/img/splashscreen.svg" />'
             });
             this._viewport.add(splash);
 

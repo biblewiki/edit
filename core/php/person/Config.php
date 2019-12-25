@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace person;
+namespace biwi\edit\person;
 
 /**
  * Class Config

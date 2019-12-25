@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Rpc;
+namespace biwi\edit\Rpc;
 
 /**
  * Die RpcResponse-Klasse dient zur Daten-Rückgabe vom Server an den Browser.

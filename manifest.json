@@ -3,11 +3,11 @@
     "short_name": "BibleWiki",
     "icons": [
         {
-            "src": "ressources/images/biblewiki_logo_128x128.png",
+            "src": "core/ressources/img/icon/biblewiki_logo_128x128.png",
             "type": "image/png",
             "sizes": "128x128"
         },{
-            "src": "ressources/images/biblewiki_logo_512x512.png",
+            "src": "core/ressources/img/icon/biblewiki_logo_512x512.png",
             "type": "image/png",
             "sizes": "512x512"
         }

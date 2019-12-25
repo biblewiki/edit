@@ -1,44 +1,28 @@
-/* global this, kijs */
+/* global kijs, kg, biwi */
 
 // --------------------------------------------------------------
-// ki.DefaultGridComponent
+// kg.kapitel.Kapitel
 // --------------------------------------------------------------
-kijs.createNamespace('biwi');
 
-biwi.Person = class biwi_Person extends kijs.gui.Container {
+kijs.createNamespace('biwi.person');
+
+biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel {
+
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
     constructor(config={}) {
-        super();
-
-        this._app = new biwi.app.App();
-        this._gridPanel = null;
-        this._formPanel = null;
-        this._selection = null;
-        this._apertureMask = null;
-
-        this._gridFnLoad = null;
-        this._formFnLoad = null;
-        this._formFnSave = null;
-        this._deleteFn = null;
-
-        this._formRemoteParams = {};
+        super(false);
 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
-            cls: ['kijs-flexrow', 'ki-defaultgridcomponent'],
-            style: {
-                flex: 1
-            }
+            formFnLoad: 'person.getForm',
+            formFnSave: 'person.saveDetailForm'
         });
 
-        // Mapping für die Zuweisung der Config-Eigenschaften
+         // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            gridFnLoad  : true,
-            formFnLoad  : true,
-            formFnSave  : true,
-            deleteFn    : true
+
         });
 
         // Config anwenden
@@ -46,187 +30,204 @@ biwi.Person = class biwi_Person extends kijs.gui.Container {
             config = Object.assign({}, this._defaultConfig, config);
             this.applyConfig(config, true);
         }
-
-        this.showPanel();
     }
 
-
-    // --------------------------------------------------------------
-    // GETTERS / SETTERS
-    // --------------------------------------------------------------
-
-    get grid() { return this._gridPanel.firstChild; }
-    get form() { return this._formPanel.firstChild; }
-
-    set formCaption(val) { this._formPanel.headerBar.html = val; }
-    set gridCaption(val) { this._gridPanel.headerBar.html = val; }
-
-    get isDirty() {
-        return this.form.isDirty;
-    }
-
-    get formRemoteParams() { return this._formRemoteParams; }
 
     // --------------------------------------------------------------
     // MEMBERS
     // --------------------------------------------------------------
 
-    refreshPanel(args) {
-        if (args && args.restoreSelection){
-            this.grid.reload(args.restoreSelection);
-        } else {
-            this.grid.reload();
-        }
+    // overwrite
+    _populateFormPanel(formPanel) {
 
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.selection = this._selection;
+        // Titel
+        this.formCaption = this._app.getText('Person');
 
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true);
-        }
-    }
+        //formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
-    /**
-     * Speichert das Detailformular
-     * @param {boolean} [force=false] true: Auch speichern, wenn nicht dirty
-     * @returns {Promise}
-     */
-    saveData(force=false) {
-        let p;
-        if (force || this.form.isDirty) {
-            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
-
-                // kiOpenTS zurücksetzen
-                if (this.form.data.kiOpenTS) {
-                    this.form.data.kiOpenTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
-                }
-
-                if (response.newId !== response.oldId){
-                    this.grid.reload().then(() => {
-                        this.grid.selectByIds(response.newId, false, true);
-
-                        if (this.grid.primaryKeys.length === 1){
-                            // Selection definieren mit dem neuen Eintrag
-                            this._selection = {};
-                            this._selection[this.grid.primaryKeys[0]] = response.newId;
-
-                            let params = kijs.Object.clone(this._formRemoteParams);
-                            params.selection = this._selection;
-
-                            // Formular laden
-                            if (this.form.facadeFnLoad) {
-                                this.form.load(params, true, true);
-                            }
-                        } else {
-                            kijs.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Mehrere Primary Keys vorhanden.'));
+        // Felder hinzufügen
+        formPanel.add({
+            xtype:'kijs.gui.Container',
+            innerStyle: {
+                padding: '10px',
+                overflowY: 'auto'
+            },
+            defaults: {
+                width: 800,
+                labelWidth: 120,
+                style: {marginBottom: '4px'}
+            },
+            elements: [
+                {
+                    xtype: 'kijs.gui.Container',
+                    cls: 'biwi-form-row',
+                    defaults: {
+                        width: 800,
+                        labelWidth: 120,
+                        style: {marginBottom: '4px'}
+                    },
+                    elements: [
+                        {
+                            xtype: 'kijs.gui.field.Text',
+                            label: this._app.getText('Name'),
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Button',
+                                    iconChar: '&#xf039',
+                                    toolTip: this._app.getText('Quelle'),
+                                    on: {
+                                        click: function(e) {
+                                            let quelle = new biwi.default.QuelleWindow();
+                                            quelle.show();
+                                        },
+                                        context: this
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'kijs.gui.field.Text',
+                            label: this._app.getText('Eindeutigkeit'),
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Button',
+                                    iconChar: '&#xf039',
+                                    toolTip: this._app.getText('Quelle'),
+                                    on: {
+                                        click: function(e) {
+                                            let quelle = new biwi.default.QuelleWindow();
+                                            quelle.show();
+                                        },
+                                        context: this
+                                    }
+                                }
+                            ]
                         }
-                    });
-                } else {
-                    this.grid.reload();
-                }
-            });
-        } else {
-            p = new Promise((resolve, reject) => {});
-        }
-        return p;
-    }
+                    ]
+                },
+                {
+                    xtype: 'kijs.gui.Container',
+                    cls: 'biwi-form-row',
+                    defaults: {
+                        width: 800,
+                        labelWidth: 120,
+                        style: {marginBottom: '4px'}
+                    },
+                    elements: [
+                        {
+                            xtype: 'kijs.gui.field.OptionGroup',
+                            name: 'sex',
+                            label: this._app.getText('Geschlecht'),
+                            cls: 'kijs-inline',
+                            valueField: 'id',
+                            captionField: 'caption',
+                            required: true,
+                            data: [
+                                { id: 1, caption: this._app.getText('Mann') },
+                                { id: 2, caption: this._app.getText('Frau') },
+                                { id: 3, caption: this._app.getText('Unbekannt') }
+                            ],
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Button',
+                                    iconChar: '&#xf039',
+                                    toolTip: this._app.getText('Quelle'),
+                                    on: {
+                                        click: function(e) {
+                                            let quelle = new biwi.default.QuelleWindow();
+                                            quelle.show();
+                                        },
+                                        context: this
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'kijs.gui.field.OptionGroup',
+                            name: 'believer',
+                            label: this._app.getText('Christ'),
+                            cls: 'kijs-inline',
+                            valueField: 'id',
+                            captionField: 'caption',
+                            required: true,
+                            data: [
+                                { id: 1, caption: this._app.getText('Ja') },
+                                { id: 2, caption: this._app.getText('Nein') },
+                                { id: 3, caption: this._app.getText('Unbekannt') }
+                            ],
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Button',
+                                    iconChar: '&#xf039',
+                                    toolTip: this._app.getText('Quelle'),
+                                    on: {
+                                        click: function(e) {
+                                            let quelle = new biwi.default.QuelleWindow();
+                                            quelle.show();
+                                        },
+                                        context: this
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    xtype: 'kijs.gui.field.Checkbox',
+                    caption: 'Ja',
+                    heigth: 20
+                },
+                {
+                    xtype: 'kijs.gui.field.Checkbox',
+                    caption: 'Nein',
+                    heigth: 20
+                },
+                {
+                    xtype: 'kijs.gui.field.Checkbox',
+                    caption: 'Unbekannt',
+                    heigth: 20
+                },
+                {
+                    xtype: 'kijs.gui.field.Text',
+                    label: 'Beruf'
+                },
+                {
+                    xtype: 'kijs.gui.field.Text',
+                    label: 'Menschengruppe'
+                },
+                {
+                    xtype: 'kijs.gui.field.Combo',
+                    label: 'Personengruppe'
+                },
+                /*
+                {
+                xtype: 'kijs.gui.field.CheckboxGroup',
 
-    showPanel(args) {
-        // Tabelle und Grid erstellen
-        if (!this._gridPanel) {
-            this.add(this._createElements());
-        } else {
-            if (typeof(args) !== 'undefined' && !args.restoreSelection){
-                this.grid.reload(args.restoreSelection);
-            } else {
-                this.grid.reload();
-            }
-        }
-
-        // events (selection)
-        this.grid.on('selectionChange', this._onSelectionChange, this);
-    }
-
-    // PROTECTED
-    _createElements() {
-        return [
-            this._createTablePanel(),
-            {
-                xtype: 'kijs.gui.Splitter',
-                targetPos: 'right'
-            },
-            this._createFormPanel()
-        ];
-    }
-
-    _createTablePanel() {
-        return this._gridPanel = new kijs.gui.Panel({
-            caption: 'Tabelle',
-            cls: 'kijs-flexcolumn',
-            style: {
-                flex: 1,
-                minWidth: '40px'
-            },
-            elements: [{
-                xtype: 'kijs.gui.grid.Grid',
-                selectType: 'multi',
-                filterable: true,
-                facadeFnLoad: this._gridFnLoad,
-                rpc: this._app.rpc,
-                style: {
-                    flex: 1
-                }
-            }],
-            headerElements: this._createHeaderElements()
-        });
-    }
-
-    _createFormPanel() {
-        this._formPanel = new kijs.gui.Panel({
-            caption: 'Detailansicht',
-            width: 700,
-            elements: [{
-                xtype: 'kijs.gui.FormPanel',
-                rpc: this._app.rpc,
-                facadeFnLoad: this._formFnLoad,
-                facadeFnSave: this._formFnSave
-            }]
-        });
-
-        // FormPanel mit Elementen füllen
-        this._populateFormPanel(this.form);
-
-        // Event
-        this.form.on('change', this._onFormChange, this);
-
-        // Abbrechen-Button
-        this.form.add([
-            {
+                elements: [
+                    {
+                    xtype: 'kijs.gui.field.Checkbox',
+                    caption: 'Männlich',
+                    heigth: 20
+                    },
+                    {
+                        xtype: 'kijs.gui.field.Checkbox',
+                        caption: 'Weiblich',
+                        heigth: 20
+                    },
+                    {
+                        xtype: 'kijs.gui.field.Checkbox',
+                        caption: 'Halbe-Halbe',
+                        heigth: 20
+                    }
+                ]
+                },*/
+                {
                 xtype: 'kijs.gui.Button',
-                name: 'saveBtn',
-                caption: this._app.getText('Speichern'),
-                iconChar: '&#xf0c7',
-                visible: false,
-                style: {marginTop: '16px'},
-                on: {
-                    click: this._onSaveClick,
-                    context: this
+                caption: 'Hinzufügen',
+                heigth: 20
                 }
-            },{
-                xtype: 'kijs.gui.Button',
-                name: 'cancelBtn',
-                caption: this._app.getText('Abbrechen'),
-                iconChar: '&#xf05e',
-                visible: false,
-                style: {marginTop: '16px'},
-                on: {
-                    click: this._onCancelClick,
-                    context: this
-                }
-            }
-        ]);
-
-        return this._formPanel;
+            ]
+        });
     }
 
     _createHeaderElements() {
@@ -242,15 +243,6 @@ biwi.Person = class biwi_Person extends kijs.gui.Container {
                 }
             },{
                 xtype: 'kijs.gui.Button',
-                name: 'duplicate',
-                caption: this._app.getText('Duplizieren'),
-                iconChar: '&#xf0c5',
-                on: {
-                    click: this._onDuplicateClick,
-                    context: this
-                }
-            },{
-                xtype: 'kijs.gui.Button',
                 caption: this._app.getText('Löschen'),
                 iconChar: '&#xf1f8',
                 on: {
@@ -261,208 +253,11 @@ biwi.Person = class biwi_Person extends kijs.gui.Container {
         ];
     }
 
-    /**
-     * Kann in abgeleiteter Klasse überschrieben werden,
-     * um FormPanel zu füllen
-     * @param {kijs.gui.FormPanel} formPanel
-     * @returns {undefined}
-     */
-    _populateFormPanel(formPanel) {
-
-    }
-
-    // overwrite
-    unrender(superCall) {
-        // Event auslösen.
-        if (!superCall) {
-            this.raiseEvent('unrender');
-        }
-
-        if (this._apertureMask) {
-            this._apertureMask.unrender();
-        }
-
-        super.unrender(true);
-    }
-
-
-    // EVENTS
-
-    /**
-     * Klick auf den 'Neu' - Button
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onAddClick(e) {
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.create = true;
-
-        // Formular laden
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true).then(() => {
-                this._onFormChange(params);
-            });
-        }
-    }
-
-    /**
-     * Klick auf den Abbrechen-Button
-     * @returns {undefined}
-     */
-    _onCancelClick() {
-        this.form.reset();
-        this.form.resetValidation();
-
-        if (this._apertureMask && this._apertureMask.visible === true) {
-            this._apertureMask.visible = false;
-            this.down('cancelBtn').visible = false;
-            this.down('saveBtn').visible = false;
-        }
-    }
-
-    /**
-     * Klick auf den Löschen-Button
-     * @returns {undefined}
-     */
-    _onDeleteClick() {
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.selection = this.grid.getSelectedIds();
-
-        this._app.rpc.do(this._deleteFn, params, function() {
-
-            // grid neu laden
-            this.grid.reload();
-
-            // form leeren
-            this.form.clear();
-
-            this._selection = null;
-
-        }, this);
-    }
-
-    /**
-     * Klick auf den Duplicate-Button
-     * @returns {undefined}
-     */
-    _onDuplicateClick(){
-        if (this.grid.getSelectedIds().length > 0){
-            if (this.grid.getSelectedIds().length === 1){
-                let params = kijs.Object.clone(this._formRemoteParams);
-                params.create = true;
-                params.selection = this._selection;
-
-                // Formular laden
-                if (this.form.facadeFnLoad) {
-                    this.form.load(params, true, true).then(() => {
-                        this.form.isDirty = true;
-                        this._onFormChange();
-                    });
-                }
-            } else {
-                kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es können nicht mehrere Einträge gleichzeitig dupliziert werden.'));
-            }
-        } else {
-            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Kein Eintrag ausgewählt.'));
-        }
-    }
-
-    /**
-     * Wenn das Formular geändert wird.
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onFormChange(e) {
-        if (!this.form.validate()) {
-            if (!this._apertureMask) {
-                this._apertureMask = new kijs.gui.ApertureMask({
-                   target: this._formPanel
-                });
-            }
-            this._apertureMask.visible = true;
-            this.down('cancelBtn').visible = true;
-            this.down('saveBtn').visible = true;
-
-        } else {
-            // Speichern & Maske ausblenden
-            this.saveData().then(() => {
-                if (this._apertureMask && this._apertureMask.visible === true){
-                    this._apertureMask.visible = false;
-                    this.down('cancelBtn').visible = false;
-                    this.down('saveBtn').visible = false;
-                }
-            }).catch(() => {});
-        }
-    }
-
-    _onSaveClick() {
-        if (!this.form.validate()) {
-            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
-        } else {
-            this._onFormChange();
-        }
-    }
-
-    /**
-     * Wenn eine neue Zeile ausgewählt wird.
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onSelectionChange(e) {
-        let oldSelection = this._selection;
-
-        this._selection = {};
-        if (e.rows && e.rows.length === 1){
-            let pks = this.grid.primaryKeys, pk=null;
-            for (let i=0; i<pks.length; i++) {
-                pk = pks[i];
-                if (e.unSelect && this.grid.getSelectedIds().length === 1){
-                    this._selection[pk] = this.grid.getSelectedIds()[0];
-                } else {
-                    this._selection[pk] = e.rows[0].dataRow[pk];
-                }
-            }
-        }
-
-        if (this.grid.getSelectedIds().length === 1){
-            if (oldSelection !== null && !this.form.disabled && !this.form.readOnly){
-                this.saveData();
-            }
-            oldSelection = null;
-
-            let params = kijs.Object.clone(this._formRemoteParams);
-            params.selection = this._selection;
-
-            // Formular laden
-            if (this.form.facadeFnLoad) {
-                this.form.load(params, true, true);
-            }
-        } else {
-            //this.form.disabled = true;
-            this.form.clear();
-        }
-    }
-
-
     // --------------------------------------------------------------
     // DESTRUCTOR
     // --------------------------------------------------------------
-    destruct(preventDestructEvent) {
-        // Event auslösen.
-        if (!preventDestructEvent) {
-            this.raiseEvent('destruct');
-        }
-
-        // Maske entfernen
-        this._apertureMask.destruct();
-
-        // Basisklasse auch entladen
-        super.destruct(true);
-
-        // Variablen (Objekte/Arrays) leeren
-        this._app = null;
-        this._formPanel = null;
-        this._gridPanel = null;
-        this._apertureMask = null;
+    destruct() {
+        super.destruct();
     }
+
 };

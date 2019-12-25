@@ -2,3 +2,6 @@
 .htaccess
 nbproject
 nbproject/private/private.xml
+config/config.php
+log /*/
+nbproject /*/

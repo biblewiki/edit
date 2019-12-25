@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Rpc;
+namespace biwi\edit\Rpc;
 
 /**
  * Standard-RPC-Response für individuelle Rückgaben.

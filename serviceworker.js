@@ -1,5 +1,5 @@
 // Incrementing OFFLINE_VERSION will kick off the install event and force
-// previously cached resources to be updated from the network.
+// previously cached ressources to be updated from the network.
 const OFFLINE_VERSION = 1;
 // Customize this with a different URL if needed.
 const offlineUrl = 'core/html/offline.html';
@@ -15,15 +15,15 @@ self.addEventListener('install', (event) => {
     caches.open('BibleWiki Logos').then(function(cache) {
       return cache.addAll(
         [
-          '/ressources/images/biblewiki_logo_32x32.png',
-          '/ressources/images/biblewiki_logo_64x64.png',
-          '/ressources/images/biblewiki_logo_128x128.png',
-          '/ressources/images/biblewiki_logo_256x256.png',
-          '/ressources/images/biblewiki_logo_512x512.png',
-          '/ressources/images/logo.svg',
-          '/ressources/images/logo-mini.svg',
-          '/ressources/images/logo-white.svg',
-          '/ressources/images/favicon.png'
+          '/ressources/img/icon/biblewiki_logo_32x32.png',
+          '/ressources/img/icon/biblewiki_logo_64x64.png',
+          '/ressources/img/icon/biblewiki_logo_128x128.png',
+          '/ressources/img/icon/biblewiki_logo_256x256.png',
+          '/ressources/img/icon/biblewiki_logo_512x512.png',
+          '/ressources/img/icon/logo.svg',
+          '/ressources/img/icon/logo-mini.svg',
+          '/ressources/img/icon/logo-white.svg',
+          '/ressources/img/icon/favicon.png'
         ]
       );
     })
@@ -75,8 +75,8 @@ self.addEventListener('fetch', function (event) {
           }).catch(error => {
 
             console.log('offline');
-            
-      
+
+
           }
         );
       }),

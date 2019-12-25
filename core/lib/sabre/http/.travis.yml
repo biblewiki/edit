@@ -1,0 +1,25 @@
+language: php
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+
+matrix:
+  fast_finish: true
+
+env:
+  matrix:
+    - PREFER_LOWEST="" WITH_COVERAGE="--coverage-clover=coverage.xml"
+    - PREFER_LOWEST="--prefer-lowest" $WITH_COVERAGE=""
+
+before_script:
+#    - composer self-update
+    - composer update --prefer-source $PREFER_LOWEST
+
+script:
+  - ./bin/phpunit --configuration tests/phpunit.xml $WITH_COVERAGE
+  - rm -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+  - ./bin/sabre-cs-fixer fix . --dry-run --diff
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

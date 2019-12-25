@@ -1,6 +1,6 @@
 <?php
 
-//namespace ki\kgweb\ki;
+namespace biwi\edit;
 
 
 /**
@@ -471,7 +471,7 @@ class ExceptionHandler {
     ): string {
 
         // App-Name
-        $appName = @$this->app->getText("suissetec Kalkulation");
+        $appName = @$this->app->getText("BibleWiki");
         if (!$appName) {
             $appName = "Es ist ein Fehler aufgetreten";
         }

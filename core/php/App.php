@@ -1,7 +1,17 @@
 <?php
 declare(strict_types = 1);
 
+namespace biwi\edit;
+
+use Sabre\HTTP;
+use Sabre\Event\EventEmitter;
+use biwi\edit;
+
 class App {
+    /**
+     * @var string
+     */
+    private $version = '0.0.1';
     /**
      * @var array
      */
@@ -14,6 +24,28 @@ class App {
      * @var ExceptionHandler
      */
     private $exceptionHandler;
+    /**
+     * Wird von der kijs-Library verwendet
+     *
+     * @var bool
+     */
+    private $ignoreWarnings;
+    /**
+     * @var string
+     */
+    private $languageId;
+    /**
+     * @var Modules
+     */
+    private $modules;
+    /**
+     * @var Response
+     */
+    private $response;
+    /**
+     * @var Request
+     */
+    private $request;
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -27,8 +59,27 @@ class App {
     public function __construct(array $config) {
         $this->config = $config;
 
+        // Events -> geeignet um Funktionen in ausschaltbaren Modulen event-abhängig auszuführen.
+        // Ist das Modul ausgeschaltet, registriert es sich auch nicht für die Events.
+        $this->event = new EventEmitter;
+
         // Exception-Handler initialisieren
         $this->exceptionHandler = new ExceptionHandler($this);
+
+        // Module ermitteln
+        $this->modules = new Modules($this, "App", $this->getConfig("module"));
+
+        // Sabre HTTP Request
+        $this->request = HTTP\Sapi::getRequest();
+
+        // Erweitern durch eigene Klasse
+        $this->request = new Request($this->request);
+
+        // Sabre HTTP Response
+        $this->response = new HTTP\Response(200);
+
+        // Erweitern durch eigene Klasse
+        $this->response = new Response($this->response);
 
         // DB öffnen
         try {
@@ -43,6 +94,22 @@ class App {
             $msg = $this->getExceptionHandler()->handleException($e, 'Die Verbindung zur Datenbank konnte nicht hergestellt werden.');
             die($msg . PHP_EOL);echo $msg;
         }
+
+        // Session auslesen
+        $this->session = null;
+        session_start();
+        if (\array_key_exists("biwi", $_SESSION) && ($_SESSION["biwi"] instanceof Session)) {
+            $this->session = $_SESSION["biwi"];
+        } else {
+            $this->session = new Session();
+        }
+
+        // Router
+        $router = new Router\Router($this);
+        $router = $router->handleRequest($this->request, $this->response);
+
+        // Exit
+        $this->kiExit();
     }
 
 
@@ -87,152 +154,12 @@ class App {
         return 'de';
     }
 
+
     /**
-     * Gibt den navi-Baum zurück.
+     * @return Modules
      */
-    public function getNaviTree(): Rpc\ResponseDefault {
-
-        $elements = [];
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Dashboard');
-        $btn->name = 'kg_dashboard_Dashboard';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Personen');
-        $btn->name = 'biwi_person_Person';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Produktimport');
-        $btn->name = 'kg_produkt_ImportQueue';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Zuweisungen');
-        $btn->name = 'kg_zuweisung_Zuweisung';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Preise');
-        $btn->name = 'kg_preisrezept_PreisRezept';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Log');
-        $btn->name = 'kg_log_Log';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = self::getText('Positionen');
-        $btn->name = 'kg_position_Position';
-        $elements[] = $btn;
-
-        // ****************************
-        // Stammdaten
-        // ****************************
-
-
-            $stammdaten = new \stdClass();
-            $stammdaten->caption = self::getText('Stammdaten');
-            $stammdaten->name = 'stammdaten';
-            $stammdaten->elements = [];
-            $elements[] = $stammdaten;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Artikelgruppen');
-            $btn->name = 'kg_stammdaten_Artikelgruppe';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Buchtexte');
-            $btn->name = 'kg_stammdaten_Buchtexte';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Ausführungen');
-            $btn->name = 'kg_stammdaten_Ausfuehrung';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Zeiten');
-            $btn->name = 'kg_stammdaten_Zeit';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Branchen');
-            $btn->name = 'kg_stammdaten_Branche';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Einheiten');
-            $btn->name = 'kg_stammdaten_Einheit';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Hilfsmaterialfaktor');
-            $btn->name = 'kg_stammdaten_Hilfsmaterialfaktor';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Kostenelement');
-            $btn->name = 'kg_stammdaten_Kostenelement';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Kosten');
-            $btn->name = 'kg_stammdaten_Kosten';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Icons');
-            $btn->name = 'kg_stammdaten_Icon';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Lieferanten');
-            $btn->name = 'kg_stammdaten_Lieferant';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Produktgruppen');
-            $btn->name = 'kg_stammdaten_Produktgruppe';
-            $stammdaten->elements[] = $btn;
-
-
-
-        // ****************************
-        // Administration
-        // ****************************
-
-
-            $administration = new \stdClass();
-            $administration->caption = self::getText('Administration');
-            $administration->name = 'administration';
-            $administration->elements = [];
-            $elements[] = $administration;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Kapitel');
-            $btn->name = 'kg_kapitel_Kapitel';
-            $administration->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Einzelpreise');
-            $btn->name = 'kg_dienstleistung_Einzelpreis';
-            $administration->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = self::getText('Email Config');
-            $btn->name = 'kg_email_Email';
-            $administration->elements[] = $btn;
-
-
-        // Response
-        $return = new Rpc\ResponseDefault();
-        $return->elements = $elements;
-        return $return;
+    public function getModules(): Modules {
+        return $this->modules;
     }
 
 
@@ -258,10 +185,26 @@ class App {
     }
 
 
-    public function getTexts() {
-        $return = new stdClass();
-        $return->texts = [];
-        return $return;
+    /**
+     * Gibt die aktuelle URL der App zurück
+     *
+     * @return string
+     */
+    public function getUrl(): string {
+        $url = \array_key_exists('HTTPS', $_SERVER) ? 'https://' : 'http://';
+        $url .= $_SERVER['HTTP_HOST'];
+        $mainDir = $this->getConfig('url, mainDir');
+        if ($mainDir) {
+            $url .= '/' . $mainDir;
+        }
+
+        // Falls die App in einem Ordner läuft, ist der korrekte Pfad mit slash am Ende.
+        // Siehe https://httpd.apache.org/docs/2.4/mod/mod_dir.html#DirectorySlash
+        if (mb_substr($url, -1) !== '/' && mb_substr($url, -4) !== '.php') {
+            $url .= '/';
+        }
+
+        return $url;
     }
 
 
@@ -276,60 +219,164 @@ class App {
 
 
     /**
+     * Gibt die App-Version zurück
+     * @return string
+     */
+    public function getVersion(): string {
+        return $this->version;
+    }
+
+
+    /**
+     * Gibt die UserId des eingeloggten Benutzers zurück
+     * oder ein Leerstring falls guest
+     *
+     * @return string
+     */
+    public function getLoggedInUserId(): string {
+        $userId = $this->getSession()->userId;
+        if (!$userId || $userId === "guest") {
+            return "";
+        }
+
+        return $userId;
+    }
+
+
+    /**
+     * Gibt die aktuelle Benutzergruppe zurück.
+     * 1 für Lieferant, 2 für Fachbereich und 3 für Admins und 0 für undefiniert (z.B. guest)
+     *
+     * @return int
+     */
+    public function getLoggedInUserType(): int {
+//        if ($this->checkRights($this->getConfig('rights, adminFunction'))) {
+//            return 3;
+//        }
+//        if ($this->checkRights($this->getConfig('rights, fachbereichFunction'))) {
+//            return 2;
+//        }
+//        if ($this->getLoggedInLieferantId() && $this->checkRights($this->getConfig('rights, lieferantFunction'))) {
+//            return 1;
+//        }
+//
+//        $loggenInLieferantId = $this->getLoggedInLieferantId();
+//        $hasRights = $this->checkRights($this->getConfig('rights, lieferantFunction'));
+
+        return 3;
+    }
+
+
+    /**
+     * Handels last json Exception
+     *
+     * @param string $action msg, log, exception
+     * @return string
+     * @throws \Exception
+     */
+    public function handleJsonError(string $action = "exception"): string {
+        $lastErrorInt = json_last_error();
+
+        if ($lastErrorInt > 0) {
+
+            // Define the errors.
+            $constants = get_defined_constants(true);
+            $json_errors = [];
+            foreach ($constants["json"] as $name => $value) {
+                if (!strncmp($name, "JSON_ERROR_", 11)) {
+                    $json_errors[$value] = $name;
+                }
+            }
+
+            // Get message
+            $msg = "";
+            try {
+                $msg = json_last_error_msg();
+            } catch (\Exception $e) {}
+            if (!empty($json_errors[$lastErrorInt])) {
+                $msg .= "\n" . $json_errors[$lastErrorInt];
+            }
+            $msg = "JSON Fehler: " . ($msg ?: "Syntaxfehler, ungültiges JSON.");
+            switch ($action) {
+
+                case "msg":
+                    return $msg;
+
+                case "log":
+                    edit\app\App::writeMsgToLog($this, $msg);
+                    break;
+
+                default:
+                    throw new \Exception($msg);
+            }
+
+        }
+
+        return "";
+    }
+
+
+    /**
      * Gibt zurück, ob der Benutzer eingeloggt ist
      *
      * @return bool
      */
     public function isLoggedIn(): bool {
-        return (bool)$this->getUserId();
+        //return (bool)$this->getLoggedInUserId();
+        return true;
     }
 
 
+
     /**
-     * Speichert eine Javascript-Fehlermeldung ins Error-Log.
-     * @param \stdClass $error
-     * @return void
+     * Beendet den Request und flushed den Response an den Browser / CLI.
+     *
+     * @param string $msg           -> Msg für den User
+     * @param bool $error           -> Gibt an ob es sich bei der msg um eine Fehlermeldung handelt
+     * @param bool $deleteSession   -> Löscht die aktive Session
      */
-    public function jsErrorLog(\stdClass $error): void {
+    public function kiExit(string $msg = "", bool $error = true, bool $deleteSession = false): void {
 
-        // Loggen?
-        //if (self::getConfig('exceptionHandling,logJavascriptErrors') !== true) {
-        //    return;
-        //}
+        // Session wieder schreiben
+        $_SESSION["biwi"] = $this->session;
 
-        $log = '';
-        $log .= 'Date  : ' . \date('d.m.Y H:i:s'). "\n";
-        //$log .= 'User  : ' . self::getSession()->userId . "\n";
+        // SessionHandler schliessen
+        if (method_exists($this->sessionHandler, 'closeWrite')) {
+            $this->sessionHandler->closeWrite();
 
-        if ($error->message) {
-            $log .= 'Msg   : ' . $error->message . "\n";
-        }
-        if ($error->filename) {
-            $log .= 'File  : ' . $error->filename . "\n";
-        }
-        if ($error->lineNumber) {
-            $log .= 'Line  : ' . $error->lineNumber . "\n";
-        }
-        if ($error->columnNumber) {
-            $log .= 'Column: ' . $error->columnNumber . "\n";
-        }
-        if ($error->stack) {
-            $log .= 'Stack : ' . "\n" . \trim($error->stack) . "\n";
-        }
-        $log .= "--------------------------------------\n";
-
-
-        if (\is_dir('log')) {
-            // Log-Datei erstellen
-            if (!\is_file('log/jsExceptions.log')) {
-                \file_put_contents('log/jsExceptions.log', '');
-            }
-
-            // Log-Datei schreiben
-            if (\is_file('log/jsExceptions.log') && \is_writable('log/jsExceptions.log')) {
-                \file_put_contents('log/jsExceptions.log', $log, \FILE_APPEND);
+            // Falls die Session von einem REST-Client ist, löschen
+            if ($deleteSession) {
+                $this->sessionHandler->destroy(session_id());
             }
         }
+
+        if ($this->db instanceof Db) {
+
+            // Rollback
+            $this->db->rollBackIfTransaction();
+        }
+
+        // DB schliessen
+        unset($this->db);
+
+        // End script
+        if ($msg) {
+
+            // Msg an User senden
+            if ($error && $this->response->getStatus() === 200) {
+                $this->response->setStatus(400); // Bad request
+            }
+            $this->response->setBody($msg);
+            HTTP\Sapi::sendResponse($this->response);
+            if ($error) {
+                exit(1);
+            }
+            exit(0);
+        }
+
+        // Response an Browser senden
+        HTTP\Sapi::sendResponse($this->response);
+        exit(0);
     }
 
 

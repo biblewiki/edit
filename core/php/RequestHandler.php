@@ -65,25 +65,26 @@ function doRpc(\App $app, object $cdata): \stdClass {
         $functionName = "";
         if ($cdata->facadeFn) {
             $tmp = explode(".", $cdata->facadeFn);
-            $className = array_shift($tmp);
+            $moduleName = array_shift($tmp);
+            //$moduleName = substr($moduleName, strpos($moduleName, "_") + 1);
             $functionName = implode(".", $tmp);
         }
-        if (!$className || !$functionName) {
-            throw new \Exception("Call to undefined Class: " . $cdata->facadeFn);
+        if (!$moduleName || !$functionName) {
+            throw new \Exception("Call to undefined Module: " . $cdata->facadeFn);
         }
 
         // Modul ermitteln und laden
 //        $mod = $this->app->getModules()->getModule($moduleName);
 //        if (isset($mod)) {
-//            $className = $mod->getFacadeClassName();
-//            $class = new $className($this->app);
+//            $moduleName = $mod->getFacadeClassName();
+//            $class = new $moduleName($this->app);
 //        } else {
 //            throw new \Exception("Call to undefined module: " . $cdata->facadeFn);
 //        }
 
         // Ist die Funktion vorhanden?
-        if (!method_exists($className, $functionName)) {
-            throw new \Exception("Call to undefined method: " . $functionName . " in module: " . $className);
+        if (!method_exists($moduleName, $functionName)) {
+            throw new \Exception("Call to undefined method: " . $functionName . " in module: " . $moduleName);
         }
 
         // Funktion ausführen
@@ -95,10 +96,12 @@ function doRpc(\App $app, object $cdata): \stdClass {
             $params = [$cdata->requestData];
         }
 
+        $module = new $moduleName($app);
+
         $response = new \stdClass();
         $response->tid = $cdata->tid;
         $response->facadeFn = $cdata->facadeFn;
-        $response->responseData = \call_user_func_array([$className, $functionName], $params);
+        $response->responseData = \call_user_func_array([$module, $functionName], $params);
 
         // Prüfen, ob eingeloggt
         if (!$app->isLoggedIn()) {

@@ -31,7 +31,7 @@ biwi.app.ButtonTree = class biwi_app_ButtonTree extends kijs.gui.ContainerStack 
         }
 
         // Panels vom Server laden
-        this._app.rpc.do('app.getNaviTree', null, function(ret) {console.log(ret);
+        this._app.rpc.do('app.getNaviTree', null, function(ret) {
             this.generateButtonContainer(ret.elements);
 
             // Event
