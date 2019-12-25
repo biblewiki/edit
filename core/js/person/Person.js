@@ -45,6 +45,12 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
 
         //formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
+                            // Formular laden
+                            if (this.form.facadeFnLoad) {
+                                this.form.load(params, true, true);
+                            }
+                        } else {
+                            kijs.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Mehrere Primary Keys vorhanden.'));
         // Felder hinzufügen
         formPanel.add({
             xtype:'kijs.gui.Container',
@@ -103,6 +109,33 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                                 }
                             ]
                         }
+                    });
+                } else {
+                    this.grid.reload();
+                }
+            });
+        } else {
+            p = new Promise((resolve, reject) => {});
+        }
+        return p;
+    }
+
+    showPanel(args) {
+        // Tabelle und Grid erstellen
+        if (!this._gridPanel) {
+            this.add(this._createElements());
+        } else {
+            if (typeof(args) !== 'undefined' && !args.restoreSelection){
+                this.grid.reload(args.restoreSelection);
+            } else {
+                this.grid.reload();
+            }
+        }
+
+        // events (selection)
+        this.grid.on('selectionChange', this._onSelectionChange, this);
+    }
+
                     ]
                 },
                 {
