@@ -1,4 +1,4 @@
-/* global kijs, kg, biwi */
+/* global kijs, biwi */
 
 // --------------------------------------------------------------
 // biwi.person.Person
@@ -6,7 +6,7 @@
 
 kijs.createNamespace('biwi.person');
 
-biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel {
+biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPanel {
 
     // --------------------------------------------------------------
     // CONSTRUCTOR

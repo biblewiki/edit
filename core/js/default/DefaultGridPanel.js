@@ -5,7 +5,7 @@
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.default');
 
-biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Container {
+biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs.gui.Container {
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
@@ -92,6 +92,10 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         if (force || this.form.isDirty) {
             p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
 
+                // Button reseten
+                this._detailPanel.footer.down('saveBtn').disabled = true;
+                this._detailPanel.footer.down('saveBtn').badgeText = '';
+
                 // biwiOpenTS zurücksetzen
                 if (this.form.data.openTS) {
                     this.form.data.openTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
@@ -166,10 +170,11 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
             footerElements: [
                 {
                     xtype: 'kijs.gui.Button',
-                    name: 'add',
+                    name: 'saveBtn',
                     caption: this._app.getText('Speichern'),
                     iconChar: '&#xf0c7',
                     height: 40,
+                    disabled: true,
                     style: {
                       flex: 1
                     },
@@ -201,38 +206,17 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         this._populateFormPanel(this.form);
 
         // Event
-        //this.form.on('change', this._onFormChange, this);
-
-        // Abbrechen-Button
-        this.form.add([
-            {
-                xtype: 'kijs.gui.Button',
-                name: 'saveBtn',
-                caption: this._app.getText('Speichern'),
-                iconChar: '&#xf0c7',
-                visible: false,
-                style: {marginTop: '16px'},
-                on: {
-                    click: this._onSaveClick,
-                    context: this
-                }
-            },{
-                xtype: 'kijs.gui.Button',
-                name: 'cancelBtn',
-                caption: this._app.getText('Abbrechen'),
-                iconChar: '&#xf05e',
-                visible: false,
-                style: {marginTop: '16px'},
-                on: {
-                    click: this._onCancelClick,
-                    context: this
-                }
-            }
-        ]);
+        this.form.on('change', this._onFormChange, this);
 
         return this._formPanel;
     }
 
+    /**
+     * Details vom Server holen
+     *
+     * @param {type} id
+     * @returns {undefined}
+     */
     _getDetailData(id) {
 
         if (kijs.isEmpty(id)){
@@ -244,38 +228,53 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         };
 
         this._app.rpc.do(this._detailFnLoad, params, function(response) {
-            this._setDetails(response);
-        }, this);
+            this._detailPanel.down('details').html = this._getDetailsHtml(response);
+        }, this, false, this._detailPanel);
     }
 
     /**
-     * Kann in abgeleiteter Klasse überschrieben werden,
-     * um FormPanel zu füllen
-     * 
-     * @param {kijs.gui.FormPanel} formPanel
-     * @returns {undefined}
-     */
-    _populateFormPanel(formPanel) {
-
-    }
-
-    /**
-     * Details schreiben
+     * Details als HTML formatieren
      *
      * @param {type} data
-     * @returns {undefined}
+     * @returns {String}
      */
-    _setDetails(data) {
+    _getDetailsHtml(data) {
         let html = '';
         html += '<table>';
         html += '<tr>';
         html += '<td><b>Erstellt</b></td>';
         html += '<td>' + data.create.createId + '</td>';
+        html += '<td>' + kijs.Date.format(kijs.Date.create(data.create.createDate), 'd.m.Y H:i') + '</td>';
         html += '</tr>';
+
+        html += '<tr>';
+        html += '<td><b>Geändert</b></td>';
+        html += '<td></td>';
+        html += '</tr>';
+
+        kijs.Array.each(data.change, function(change) {
+            html += '<tr>';
+            html += '<td></td>';
+            html += '<td>' + change.changeId + '</td>';
+            html += '<td>' + kijs.Date.format(kijs.Date.create(change.changeDate), 'd.m.Y H:i') + '</td>';
+            html += '</tr>';
+        }, this);
+
         html += '</table>';
 
 
-        this._detailPanel.down('details').html = html;
+        return html;
+    }
+
+    /**
+     * Kann in abgeleiteter Klasse überschrieben werden,
+     * um FormPanel zu füllen
+     *
+     * @param {kijs.gui.FormPanel} formPanel
+     * @returns {undefined}
+     */
+    _populateFormPanel(formPanel) {
+
     }
 
     // overwrite
@@ -288,6 +287,9 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         if (this._apertureMask) {
             this._apertureMask.unrender();
         }
+
+        // Button Klasse 'active' entfernen
+        this.parent.parent.down(this.constructor.name).dom.clsRemove('active');
 
         super.unrender(true);
     }
@@ -308,6 +310,11 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
             this.down('cancelBtn').visible = false;
             this.down('saveBtn').visible = false;
         }
+    }
+
+    _onFormChange() {
+        this._detailPanel.footer.down('saveBtn').disabled = false;
+        this._detailPanel.footer.down('saveBtn').badgeText = ' ';
     }
 
     _onSaveClick() {

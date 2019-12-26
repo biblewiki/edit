@@ -207,117 +207,36 @@ class Facade {
 
         $btn = new \stdClass();
         $btn->caption = $this->app->getText('Dashboard');
-        $btn->name = 'kg_dashboard_Dashboard';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Personen');
-        $btn->name = 'biwi_person_Person';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Produktimport');
-        $btn->name = 'kg_produkt_ImportQueue';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Zuweisungen');
-        $btn->name = 'kg_zuweisung_Zuweisung';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Preise');
-        $btn->name = 'kg_preisrezept_PreisRezept';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Log');
-        $btn->name = 'kg_log_Log';
-        $elements[] = $btn;
-
-        $btn = new \stdClass();
-        $btn->caption = $this->app->getText('Positionen');
-        $btn->name = 'kg_position_Position';
+        $btn->name = 'biwi_dashboard_Dashboard';
         $elements[] = $btn;
 
         // ****************************
-        // Stammdaten
+        // Personen
         // ****************************
 
 
-            $stammdaten = new \stdClass();
-            $stammdaten->caption = $this->app->getText('Stammdaten');
-            $stammdaten->name = 'stammdaten';
-            $stammdaten->elements = [];
-            $elements[] = $stammdaten;
+            $personen = new \stdClass();
+            $personen->caption = $this->app->getText('Personen');
+            $personen->name = 'personen';
+            $personen->elements = [];
+            $elements[] = $personen;
 
             $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Artikelgruppen');
-            $btn->name = 'kg_stammdaten_Artikelgruppe';
-            $stammdaten->elements[] = $btn;
+            $btn->caption = $this->app->getText('Person');
+            $btn->name = 'biwi_person_Person';
+            $personen->elements[] = $btn;
 
             $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Buchtexte');
-            $btn->name = 'kg_stammdaten_Buchtexte';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Ausführungen');
-            $btn->name = 'kg_stammdaten_Ausfuehrung';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Zeiten');
-            $btn->name = 'kg_stammdaten_Zeit';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Branchen');
-            $btn->name = 'kg_stammdaten_Branche';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Einheiten');
-            $btn->name = 'kg_stammdaten_Einheit';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Hilfsmaterialfaktor');
-            $btn->name = 'kg_stammdaten_Hilfsmaterialfaktor';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Kostenelement');
-            $btn->name = 'kg_stammdaten_Kostenelement';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Kosten');
-            $btn->name = 'kg_stammdaten_Kosten';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Icons');
-            $btn->name = 'kg_stammdaten_Icon';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Lieferanten');
-            $btn->name = 'kg_stammdaten_Lieferant';
-            $stammdaten->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Produktgruppen');
-            $btn->name = 'kg_stammdaten_Produktgruppe';
-            $stammdaten->elements[] = $btn;
-
+            $btn->caption = $this->app->getText('Übersicht');
+            $btn->name = 'biwi_person_Overview';
+            $personen->elements[] = $btn;
 
 
         // ****************************
         // Administration
         // ****************************
 
-
+        if ($this->app->getLoggedInUserType() === 99) {
             $administration = new \stdClass();
             $administration->caption = $this->app->getText('Administration');
             $administration->name = 'administration';
@@ -338,7 +257,7 @@ class Facade {
             $btn->caption = $this->app->getText('Email Config');
             $btn->name = 'kg_email_Email';
             $administration->elements[] = $btn;
-
+        }
 
         // Response
         $return = new edit\Rpc\ResponseDefault();

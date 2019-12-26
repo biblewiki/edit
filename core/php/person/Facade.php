@@ -27,10 +27,23 @@ class Facade {
     }
 
 
+    /**
+     * Details von ID aus DB holen
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     * @throws \Exception
+     */
     public function getDetailData(\stdClass $args): edit\Rpc\ResponseDefault {
 
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // Überprüfen ob einen ID übergeben wurde
         if (!property_exists($args, 'id') || !$args->id) {
-            throw new \Exception($this->app->getText('Es wurde keine ID übergeben.'));
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben.'));
         }
 
         $personId = $args->id;
@@ -62,17 +75,13 @@ class Facade {
         $qryBld->addWhereElement('person.personId = :personId');
         $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
 
-
-        $changeRows = $qryBld->execute($this->app->getDb(), false);
+        $changeRows = $qryBld->execute($this->app->getDb());
         unset ($qryBld);
-
-        $row['openTS'] = date('Y-m-d H:i:s');
 
         $return = new edit\Rpc\ResponseDefault();
         $return->create = $createRow;
         $return->change = $changeRows;
         return $return;
-
     }
 
 
@@ -87,10 +96,17 @@ class Facade {
         $personId = null;
         $version = null;
 
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // ID auslesen wenn vorhanden
         if (property_exists($args, 'id') && $args->id) {
             $personId = $args->id;
         }
 
+        // Version auslesen wenn vorhanden
         if (property_exists($args, 'version') && $args->version) {
             $personId = $args->version;
         }
@@ -107,10 +123,21 @@ class Facade {
             $qryBld->addWhereElement('person.personId = :personId');
             $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
 
+            // Wenn eine Version übergeben wurde, diese laden
             if ($version) {
                 $qryBld->addWhereElement('person.version = :version');
                 $qryBld->addParam(':version', $version, \PDO::PARAM_INT);
+
+            // Die neuste Version laden
+            } else {
+                // Nur die letzte Version laden
+                $qryBld->addWhereElement('person.version = (SELECT
+                    MAX(version)
+                FROM
+                    person AS personVersion
+                WHERE person.personId = personVersion.personId)');
             }
+
 
             $row = $qryBld->execute($this->app->getDb(), false);
             unset ($qryBld);
@@ -145,6 +172,11 @@ class Facade {
      */
     public function saveDetailForm(\stdClass $args): edit\Rpc\ResponseDefault {
         $formPacket = (array)$args->formData;
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
 
         if ($formPacket['personId']) {
             $formPacket['oldVal_personId'] = $formPacket['personId'];

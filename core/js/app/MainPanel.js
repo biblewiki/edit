@@ -73,6 +73,10 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
      */
     showPanel(panelname, args) {
 
+        // TODO: for Test only
+        args = {id: 1};
+        // ---------------------------------------
+
         kijs.isArray(args) ? args : [args];
 
         let panel = this._getInstance(panelname);
@@ -95,6 +99,11 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
                 this.down('maincontainer').add(panel);
                 this.raiseEvent('panelchanged', {name: panelname, panel: panel});
 
+                // Aktivem Button die Klasse 'active' zuweisen
+                let activeBtnPanel = this.down('biwi-app-buttontreenav').activeEl;
+                if (activeBtnPanel.down(panelname)) {
+                    activeBtnPanel.down(panelname).dom.clsAdd('active');
+                }
             }
         }
     }

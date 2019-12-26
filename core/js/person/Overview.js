@@ -1,12 +1,12 @@
-/* global kijs, kg, biwi */
+/* global kijs, biwi */
 
 // --------------------------------------------------------------
-// kg.kapitel.Kapitel
+// biwi.person.Person
 // --------------------------------------------------------------
 
 kijs.createNamespace('biwi.person');
 
-biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPanel {
+biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultGridPanel {
 
     // --------------------------------------------------------------
     // CONSTRUCTOR
@@ -16,8 +16,9 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
-            formFnLoad: 'person.getForm',
-            formFnSave: 'person.saveDetailForm'
+            formFnLoad: 'person.getFormData',
+            formFnSave: 'person.saveDetailForm',
+            detailFnLoad: 'person.getDetailData'
         });
 
          // Mapping für die Zuweisung der Config-Eigenschaften
@@ -70,16 +71,14 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
                         {
                             xtype: 'kijs.gui.field.Text',
                             label: this._app.getText('Name'),
+                            name: 'name',
                             elements: [
                                 {
                                     xtype: 'kijs.gui.Button',
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -94,10 +93,7 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -133,10 +129,7 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -151,8 +144,8 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
                             captionField: 'caption',
                             required: true,
                             data: [
-                                { id: 1, caption: this._app.getText('Ja') },
-                                { id: 2, caption: this._app.getText('Nein') },
+                                { id: 1, caption: this._app.getText('Mann') },
+                                { id: 2, caption: this._app.getText('Frau') },
                                 { id: 3, caption: this._app.getText('Unbekannt') }
                             ],
                             elements: [
@@ -161,10 +154,7 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -252,6 +242,8 @@ biwi.person.Overview = class biwi_person_Overview extends biwi.default.DefaultPa
             }
         ];
     }
+
+
 
     // --------------------------------------------------------------
     // DESTRUCTOR
