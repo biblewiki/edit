@@ -10,10 +10,11 @@ biwi.default.QuelleWindow = class biwi_default_QuelleWindow extends kijs.gui.Win
     // CONSTRUCTOR
     // --------------------------------------------------------------
     constructor(config={}) {
-        super();
+        super(false);
 
         this._app = new biwi.app.App();
         this._formPanel = null;
+        this._field = '';
 
         // Config generieren
         config = Object.assign({}, {
@@ -21,7 +22,7 @@ biwi.default.QuelleWindow = class biwi_default_QuelleWindow extends kijs.gui.Win
             cls: ['kg-app-loginwindow'],
             iconChar: '&#xf039',
             width: 380,
-            closable: false,
+            closable: true,
             maximizable: false,
             resizable: false,
             modal: true
@@ -29,7 +30,7 @@ biwi.default.QuelleWindow = class biwi_default_QuelleWindow extends kijs.gui.Win
 
          // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            authToken: true,
+            field: true,
             facadeFnLoad: true,
             facadeFnSave: { target: 'facadeFnSave', context: this._formPanel },
             rpc: { target: 'rpc', context: this._formPanel }
@@ -98,7 +99,7 @@ biwi.default.QuelleWindow = class biwi_default_QuelleWindow extends kijs.gui.Win
                             xtype: 'kijs.gui.field.Combo',
                             name: 'book',
                             label: this._app.getText('Bibelbuch'),
-                            facadeFnLoad: 'Bible.getBibleBooks',
+                            facadeFnLoad: 'bible.getBibleBooks',
                             rpc: this._app.rpc,
                             autoLoad: true
                         }

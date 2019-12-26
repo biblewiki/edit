@@ -1,14 +1,15 @@
 <?php
 declare(strict_types = 1);
 
-//namespace bible;
+namespace biwi\edit\bible;
 
+use biwi\edit;
 
 /**
  * Class Bible
  *
  */
-class Bible {
+class Facade {
     /**
      * @var ki\App
      */
@@ -22,7 +23,7 @@ class Bible {
      * Facade constructor.
      * @param ki\App $app
      */
-    public function __construct(ki\App $app) {
+    public function __construct(edit\App $app) {
         $this->app = $app;
     }
 
@@ -88,22 +89,25 @@ class Bible {
      * @param \stdClass $args
      * @return ki\Rpc\ResponseCombo
      */
-    public function getBibleBooks(\stdClass $args): ki\Rpc\ResponseCombo {
-        $brancheId = property_exists($args, 'brancheId') && $args->brancheId !== null ? (int)$args->brancheId : null;
+    public function getBibleBooks(\stdClass $args): edit\Rpc\ResponseCombo {
+//        $comboLoader = new edit\ComboLoader($this->app, $args, 'kapitel');
+//        $comboLoader->setCaptionSql('CONCAT(kapitel.kapitelNr, \' - \', kapitel_text.bezeichnung)');
+//        $comboLoader->setValueSql('kapitel.kapitelNr', true);
+//
+//        $comboLoader->getQueryBuilder()->addFromElement('INNER JOIN kapitel_text ON kapitel.kapitelNr = kapitel_text.kapitelNr AND kapitel_text.languageId = :languageId');
+//        $comboLoader->getQueryBuilder()->addParam(':languageId', $this->app->getLanguageId(), \PDO::PARAM_STR);
+//
+//        if ($brancheId) {
+//            $comboLoader->getQueryBuilder()->addWhereElement('kapitel.brancheId = :brancheId');
+//            $comboLoader->getQueryBuilder()->addParam(':brancheId', $brancheId, \PDO::PARAM_INT);
+//        }
+//
+//        return $comboLoader->execute();
 
-        $comboLoader = new ComboLoader($this->app, $args, 'kapitel');
-        $comboLoader->setCaptionSql('CONCAT(kapitel.kapitelNr, \' - \', kapitel_text.bezeichnung)');
-        $comboLoader->setValueSql('kapitel.kapitelNr', true);
 
-        $comboLoader->getQueryBuilder()->addFromElement('INNER JOIN kapitel_text ON kapitel.kapitelNr = kapitel_text.kapitelNr AND kapitel_text.languageId = :languageId');
-        $comboLoader->getQueryBuilder()->addParam(':languageId', $this->app->getLanguageId(), \PDO::PARAM_STR);
-
-        if ($brancheId) {
-            $comboLoader->getQueryBuilder()->addWhereElement('kapitel.brancheId = :brancheId');
-            $comboLoader->getQueryBuilder()->addParam(':brancheId', $brancheId, \PDO::PARAM_INT);
-        }
-
-        return $comboLoader->execute();
+        $rows = new edit\Rpc\ResponseCombo();
+        $rows->addRows(['caption' => 'TestBuch', 'value' => 'tb']);
+        return $rows;
     }
 
 

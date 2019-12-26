@@ -104,6 +104,9 @@ class App {
             $this->session = new Session();
         }
 
+        // Sprache herausfinden
+        $this->languageId = $this->getLanguage();
+
         // Router
         $router = new Router\Router($this);
         $router = $router->handleRequest($this->request, $this->response);
@@ -150,8 +153,96 @@ class App {
     }
 
 
-    public function getLanguage(string $language = null): string {
-        return 'de';
+    /**
+     * Gibt die languageId zurück
+     *
+     * @return string
+     * @throws \Exception
+     */
+    private function getLanguage(): string {
+
+        // Variablen
+        $languageId = $this->request->getGet("lang");
+        $path = $this->request->getGet("path");
+
+        // Wenn path übergeben wurde (von mod_rewrite) languageId ermitteln
+        if (!$languageId && $path) {
+
+            // Pfad aufsplitten in die Bestandteile
+            $pathElements = explode("/", $path);
+
+            if (\array_key_exists(1, $pathElements) && $pathElements[1]) {
+                $languageId = $pathElements[1];
+            }
+        }
+
+        // Standardsprache ermitteln
+        $defaultLanguageId = $this->getSetting("defaultLanguageId");
+
+        // Erlaubte Sprachen ermitteln
+        $sql = "
+            SELECT
+                `languageId`
+            FROM
+                `language`
+            WHERE
+                forGui = 1 AND active = 1
+        ";
+
+        $st = $this->getDb()->query($sql);
+        $rows = $st->fetchAll(\PDO::FETCH_ASSOC);
+        unset($st);
+        $allowedLanguageIds = [];
+        foreach ($rows as $row) {
+            $allowedLanguageIds[] = $row["languageId"];
+        }
+        unset($row);
+
+        // Sprache aus User-Config in DB ermitteln
+        if ($this->getLoggedInUserId()) {
+            $st = $this->getDb()->prepare('SELECT languageId FROM user_config WHERE userId = :userId');
+            $st->bindValue(':userId', $this->getLoggedInUserId(), \PDO::PARAM_STR);
+            $st->execute();
+            $row = $st->fetch(\PDO::FETCH_ASSOC);
+            if ($row && $row['languageId'] && \in_array($row['languageId'], $allowedLanguageIds, true)) {
+                $languageId = $row['languageId'];
+            }
+            unset ($st, $row);
+        }
+
+        if ($languageId && \in_array($languageId, $allowedLanguageIds, true)) {
+
+            // Wenn eine Sprache angefordert wurde, diese in der Session merken
+            $this->getSession()->languageId = $languageId;
+
+        } elseif ($this->getSession()->languageId && \in_array($this->getSession()->languageId, $allowedLanguageIds, true)) {
+
+            // Wenn keine Sprache angefordert wurde: die Sprache aus der Session nehmen, wenn vorhanden
+            $languageId = $this->getSession()->languageId;
+
+        } else {
+
+            // Wenn auch in der Session keine Sprache war: die Browsersprache nehmen und in der Session merken
+            $languageId = $this->request->getBrowserLanguage($allowedLanguageIds, $defaultLanguageId);
+            $this->getSession()->languageId = $languageId;
+        }
+
+        if (!$languageId || !\in_array($languageId, $allowedLanguageIds, true)) {
+
+            // Wenn eine ungültige Sprache angefordert wurde: die Defaultsprache nehmen
+            $languageId = $defaultLanguageId;
+        }
+
+        return $languageId;
+    }
+
+
+    /**
+     * Gibt die Sprache des Browsers zurück
+     * @return string
+     */
+    public function getLanguageId(): string {
+        return $this->languageId;
     }
 
 
@@ -168,6 +259,46 @@ class App {
      */
     public function getSession(): Session {
         return $this->session;
+    }
+
+
+    /**
+     * Gibt den Wert einer Einstellung zurück
+     *
+     * @param $setting
+     * @param bool $silent Keine Fehler werfen
+     * @param bool $asLines Array mit Zeilen zurückgeben
+     * @return string | array
+     * @throws \Exception
+     */
+    public function getSetting(string $setting, bool $silent = false, bool $asLines = false) {
+        $row = edit\setting\Setting::getSetting($this, $setting);
+
+        if (!$silent) {
+            if (!$row) {
+                throw new \Exception("Das Setting $setting wurde nicht gefunden.");
+            }
+            if ($row["value"] === "") {
+                throw new \Exception("Das Setting $setting enthält keinen Wert.");
+            }
+        }
+
+        // Als einzelne Zeilen
+        if ($asLines) {
+            $lines = [];
+            $tmpArray = preg_split("/\r|\n/", $row ? $row["value"] : "", 0, PREG_SPLIT_NO_EMPTY);
+            if ($tmpArray) {
+                foreach ($tmpArray as $el) {
+                    if (trim($el) !== '') {
+                        $lines[] = trim($el);
+                    }
+                }
+            }
+            unset($el);
+            return $lines;
+        }
+
+        return $row ? $row["value"] : null;
     }
 
 

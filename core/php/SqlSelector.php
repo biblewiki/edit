@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-//namespace ki\kgweb\ki;
+namespace biwi\edit;
 
 class SqlSelector {
     protected $_tablename;
@@ -34,11 +34,11 @@ class SqlSelector {
     public function addParam($parameter, $variable, $data_type = \PDO::PARAM_STR, $length = 0, $driver_options = null): void {
         $this->_queryBld->addParam($parameter, $variable, $data_type, $length, $driver_options);
     }
-    
+
     public function setLimit(int $start, int $limit): void {
         $this->_queryBld->setLimit($start, $limit);
     }
-    
+
     /**
      * @return QueryBuilderForSelect
      */
@@ -61,7 +61,7 @@ class SqlSelector {
         if (!$fetchAll) {
             $this->_queryBld->setLimit(0, 1);
         }
-        
+
         // SQL ausführen
         $st = $db->prepare($this->_queryBld->getSql());
         $this->_queryBld->bindParams($st);
@@ -119,7 +119,7 @@ class SqlSelector {
                         case 'BIT':
                             $value = (bool)$value;
                             break;
-                        
+
                         default:
                             if (is_numeric($value)) {
                                 $value = (float)$value;

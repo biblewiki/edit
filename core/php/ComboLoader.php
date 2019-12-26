@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-//namespace ki\kgweb\ki;
+namespace biwi\edit;
 
 class ComboLoader {
     protected $app;

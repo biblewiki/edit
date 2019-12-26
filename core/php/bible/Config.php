@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace biwi\edit\app;
+namespace biwi\edit\bible;
 
 /**
  * Class Config
@@ -11,11 +11,6 @@ namespace biwi\edit\app;
 class Config {
     public $cssFiles = [];
     public $jsFiles = [
-            'app/App.js',
-            'app/MainPanel.js',
-            'app/ButtonTree.js',
-            'default/QuelleWindow.js'
         ];
     public $isAutoLoadJavaScriptModule = false;
-    public $dashboardPortletClasses = [];
 }

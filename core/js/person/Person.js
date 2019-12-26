@@ -1,7 +1,7 @@
 /* global kijs, kg, biwi */
 
 // --------------------------------------------------------------
-// kg.kapitel.Kapitel
+// biwi.person.Person
 // --------------------------------------------------------------
 
 kijs.createNamespace('biwi.person');
@@ -16,7 +16,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
-            formFnLoad: 'person.getForm',
+            formFnLoad: 'person.getFormData',
             formFnSave: 'person.saveDetailForm'
         });
 
@@ -45,12 +45,6 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
 
         //formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
-                            // Formular laden
-                            if (this.form.facadeFnLoad) {
-                                this.form.load(params, true, true);
-                            }
-                        } else {
-                            kijs.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Mehrere Primary Keys vorhanden.'));
         // Felder hinzufügen
         formPanel.add({
             xtype:'kijs.gui.Container',
@@ -76,16 +70,14 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                         {
                             xtype: 'kijs.gui.field.Text',
                             label: this._app.getText('Name'),
+                            name: 'name',
                             elements: [
                                 {
                                     xtype: 'kijs.gui.Button',
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -100,42 +92,12 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
                             ]
                         }
-                    });
-                } else {
-                    this.grid.reload();
-                }
-            });
-        } else {
-            p = new Promise((resolve, reject) => {});
-        }
-        return p;
-    }
-
-    showPanel(args) {
-        // Tabelle und Grid erstellen
-        if (!this._gridPanel) {
-            this.add(this._createElements());
-        } else {
-            if (typeof(args) !== 'undefined' && !args.restoreSelection){
-                this.grid.reload(args.restoreSelection);
-            } else {
-                this.grid.reload();
-            }
-        }
-
-        // events (selection)
-        this.grid.on('selectionChange', this._onSelectionChange, this);
-    }
-
                     ]
                 },
                 {
@@ -166,10 +128,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -184,8 +143,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                             captionField: 'caption',
                             required: true,
                             data: [
-                                { id: 1, caption: this._app.getText('Ja') },
-                                { id: 2, caption: this._app.getText('Nein') },
+                                { id: 1, caption: this._app.getText('Mann') },
+                                { id: 2, caption: this._app.getText('Frau') },
                                 { id: 3, caption: this._app.getText('Unbekannt') }
                             ],
                             elements: [
@@ -194,10 +153,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: function(e) {
-                                            let quelle = new biwi.default.QuelleWindow();
-                                            quelle.show();
-                                        },
+                                        click: this._onQuelleClick,
                                         context: this
                                     }
                                 }
@@ -285,6 +241,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
             }
         ];
     }
+
+
 
     // --------------------------------------------------------------
     // DESTRUCTOR

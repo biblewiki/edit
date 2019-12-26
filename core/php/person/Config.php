@@ -11,7 +11,8 @@ namespace biwi\edit\person;
 class Config {
     public $cssFiles = [];
     public $jsFiles = [
-            'person/Overview.js'
+            'person/Overview.js',
+            'person/Person.js'
         ];
     public $isAutoLoadJavaScriptModule = false;
 }

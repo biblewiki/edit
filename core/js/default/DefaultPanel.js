@@ -10,7 +10,7 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
     // CONSTRUCTOR
     // --------------------------------------------------------------
     constructor(config={}) {
-        super();
+        super(false);
 
         this._app = new biwi.app.App();
         this._detailPanel = null;
@@ -92,35 +92,19 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
     saveData(force=false) {
         let p;
         if (force || this.form.isDirty) {
-            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
+            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {console.log(response);
 
-                // kiOpenTS zurücksetzen
-                if (this.form.data.kiOpenTS) {
-                    this.form.data.kiOpenTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
+                // biwiOpenTS zurücksetzen
+                if (this.form.data.openTS) {
+                    this.form.data.openTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
                 }
 
-                if (response.newId !== response.oldId){
-                    this.grid.reload().then(() => {
-                        this.grid.selectByIds(response.newId, false, true);
+                let params = kijs.Object.clone(this._formRemoteParams);
+                params.id = response.id;
 
-                        if (this.grid.primaryKeys.length === 1){
-                            // Selection definieren mit dem neuen Eintrag
-                            this._selection = {};
-                            this._selection[this.grid.primaryKeys[0]] = response.newId;
-
-                            let params = kijs.Object.clone(this._formRemoteParams);
-                            params.selection = this._selection;
-
-                            // Formular laden
-                            if (this.form.facadeFnLoad) {
-                                this.form.load(params, true, true);
-                            }
-                        } else {
-                            kijs.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Mehrere Primary Keys vorhanden.'));
-                        }
-                    });
-                } else {
-                    this.grid.reload();
+                // Formular laden
+                if (this.form.facadeFnLoad) {
+                    this.form.load(params, true, true);
                 }
             });
         } else {
@@ -273,23 +257,6 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
     // EVENTS
 
     /**
-     * Klick auf den 'Neu' - Button
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onAddClick(e) {
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.create = true;
-
-        // Formular laden
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true).then(() => {
-                this._onFormChange(params);
-            });
-        }
-    }
-
-    /**
      * Klick auf den Abbrechen-Button
      * @returns {undefined}
      */
@@ -304,71 +271,11 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         }
     }
 
-    /**
-     * Klick auf den Löschen-Button
-     * @returns {undefined}
-     */
-    _onDeleteClick() {
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.selection = this.grid.getSelectedIds();
-
-        this._app.rpc.do(this._deleteFn, params, function() {
-
-            // grid neu laden
-            this.grid.reload();
-
-            // form leeren
-            this.form.clear();
-
-            this._selection = null;
-
-        }, this);
-    }
-
-    /**
-     * Klick auf den Duplicate-Button
-     * @returns {undefined}
-     */
-    _onDuplicateClick(){
-        if (this.grid.getSelectedIds().length > 0){
-            if (this.grid.getSelectedIds().length === 1){
-                let params = kijs.Object.clone(this._formRemoteParams);
-                params.create = true;
-                params.selection = this._selection;
-
-                // Formular laden
-                if (this.form.facadeFnLoad) {
-                    this.form.load(params, true, true).then(() => {
-                        this.form.isDirty = true;
-                        this._onFormChange();
-                    });
-                }
-            } else {
-                kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es können nicht mehrere Einträge gleichzeitig dupliziert werden.'));
-            }
-        } else {
-            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Kein Eintrag ausgewählt.'));
-        }
-    }
-
-    /**
-     * Wenn das Formular geändert wird.
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onFormChange(e) {
+    _onSaveClick() {
         if (!this.form.validate()) {
-            if (!this._apertureMask) {
-                this._apertureMask = new kijs.gui.ApertureMask({
-                   target: this._formPanel
-                });
-            }
-            this._apertureMask.visible = true;
-            this.down('cancelBtn').visible = true;
-            this.down('saveBtn').visible = true;
-
+            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
         } else {
-            // Speichern & Maske ausblenden
+             // Speichern & Maske ausblenden
             this.saveData().then(() => {
                 if (this._apertureMask && this._apertureMask.visible === true){
                     this._apertureMask.visible = false;
@@ -379,52 +286,14 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         }
     }
 
-    _onSaveClick() {
-        if (!this.form.validate()) {
-            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
-        } else {
-            this._onFormChange();
-        }
-    }
-
-    /**
-     * Wenn eine neue Zeile ausgewählt wird.
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onSelectionChange(e) {
-        let oldSelection = this._selection;
-
-        this._selection = {};
-        if (e.rows && e.rows.length === 1){
-            let pks = this.grid.primaryKeys, pk=null;
-            for (let i=0; i<pks.length; i++) {
-                pk = pks[i];
-                if (e.unSelect && this.grid.getSelectedIds().length === 1){
-                    this._selection[pk] = this.grid.getSelectedIds()[0];
-                } else {
-                    this._selection[pk] = e.rows[0].dataRow[pk];
-                }
+    _onQuelleClick(e) {
+        let quelle = new biwi.default.QuelleWindow(
+            {
+                target: document.body,
+                field: e.element.parent.name
             }
-        }
-
-        if (this.grid.getSelectedIds().length === 1){
-            if (oldSelection !== null && !this.form.disabled && !this.form.readOnly){
-                this.saveData();
-            }
-            oldSelection = null;
-
-            let params = kijs.Object.clone(this._formRemoteParams);
-            params.selection = this._selection;
-
-            // Formular laden
-            if (this.form.facadeFnLoad) {
-                this.form.load(params, true, true);
-            }
-        } else {
-            //this.form.disabled = true;
-            this.form.clear();
-        }
+        );
+        quelle.show();
     }
 
 
