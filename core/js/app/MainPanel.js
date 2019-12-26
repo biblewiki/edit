@@ -107,7 +107,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
         // Haupt-Panel erstellen
         return [{
             xtype: 'kijs.gui.Panel',
-            caption: 'kgweb',
+            caption: this._app.getText('BibleWiki'),
             iconCls: 'icoWizard16',
             cls: 'kijs-flexcolumn',
             style: {

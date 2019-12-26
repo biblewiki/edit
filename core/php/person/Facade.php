@@ -20,12 +20,68 @@ class Facade {
 
     /**
      * Facade constructor.
-     * @param ki\App $app
+     * @param edit\App $app
      */
     public function __construct(edit\App $app) {
         $this->app = $app;
     }
 
+
+    public function getDetailData(\stdClass $args): edit\Rpc\ResponseDefault {
+
+        if (!property_exists($args, 'id') || !$args->id) {
+            throw new \Exception($this->app->getText('Es wurde keine ID übergeben.'));
+        }
+
+        $personId = $args->id;
+
+        // Get Create Daten
+        $qryBld = new edit\SqlSelector('person');
+        $qryBld->addSelectElement('person.createId');
+        $qryBld->addSelectElement('person.createDate');
+
+        $qryBld->addWhereElement('person.personId = :personId');
+        $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
+
+        // Nur die erste Version laden
+        $qryBld->addWhereElement('person.version = (SELECT
+                MIN(version)
+            FROM
+                person AS personVersion
+            WHERE person.personId = personVersion.personId)');
+
+        $createRow = $qryBld->execute($this->app->getDb(), false);
+        unset ($qryBld);
+
+
+        // Get Change Daten
+        $qryBld = new edit\SqlSelector('person');
+        $qryBld->addSelectElement('person.changeId');
+        $qryBld->addSelectElement('person.changeDate');
+
+        $qryBld->addWhereElement('person.personId = :personId');
+        $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
+
+
+        $changeRows = $qryBld->execute($this->app->getDb(), false);
+        unset ($qryBld);
+
+        $row['openTS'] = date('Y-m-d H:i:s');
+
+        $return = new edit\Rpc\ResponseDefault();
+        $return->create = $createRow;
+        $return->change = $changeRows;
+        return $return;
+
+    }
+
+
+    /**
+     * Gibt das Formular zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseForm
+     */
     public function getFormData(\stdClass $args): edit\Rpc\ResponseForm {
 
         $personId = null;

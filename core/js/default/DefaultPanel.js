@@ -18,10 +18,9 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         this._selection = null;
         this._apertureMask = null;
 
-        this._gridFnLoad = null;
         this._formFnLoad = null;
         this._formFnSave = null;
-        this._deleteFn = null;
+        this._detailFnLoad = null;
 
         this._formRemoteParams = {};
 
@@ -35,10 +34,9 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
 
         // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            gridFnLoad  : true,
-            formFnLoad  : true,
-            formFnSave  : true,
-            deleteFn    : true
+            formFnLoad   : true,
+            formFnSave   : true,
+            detailFnLoad : true
         });
 
         // Config anwenden
@@ -92,7 +90,7 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
     saveData(force=false) {
         let p;
         if (force || this.form.isDirty) {
-            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {console.log(response);
+            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
 
                 // biwiOpenTS zurücksetzen
                 if (this.form.data.openTS) {
@@ -106,6 +104,11 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
                 if (this.form.facadeFnLoad) {
                     this.form.load(params, true, true);
                 }
+
+                // Details laden
+                if (this._detailFnLoad) {
+                    this._getDetailData(response.id);
+                }
             });
         } else {
             p = new Promise((resolve, reject) => {});
@@ -114,19 +117,27 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
     }
 
     showPanel(args) {
+
         // Tabelle und Grid erstellen
         if (!this._gridPanel) {
             this.add(this._createElements());
-        } else {
-//            if (typeof(args) !== 'undefined' && !args.restoreSelection){
-//                this.grid.reload(args.restoreSelection);
-//            } else {
-//                this.grid.reload();
-//            }
         }
 
-        // events (selection)
-        //this.grid.on('selectionChange', this._onSelectionChange, this);
+        if (kijs.isObject(args) && args.id) {
+            let params = kijs.Object.clone(this._formRemoteParams);
+            params.id = args.id;
+            params.version = args.version ? args.version : null;
+
+            // Formular laden
+            if (this.form.facadeFnLoad) {
+                this.form.load(params, true, true);
+            }
+
+            // Details laden
+            if (this._detailFnLoad) {
+                this._getDetailData(args.id);
+            }
+        }
     }
 
     // PROTECTED
@@ -147,16 +158,10 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
             width: 700,
             cls: ['kijs-flexcolumn', 'biwi-detail-panel'],
             elements: [
-//                {
-//                    xtype: 'kijs.gui.grid.Grid',
-//                    selectType: 'multi',
-//                    filterable: true,
-//                    facadeFnLoad: this._gridFnLoad,
-//                    rpc: this._app.rpc,
-//                    style: {
-//                        flex: 1
-//                    }
-//                }
+                {
+                    xtype: 'kijs.gui.Container',
+                    name: 'details'
+                }
             ],
             footerElements: [
                 {
@@ -228,15 +233,49 @@ biwi.default.DefaultPanel = class biwi_default_DefaultPanel extends kijs.gui.Con
         return this._formPanel;
     }
 
+    _getDetailData(id) {
+
+        if (kijs.isEmpty(id)){
+            return;
+        }
+
+        let params = {
+            id: id
+        };
+
+        this._app.rpc.do(this._detailFnLoad, params, function(response) {
+            this._setDetails(response);
+        }, this);
+    }
 
     /**
      * Kann in abgeleiteter Klasse überschrieben werden,
      * um FormPanel zu füllen
+     * 
      * @param {kijs.gui.FormPanel} formPanel
      * @returns {undefined}
      */
     _populateFormPanel(formPanel) {
 
+    }
+
+    /**
+     * Details schreiben
+     *
+     * @param {type} data
+     * @returns {undefined}
+     */
+    _setDetails(data) {
+        let html = '';
+        html += '<table>';
+        html += '<tr>';
+        html += '<td><b>Erstellt</b></td>';
+        html += '<td>' + data.create.createId + '</td>';
+        html += '</tr>';
+        html += '</table>';
+
+
+        this._detailPanel.down('details').html = html;
     }
 
     // overwrite

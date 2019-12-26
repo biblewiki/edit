@@ -17,7 +17,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultPanel 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
             formFnLoad: 'person.getFormData',
-            formFnSave: 'person.saveDetailForm'
+            formFnSave: 'person.saveDetailForm',
+            detailFnLoad: 'person.getDetailData'
         });
 
          // Mapping für die Zuweisung der Config-Eigenschaften
