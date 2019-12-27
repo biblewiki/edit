@@ -210,26 +210,31 @@ class Facade {
         $btn->name = 'biwi_dashboard_Dashboard';
         $elements[] = $btn;
 
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Personen');
+        $btn->name = 'biwi_person_Overview';
+        $elements[] = $btn;
+
         // ****************************
         // Personen
         // ****************************
 
 
-            $personen = new \stdClass();
-            $personen->caption = $this->app->getText('Personen');
-            $personen->name = 'personen';
-            $personen->elements = [];
-            $elements[] = $personen;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Person');
-            $btn->name = 'biwi_person_Person';
-            $personen->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Übersicht');
-            $btn->name = 'biwi_person_Overview';
-            $personen->elements[] = $btn;
+//            $personen = new \stdClass();
+//            $personen->caption = $this->app->getText('Personen');
+//            $personen->name = 'personen';
+//            $personen->elements = [];
+//            $elements[] = $personen;
+//
+//            $btn = new \stdClass();
+//            $btn->caption = $this->app->getText('Person');
+//            $btn->name = 'biwi_person_Person';
+//            $personen->elements[] = $btn;
+//
+//            $btn = new \stdClass();
+//            $btn->caption = $this->app->getText('Übersicht');
+//            $btn->name = 'biwi_person_Overview';
+//            $personen->elements[] = $btn;
 
 
         // ****************************
@@ -244,18 +249,8 @@ class Facade {
             $elements[] = $administration;
 
             $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Kapitel');
-            $btn->name = 'kg_kapitel_Kapitel';
-            $administration->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Einzelpreise');
-            $btn->name = 'kg_dienstleistung_Einzelpreis';
-            $administration->elements[] = $btn;
-
-            $btn = new \stdClass();
-            $btn->caption = $this->app->getText('Email Config');
-            $btn->name = 'kg_email_Email';
+            $btn->caption = $this->app->getText('Mitteilungen');
+            $btn->name = 'biwi_message_Message';
             $administration->elements[] = $btn;
         }
 

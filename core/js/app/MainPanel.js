@@ -149,7 +149,7 @@ biwi.app.MainPanel = class biwi_app_MainPanel extends kijs.gui.Container {
                     toolTip: this._app.getText('Benutzerkonto'),
                     on: {
                         click: function() {
-                            this.showPanel('kg_user_User');
+                            this.showPanel('biwi_user_User');
                         },
                         context: this
                     }

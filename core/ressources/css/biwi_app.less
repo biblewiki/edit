@@ -1,0 +1,222 @@
+/* ******************
+   * Variablen
+   ****************** */
+
+@default-font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+
+@default-main-color: #4398dd;
+@default-second-color: #efefef;
+
+/* ******************
+   * Navigation
+   ****************** */
+
+.biwi-app-buttontree {
+    .kijs-button {
+        margin: 5px 5px 0 5px;
+    }
+
+    .active {
+        background-color: #ddd;
+    }
+
+    .backbutton {
+        background-color: #ddd;
+    }
+}
+
+span.biwi-logo-header {
+    background-image: url('../../resources/img/icon/kgweb_icon_ws.svg');
+    background-repeat: no-repeat;
+    background-size: 19px;
+    background-position: left 4px;
+    width: 22px;
+}
+
+/* ******************
+   * Dashboard
+   ****************** */
+
+.biwi-dashboard-dashboard {
+    .titleContainer {
+        font-family: @default-font-family;
+        font-size: 2em;
+
+        > .kijs-container-inner {
+            margin: 10px 0 10px 20px;
+        }
+    }
+
+    .btnContainer .kijs-container-inner {
+        margin: 0 0 10px 20px;
+    }
+
+
+    .biwi-dashboard-portletcontainer {
+        > .kijs-container-inner {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-content: flex-start;
+            align-items: flex-start;
+            overflow: auto;
+
+            > .biwi-dashboard-portlet {
+                flex: none;
+                margin: 0 20px 30px 20px;
+                width: 400px;
+
+                > .kijs-headerbar {
+                    cursor: grab;
+
+                    &:active {
+                        cursor: grabbing;
+                    }
+                }
+
+                > .kijs-container-inner {
+                    border: 1px solid #f6f6f6;
+                    border-top: 0;
+                    min-height: 120px;
+                    max-height: 250px;
+                    overflow: auto;
+                }
+            }
+        }
+    }
+    .biwi-app-zuweisung-comment-row {
+        font-family: @default-font-family;
+        font-size: 14px;
+    }
+
+    .biwi-app-log-row {
+        font-family: @default-font-family;
+        font-size: 14px;
+        cursor: pointer;
+
+        .logEntryContainer {
+            > .kijs-container-inner {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .text {
+                margin: 10px;
+            }
+        }
+
+        .log_icon_default {
+            font-size: 18pt;
+            margin-top: 6px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            margin-left: 10px;
+        }
+
+        .log_icon_error {
+            color: #EB4C00;
+        }
+
+        .log_icon_warning {
+            color: #EBCA3B;
+            margin-right: 4px;
+            margin-left: 8px;
+        }
+
+        .log_icon_info {
+            color: #4398DE;
+        }
+
+        .footer {
+            margin: 0px 10px 10px 10px;
+            font-weight: normal;
+            font-size: 7pt;
+            text-align: right;
+            text-overflow: ellipsis;
+        }
+    }
+
+    hr {
+        color: @default-second-color;
+    }
+
+    .commentContainer {
+        padding: 10px;
+        cursor: pointer;
+
+        .text {
+            > .kijs-container-inner {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        }
+
+        .footer {
+            margin-top: 10px;
+            font-weight: normal;
+            font-size: 7pt;
+            text-align: right;
+            text-overflow: ellipsis;
+        }
+    }
+
+    /* Mitteilungen */
+
+    .biwi-dashboard-mitteilungcontainer {
+        margin: 0px 50px 20px 10px;
+
+        .container {
+            font-family: @default-font-family;
+            font-size: 14px;
+            margin: 10px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #4398DE;
+
+            .kijs-container-inner {
+                display: flex;
+            }
+
+            .icon {
+                color: #4398DE;
+                margin-right: 10px;
+                font-size: 16pt;
+            }
+
+            .message {
+                line-height: 16pt;
+            }
+        }
+    }
+}
+
+
+
+/* ******************
+   * Formular
+   ****************** */
+
+.biwi-form-row {
+    > .kijs-container-inner {
+        display: flex;
+    }
+}
+
+
+/* ******************
+   * Detail Panel
+   ****************** */
+
+div.biwi-detail-panel {
+    > div.kijs-footer {
+        > .kijs-container-inner {
+            display: flex;
+        }
+    }
+}
+
+
+

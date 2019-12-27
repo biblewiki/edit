@@ -251,7 +251,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         }
 
         // Button Klasse 'active' entfernen
-        this.parent.parent.down(this.constructor.name).dom.clsRemove('active');
+        //this.parent.parent.down(this.constructor.name).dom.clsRemove('active');
 
         super.unrender(true);
     }

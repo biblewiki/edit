@@ -57,7 +57,7 @@ class SaveData {
     }
 
     public function getVersion(): int {
-        return $this->version;
+        return $this->version ?: 0;
     }
 
 
@@ -80,7 +80,7 @@ class SaveData {
                 if (!$field->value) {
                     if($field->name === 'version') {
                         $key = $this->getNextVersion($formPacket);
-                    } else {
+                    } elseif (!$field->isAutoIncrement) {
                         $key = $this->getNextPrimaryKey($field, $formPacket);
                     }
                     $field->value = $key;

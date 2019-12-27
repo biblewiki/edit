@@ -5,7 +5,7 @@
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.default');
 
-biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs.gui.Container {
+biwi.default.DefaultGridFormPanel = class biwi_default_DefaultGridFormPanel extends kijs.gui.Container {
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
@@ -14,14 +14,14 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
         this._app = new biwi.app.App();
         this._gridPanel = null;
-        this._detailPanel = null;
+        this._formPanel = null;
         this._selection = null;
         this._apertureMask = null;
+
         this._gridFnLoad = null;
-        this._detailFnLoad = null;
-        this._editPanel = null;
-        this._gridCaption = this._app.getText('Tabelle');
-        this._detailCaption = this._app.getText('Details');
+        this._formFnLoad = null;
+        this._formFnSave = null;
+        this._deleteFn = null;
 
         this._formRemoteParams = {};
 
@@ -35,11 +35,10 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
         // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            gridFnLoad: true,
-            detailFnLoad: true,
-            editPanel: true,
-            gridCaption: true,
-            detailCaption: true
+            gridFnLoad  : true,
+            formFnLoad  : true,
+            formFnSave  : true,
+            deleteFn    : true
         });
 
         // Config anwenden
@@ -55,8 +54,16 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
     // --------------------------------------------------------------
 
     get grid() { return this._gridPanel.firstChild; }
-    get detail() { return this._detailPanel; }
+    get form() { return this._formPanel.firstChild; }
 
+    set formCaption(val) { this._formPanel.headerBar.html = val; }
+    set gridCaption(val) { this._gridPanel.headerBar.html = val; }
+
+    get isDirty() {
+        return this.form.isDirty;
+    }
+
+    get formRemoteParams() { return this._formRemoteParams; }
 
     // --------------------------------------------------------------
     // MEMBERS
@@ -68,8 +75,59 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
         } else {
             this.grid.reload();
         }
+
+        let params = kijs.Object.clone(this._formRemoteParams);
+        params.selection = this._selection;
+
+        if (this.form.facadeFnLoad) {
+            this.form.load(params, true, true);
+        }
     }
 
+    /**
+     * Speichert das Detailformular
+     * @param {boolean} [force=false] true: Auch speichern, wenn nicht dirty
+     * @returns {Promise}
+     */
+    saveData(force=false) {
+        let p;
+        if (force || this.form.isDirty) {
+            p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
+
+                // kiOpenTS zurücksetzen
+                if (this.form.data.kiOpenTS) {
+                    this.form.data.kiOpenTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
+                }
+
+                if (response.newId !== response.oldId){
+                    this.grid.reload().then(() => {
+                        this.grid.selectByIds(response.newId, false, true);
+
+                        if (this.grid.primaryKeys.length === 1){
+                            // Selection definieren mit dem neuen Eintrag
+                            this._selection = {};
+                            this._selection[this.grid.primaryKeys[0]] = response.newId;
+
+                            let params = kijs.Object.clone(this._formRemoteParams);
+                            params.selection = this._selection;
+
+                            // Formular laden
+                            if (this.form.facadeFnLoad) {
+                                this.form.load(params, true, true);
+                            }
+                        } else {
+                            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Mehrere Primary Keys vorhanden.'));
+                        }
+                    });
+                } else {
+                    this.grid.reload();
+                }
+            });
+        } else {
+            p = new Promise((resolve, reject) => {});
+        }
+        return p;
+    }
 
     showPanel(args) {
         // Grid erstellen
@@ -85,7 +143,13 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
         // events (selection)
         this.grid.on('selectionChange', this._onSelectionChange, this);
-        this.grid.on('rowDblClick', this._editEntry, this);
+
+        let params = kijs.Object.clone(this._formRemoteParams);
+        params.selection = this._selection;
+
+        if (this.form.facadeFnLoad && this._selection) {
+            this.form.load(params, true, true);
+        }
     }
 
     // PROTECTED
@@ -96,13 +160,13 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
                 xtype: 'kijs.gui.Splitter',
                 targetPos: 'right'
             },
-            this._createDetailPanel()
+            this._createFormPanel()
         ];
     }
 
     _createTablePanel() {
         return this._gridPanel = new kijs.gui.Panel({
-            caption: this._gridCaption,
+            caption: this._app.getText('Tabelle'),
             cls: 'kijs-flexcolumn',
             style: {
                 flex: 1,
@@ -123,35 +187,50 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
         });
     }
 
-    _createDetailPanel() {
-        return this._detailPanel = new kijs.gui.Panel({
-            caption: this._detailCaption,
+    _createFormPanel() {
+        this._formPanel = new kijs.gui.Panel({
+            caption: this._app.getText('Detailansicht'),
             width: 700,
-            cls: ['kijs-flexcolumn', 'biwi-detail-panel'],
-            elements: [
-                {
-                    xtype: 'kijs.gui.Container',
-                    name: 'details'
-                }
-            ],
-            footerElements: [
-                {
-                    xtype: 'kijs.gui.Button',
-                    name: 'editBtn',
-                    caption: this._app.getText('Bearbeiten'),
-                    iconChar: '&#xf040;',
-                    height: 40,
-                    disabled: true,
-                    style: {
-                      flex: 1
-                    },
-                    on: {
-                        click: this._editEntry,
-                        context: this
-                    }
-                }
-            ]
+            elements: [{
+                xtype: 'kijs.gui.FormPanel',
+                rpc: this._app.rpc,
+                facadeFnLoad: this._formFnLoad,
+                facadeFnSave: this._formFnSave
+            }],
+            innerStyle: {
+                overflowY: 'auto'
+            }
         });
+
+        // FormPanel mit Elementen füllen
+        this._populateFormPanel(this.form);
+
+        // Abbrechen-Button
+        this.form.add([
+            {
+                xtype: 'kijs.gui.Button',
+                name: 'saveBtn',
+                caption: this._app.getText('Speichern'),
+                iconChar: '&#xf0c7',
+                style: {marginTop: '16px'},
+                on: {
+                    click: this._onSaveClick,
+                    context: this
+                }
+            },{
+                xtype: 'kijs.gui.Button',
+                name: 'cancelBtn',
+                caption: this._app.getText('Abbrechen'),
+                iconChar: '&#xf05e',
+                style: {marginTop: '16px'},
+                on: {
+                    click: this._onCancelClick,
+                    context: this
+                }
+            }
+        ]);
+
+        return this._formPanel;
     }
 
     _createHeaderElements() {
@@ -167,6 +246,15 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
                 }
             },{
                 xtype: 'kijs.gui.Button',
+                name: 'duplicate',
+                caption: this._app.getText('Duplizieren'),
+                iconChar: '&#xf0c5',
+                on: {
+                    click: this._onDuplicateClick,
+                    context: this
+                }
+            },{
+                xtype: 'kijs.gui.Button',
                 caption: this._app.getText('Löschen'),
                 iconChar: '&#xf1f8',
                 on: {
@@ -178,56 +266,14 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
     }
 
     /**
-     * Öffnet das entsprechende Panel um den Eintrag zu bearbeiten
-     *
+     * Kann in abgeleiteter Klasse überschrieben werden,
+     * um FormPanel zu füllen
+     * @param {kijs.gui.FormPanel} formPanel
      * @returns {undefined}
      */
-    _editEntry() {
+    _populateFormPanel(formPanel) {
 
-        if (kijs.isEmpty(this._editPanel)) {
-            kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Es wurde kein Edit-Panel angegeben.'));
-            return;
-        }
-
-        let mainPanel = this._app.mainPanel;
-
-        let params = {};
-
-        // Parameter vorbereiten
-        kijs.Object.each(this._selection, function(key) {
-            if (key.includes('Id')) {
-                params.id = this._selection[key];
-            } else if (key === 'version') {
-                params.version = this._selection[key];
-            }
-        }, this);
-
-        if (mainPanel) {
-            mainPanel.showPanel(this._editPanel, params);
-        }
     }
-
-    /**
-     * Details vom Server holen
-     *
-     * @param {type} id
-     * @returns {undefined}
-     */
-    _getDetailData(id) {
-
-        if (kijs.isEmpty(id)){
-            return;
-        }
-
-        let params = {
-            id: id
-        };
-
-        this._app.rpc.do(this._detailFnLoad, params, function(response) {
-            this._detailPanel.down('details').html = response.html;
-        }, this, false, this._detailPanel);
-    }
-
 
     // overwrite
     unrender(superCall) {
@@ -251,14 +297,18 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
     /**
      * Klick auf den 'Neu' - Button
-     * 
+     * @param {Object} e
      * @returns {undefined}
      */
-    _onAddClick() {
-        let mainPanel = this._app.mainPanel;
+    _onAddClick(e) {
+        let params = kijs.Object.clone(this._formRemoteParams);
+        params.create = true;
 
-        if (mainPanel) {
-            mainPanel.showPanel(this._editPanel);
+        // Formular laden
+        if (this.form.facadeFnLoad) {
+            this.form.load(params, true, true).then(() => {
+
+            });
         }
     }
 
@@ -313,7 +363,6 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
                 if (this.form.facadeFnLoad) {
                     this.form.load(params, true, true).then(() => {
                         this.form.isDirty = true;
-                        this._onFormChange();
                     });
                 }
             } else {
@@ -324,6 +373,20 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
         }
     }
 
+    _onSaveClick() {
+        if (!this.form.validate()) {
+            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
+        } else {
+            // Speichern & Maske ausblenden
+            this.saveData().then(() => {
+                if (this._apertureMask && this._apertureMask.visible === true){
+                    this._apertureMask.visible = false;
+                    this.down('cancelBtn').visible = false;
+                    this.down('saveBtn').visible = false;
+                }
+            }).catch(() => {});
+        }
+    }
 
     /**
      * Wenn eine neue Zeile ausgewählt wird.
@@ -344,14 +407,19 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
             }
         }
 
-        // Details laden
-        kijs.Object.each(this._selection, function(key) {
-            if (key.includes('Id')) {
-                this._getDetailData(this._selection[key]);
-            }
-        }, this);
+        if (this.grid.getSelectedIds().length === 1){
 
-        this._detailPanel.footer.down('editBtn').disabled = false;
+            let params = kijs.Object.clone(this._formRemoteParams);
+            params.selection = this._selection;
+
+            // Formular laden
+            if (this.form.facadeFnLoad) {
+                this.form.load(params, true, true);
+            }
+        } else {
+            //this.form.disabled = true;
+            this.form.clear();
+        }
     }
 
 
@@ -372,7 +440,7 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
-        this._detailPanel = null;
+        this._formPanel = null;
         this._gridPanel = null;
         this._apertureMask = null;
     }

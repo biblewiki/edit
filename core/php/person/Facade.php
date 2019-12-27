@@ -27,6 +27,52 @@ class Facade {
     }
 
 
+    public function deleteRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
+        try {
+            $ids = \property_exists($args, 'selection') ? $args->selection : [];
+
+            // Rechte überprüfen
+            if (!$this->app->getLoggedInUserType()) {
+                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            }
+
+            if (!$ids) {
+                throw new edit\ExceptionNotice($this->app->getText('Es wurde kein Datensatz ausgewählt.'));
+            }
+
+            if (!$this->app->isIgnoreWarnings()) {
+                throw new edit\Rpc\Warning($this->app->getText('Möchten Sie die ausgewählten Datensätze wirklich löschen?'), $this->app->getText('Löschen') . '?');
+            }
+
+            // Transaktion starten
+            $this->app->getDb()->beginTransaction();
+
+            // sql
+            $st = $this->app->getDb()->prepare('DELETE FROM personRelationship WHERE relationshipId = :relationshipId');
+
+            foreach ($ids as $id) {
+                $st->bindValue(':relationshipId', $id, \PDO::PARAM_INT);
+                $st->execute();
+            }
+            unset ($st);
+
+            // Transaktion beenden
+            $this->app->getDb()->commit();
+
+            $response = new edit\Rpc\ResponseDefault();
+            $response->return = $ids;
+            return $response;
+
+        } catch (\Throwable $e) {
+
+            // Rollback
+            $this->app->getDb()->rollBackIfTransaction();
+
+            throw $e;
+        }
+    }
+
+
     /**
      * Details von ID aus DB holen
      *
@@ -192,6 +238,7 @@ class Facade {
             $qryBld->addSelectElement('person.personId');
             $qryBld->addSelectElement('person.version');
             $qryBld->addSelectElement('person.name');
+            $qryBld->addSelectElement('person.description');
             $qryBld->addSelectElement('person.sex');
             $qryBld->addSelectElement('person.believer');
 
@@ -221,6 +268,7 @@ class Facade {
             $row['personId'] = null;
             $row['version'] = null;
             $row['name'] = null;
+            $row['description'] = null;
             $row['sex'] = null;
             $row['believer'] = null;
         }
@@ -236,6 +284,65 @@ class Facade {
         $return->setFormData($row);
         return $return;
 
+    }
+
+    public function getPersons(\stdClass $args): edit\Rpc\ResponseCombo {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        $persons = edit\person\Person::getPersons($this->app, $args);
+
+        $response = new edit\Rpc\ResponseCombo();
+        $response->addRows($persons);
+        return $response;
+    }
+
+    public function getRelationshipGrid(\stdClass $args): edit\Rpc\ResponseGrid {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        $loader = new edit\GridLoader($this->app, $args, 'personRelationship');
+
+        // Primary Keys
+        $loader->addPrimaryColumn('personRelationship.relationshipId', $this->app->getText('Beziehung') . ' ' . $this->app->getText('ID'));
+
+        $loader->addColumn($this->app->getText('Bezugsperson'), 'secondPerson.name');
+        $loader->addColumn($this->app->getText('Beschreibung'), 'secondPerson.description');
+        $loader->addColumn($this->app->getText('Beziehungsart'), 'relationship.name');
+        $loader->addColumn($this->app->getText('Alter Vater'), 'personRelationship.fatherAge');
+
+        $loader->addFromElement('INNER JOIN person AS secondPerson ON personRelationship.secondPersonId = secondPerson.personId');
+        $loader->addFromElement('INNER JOIN relationship ON personRelationship.relationshipId = relationship.relationshipId');
+
+        // Nur die letzte Versionen laden
+        $loader->addWhereElement('personRelationship.version = (SELECT
+            MAX(version)
+        FROM
+            personRelationship AS personVersion
+        WHERE personRelationship.personId = personVersion.personId)');
+
+        return $loader->load();
+    }
+
+
+    public function getRelationships(\stdClass $args): edit\Rpc\ResponseCombo {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        $relationships = edit\person\Person::getRelationships($this->app, $args);
+
+        $response = new edit\Rpc\ResponseCombo();
+        $response->addRows($relationships);
+        return $response;
     }
 
 
@@ -264,7 +371,7 @@ class Facade {
         $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'person');
         $save->save($formPacket);
         $id = (int)$save->getPrimaryKey()->value;
-        $version = (int)$save->getversion();
+        $version = (int)$save->getVersion();
         unset ($save);
 
         $response = new edit\Rpc\ResponseDefault();
@@ -273,4 +380,28 @@ class Facade {
         return $response;
     }
 
+
+    /**
+     * Speichert das Beziehungs-Formular
+     *
+     * @param \stdClass $args
+     * @return edit\Rpc\ResponseDefault
+     */
+    public function saveRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
+        $formPacket = (array)$args->formData;
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'personRelationship');
+        $save->save($formPacket);
+        $id = (int)$save->getPrimaryKey()->value;
+        unset ($save);
+
+        $response = new edit\Rpc\ResponseDefault();
+        $response->id = $id;
+        return $response;
+    }
 }

@@ -58,6 +58,7 @@ class App {
      */
     public function __construct(array $config) {
         $this->config = $config;
+        $this->ignoreWarnings = false;
 
         // Events -> geeignet um Funktionen in ausschaltbaren Modulen event-abhängig auszuführen.
         // Ist das Modul ausgeschaltet, registriert es sich auch nicht für die Events.
@@ -394,7 +395,7 @@ class App {
 //        $loggenInLieferantId = $this->getLoggedInLieferantId();
 //        $hasRights = $this->checkRights($this->getConfig('rights, lieferantFunction'));
 
-        return 3;
+        return 99;
     }
 
 
@@ -448,6 +449,14 @@ class App {
 
 
     /**
+     * @return bool
+     */
+    public function isIgnoreWarnings(): bool {
+        return $this->ignoreWarnings;
+    }
+
+
+    /**
      * Gibt zurück, ob der Benutzer eingeloggt ist
      *
      * @return bool
@@ -456,7 +465,6 @@ class App {
         //return (bool)$this->getLoggedInUserId();
         return true;
     }
-
 
 
     /**
@@ -516,6 +524,24 @@ class App {
      */
     public function setIgnoreWarnings(bool $ignoreWarnings): void {
         $this->ignoreWarnings = $ignoreWarnings;
+    }
+
+
+    /**
+     * Wird von der kijs-Library verwendet.
+     * Zeigt eine Warnung mit OK und Abbrechen-Button an.
+     *
+     * @param string $msg
+     * @return null|\stdClass
+     */
+    public function showWarning(string $msg): ?\stdClass {
+        if ($this->ignoreWarnings) {
+            return null;
+        }
+
+        $return = new \stdClass();
+        $return->warningMsg = $msg;
+        return $return;
     }
 
 }

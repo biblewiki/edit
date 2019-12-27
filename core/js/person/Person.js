@@ -42,7 +42,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
     // overwrite
     _populateFormPanel(formPanel) {
 
-        //formPanel.on('afterLoad', this._onAfterFormLoad, this);
+        formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
         // Felder hinzufügen
         formPanel.add({
@@ -84,7 +84,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                         },
                         {
                             xtype: 'kijs.gui.field.Text',
-                            label: this._app.getText('Eindeutigkeit'),
+                            label: this._app.getText('Beschreibung'),
+                            name: 'description',
                             elements: [
                                 {
                                     xtype: 'kijs.gui.Button',
@@ -161,58 +162,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                     ]
                 },
                 {
-                    xtype: 'kijs.gui.field.Checkbox',
-                    caption: 'Ja',
-                    heigth: 20
-                },
-                {
-                    xtype: 'kijs.gui.field.Checkbox',
-                    caption: 'Nein',
-                    heigth: 20
-                },
-                {
-                    xtype: 'kijs.gui.field.Checkbox',
-                    caption: 'Unbekannt',
-                    heigth: 20
-                },
-                {
-                    xtype: 'kijs.gui.field.Text',
-                    label: 'Beruf'
-                },
-                {
-                    xtype: 'kijs.gui.field.Text',
-                    label: 'Menschengruppe'
-                },
-                {
-                    xtype: 'kijs.gui.field.Combo',
-                    label: 'Personengruppe'
-                },
-                /*
-                {
-                xtype: 'kijs.gui.field.CheckboxGroup',
-
-                elements: [
-                    {
-                    xtype: 'kijs.gui.field.Checkbox',
-                    caption: 'Männlich',
-                    heigth: 20
-                    },
-                    {
-                        xtype: 'kijs.gui.field.Checkbox',
-                        caption: 'Weiblich',
-                        heigth: 20
-                    },
-                    {
-                        xtype: 'kijs.gui.field.Checkbox',
-                        caption: 'Halbe-Halbe',
-                        heigth: 20
-                    }
-                ]
-                },*/
-                {
-                xtype: 'kijs.gui.Button',
-                caption: 'Hinzufügen',
-                heigth: 20
+                    xtype: 'biwi.person.RelationshipGridPanel',
+                    name: 'relationshipGrid'
                 }
             ]
         });
@@ -239,6 +190,12 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                 }
             }
         ];
+    }
+
+    // Events
+    _onAfterFormLoad() {
+        this.down('relationshipGrid').personId = this.form.data.personId;
+        this.down('relationshipGrid').version = this.form.data.version;
     }
 
 

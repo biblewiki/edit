@@ -9,17 +9,17 @@ namespace biwi\edit\Rpc;
 abstract class ResponseBase implements \JsonSerializable {
     protected $jsonType = 'RpcResponse';
 
-    protected $errorTitle = 'Fehler';
+    protected $errorTitle = '';
     protected $errorMsgs = [];
     protected $errorCancelCallback = true;
 
-    protected $infoTitle = 'Info';
+    protected $infoTitle = '';
     protected $infoMsgs = [];
 
-    protected $cornerTipTitle = 'Info';
+    protected $cornerTipTitle = '';
     protected $cornerTipMsgs = [];
 
-    protected $warningTitle = 'Warnung';
+    protected $warningTitle = '';
     protected $warningMsgs = [];
 
     // -------------------------------------------------------------------
@@ -51,6 +51,13 @@ abstract class ResponseBase implements \JsonSerializable {
         }
 
         return $messages;
+    }
+
+    public function setDefaultTitle(string $errorTitle, string $infoTitle, string $cornerTipTitle, string $warningTitle): void {
+        $this->errorTitle = $this->errorTitle !== '' ? $this->errorTitle : $errorTitle;
+        $this->infoTitle = $this->infoTitle !== '' ? $this->infoTitle : $infoTitle;
+        $this->cornerTipTitle = $this->cornerTipTitle !== '' ? $this->cornerTipTitle : $cornerTipTitle;
+        $this->warningTitle = $this->warningTitle !== '' ? $this->warningTitle : $warningTitle;
     }
 
 
@@ -148,3 +155,4 @@ abstract class ResponseBase implements \JsonSerializable {
         return $return;
     }
 }
+

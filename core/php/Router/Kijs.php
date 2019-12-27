@@ -8,11 +8,11 @@ use biwi\edit;
 /**
  * Class Kijs
  *
- * @package ki\kgweb\ki\Router
+ * @package biwi\edit\Router
  */
 class Kijs implements RouterInterface {
     /**
-     * @var ki\App
+     * @var edit\App
      */
     protected $app;
 
@@ -23,7 +23,7 @@ class Kijs implements RouterInterface {
     /**
      * Kijs constructor.
      *
-     * @param ki\App $app
+     * @param edit\App $app
      */
     public function __construct(edit\App $app) {
         $this->app = $app;
@@ -31,8 +31,8 @@ class Kijs implements RouterInterface {
 
 
     /**
-     * @param ki\RequestInterface $request
-     * @param ki\ResponseInterface $response
+     * @param edit\RequestInterface $request
+     * @param edit\ResponseInterface $response
      */
     public function handleRequest(edit\RequestInterface $request, edit\ResponseInterface $response): void {
         $responseData = null;
@@ -134,7 +134,7 @@ class Kijs implements RouterInterface {
             }
 
             // Nachrichten anhängen
-            if ($response->responseData instanceof ki\Rpc\ResponseBase) {
+            if ($response->responseData instanceof edit\Rpc\ResponseBase) {
                 $errorTitle = $this->app->getText('Fehler');
                 $infoTitle = $this->app->getText('Info');
                 $cornerMsgTitle = $this->app->getText('Info');
@@ -148,7 +148,7 @@ class Kijs implements RouterInterface {
 
             return $response;
 
-        } catch (ki\Rpc\Warning $w) {
+        } catch (edit\Rpc\Warning $w) {
 
             $return = new \stdClass();
             $return->tid = $cdata->tid;
@@ -172,7 +172,7 @@ class Kijs implements RouterInterface {
 
             return $return;
 
-        } catch (ki\ExceptionNotice $e) {
+        } catch (edit\ExceptionNotice $e) {
 
             // Fehlerauswertung und Rückgabe
             $return = new \stdClass();

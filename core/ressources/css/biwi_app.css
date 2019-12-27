@@ -1,47 +1,161 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/* 
-    Created on : 23.12.2019, 22:26:47
-    Author     : JoelK
-*/
-
+/* ******************
+   * Variablen
+   ****************** */
 /* ******************
    * Navigation
    ****************** */
-
-.biwi-app-buttontree button {
-    margin-top: 5px;
+.biwi-app-buttontree .kijs-button {
+  margin: 5px 5px 0 5px;
 }
-
 .biwi-app-buttontree .active {
-    background-color: #ddd;
+  background-color: #ddd;
 }
-
 .biwi-app-buttontree .backbutton {
-    background-color: #ddd;
+  background-color: #ddd;
 }
-
-
-
+span.biwi-logo-header {
+  background-image: url('../../resources/img/icon/kgweb_icon_ws.svg');
+  background-repeat: no-repeat;
+  background-size: 19px;
+  background-position: left 4px;
+  width: 22px;
+}
+/* ******************
+   * Dashboard
+   ****************** */
+.biwi-dashboard-dashboard {
+  /* Mitteilungen */
+}
+.biwi-dashboard-dashboard .titleContainer {
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+  font-size: 2em;
+}
+.biwi-dashboard-dashboard .titleContainer > .kijs-container-inner {
+  margin: 10px 0 10px 20px;
+}
+.biwi-dashboard-dashboard .btnContainer .kijs-container-inner {
+  margin: 0 0 10px 20px;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-portletcontainer > .kijs-container-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: flex-start;
+  overflow: auto;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-portletcontainer > .kijs-container-inner > .biwi-dashboard-portlet {
+  flex: none;
+  margin: 0 20px 30px 20px;
+  width: 400px;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-portletcontainer > .kijs-container-inner > .biwi-dashboard-portlet > .kijs-headerbar {
+  cursor: grab;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-portletcontainer > .kijs-container-inner > .biwi-dashboard-portlet > .kijs-headerbar:active {
+  cursor: grabbing;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-portletcontainer > .kijs-container-inner > .biwi-dashboard-portlet > .kijs-container-inner {
+  border: 1px solid #f6f6f6;
+  border-top: 0;
+  min-height: 120px;
+  max-height: 250px;
+  overflow: auto;
+}
+.biwi-dashboard-dashboard .biwi-app-zuweisung-comment-row {
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+  font-size: 14px;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row {
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .logEntryContainer > .kijs-container-inner {
+  display: flex;
+  flex-direction: row;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .logEntryContainer .text {
+  margin: 10px;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .log_icon_default {
+  font-size: 18pt;
+  margin-top: 6px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  margin-left: 10px;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .log_icon_error {
+  color: #EB4C00;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .log_icon_warning {
+  color: #EBCA3B;
+  margin-right: 4px;
+  margin-left: 8px;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .log_icon_info {
+  color: #4398DE;
+}
+.biwi-dashboard-dashboard .biwi-app-log-row .footer {
+  margin: 0px 10px 10px 10px;
+  font-weight: normal;
+  font-size: 7pt;
+  text-align: right;
+  text-overflow: ellipsis;
+}
+.biwi-dashboard-dashboard hr {
+  color: #efefef;
+}
+.biwi-dashboard-dashboard .commentContainer {
+  padding: 10px;
+  cursor: pointer;
+}
+.biwi-dashboard-dashboard .commentContainer .text > .kijs-container-inner {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.biwi-dashboard-dashboard .commentContainer .footer {
+  margin-top: 10px;
+  font-weight: normal;
+  font-size: 7pt;
+  text-align: right;
+  text-overflow: ellipsis;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-mitteilungcontainer {
+  margin: 0px 50px 20px 10px;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-mitteilungcontainer .container {
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+  font-size: 14px;
+  margin: 10px;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #4398DE;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-mitteilungcontainer .container .kijs-container-inner {
+  display: flex;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-mitteilungcontainer .container .icon {
+  color: #4398DE;
+  margin-right: 10px;
+  font-size: 16pt;
+}
+.biwi-dashboard-dashboard .biwi-dashboard-mitteilungcontainer .container .message {
+  line-height: 16pt;
+}
 /* ******************
    * Formular
    ****************** */
-
 .biwi-form-row > .kijs-container-inner {
-    display: flex;
+  display: flex;
 }
-
-
 /* ******************
    * Detail Panel
    ****************** */
-
 div.biwi-detail-panel > div.kijs-footer > .kijs-container-inner {
-    display: flex;
+  display: flex;
 }
-
-
-
+/*# sourceMappingURL=biwi_app.css.map */
