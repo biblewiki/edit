@@ -12,6 +12,10 @@ and open the template in the editor.
    * Navigation
    ****************** */
 
+.biwi-app-buttontree button {
+    margin-top: 5px;
+}
+
 .biwi-app-buttontree .active {
     background-color: #ddd;
 }

@@ -14,7 +14,9 @@ class Config {
             'app/App.js',
             'app/MainPanel.js',
             'app/ButtonTree.js',
-            'default/QuelleWindow.js'
+            'default/source/SourceWindow.js',
+            'default/source/BibleSourceField.js',
+            'default/source/BookSourceField.js'
         ];
     public $isAutoLoadJavaScriptModule = false;
     public $dashboardPortletClasses = [];

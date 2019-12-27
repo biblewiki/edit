@@ -21,6 +21,8 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         this._formFnLoad = null;
         this._formFnSave = null;
         this._detailFnLoad = null;
+        this._formCaption = this._app.getText('Formular');
+        this._detailCaption = this._app.getText('Details');
 
         this._formRemoteParams = {};
 
@@ -36,7 +38,9 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         Object.assign(this._configMap, {
             formFnLoad   : true,
             formFnSave   : true,
-            detailFnLoad : true
+            detailFnLoad : true,
+            formCaption: true,
+            detailCaption: true
         });
 
         // Config anwenden
@@ -54,9 +58,6 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     get detail() { return this._detailPanel.firstChild; }
     get form() { return this._formPanel.firstChild; }
 
-    set formCaption(val) { this._formPanel.headerBar.html = val; }
-    set detailCaption(val) { this._detailPanel.headerBar.html = val; }
-
     get isDirty() {
         return this.form.isDirty;
     }
@@ -68,11 +69,6 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     // --------------------------------------------------------------
 
     refreshPanel(args) {
-//        if (args && args.restoreSelection){
-//            this.grid.reload(args.restoreSelection);
-//        } else {
-//            this.grid.reload();
-//        }
 
         let params = kijs.Object.clone(this._formRemoteParams);
         params.selection = this._selection;
@@ -123,7 +119,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     showPanel(args) {
 
         // Tabelle und Grid erstellen
-        if (!this._gridPanel) {
+        if (!this._formPanel) {
             this.add(this._createElements());
         }
 
@@ -158,7 +154,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
     _createDetailPanel() {
         return this._detailPanel = new kijs.gui.Panel({
-            caption: this._app.getText('Details'),
+            caption: this._detailCaption,
             width: 700,
             cls: ['kijs-flexcolumn', 'biwi-detail-panel'],
             elements: [
@@ -189,7 +185,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
     _createFormPanel() {
         this._formPanel = new kijs.gui.Panel({
-            caption: this._app.getText('Formular'),
+            caption: this._formCaption,
             style: {
                 flex: 1,
                 minWidth: '40px'
@@ -228,42 +224,8 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         };
 
         this._app.rpc.do(this._detailFnLoad, params, function(response) {
-            this._detailPanel.down('details').html = this._getDetailsHtml(response);
+            this._detailPanel.down('details').html = response.html;
         }, this, false, this._detailPanel);
-    }
-
-    /**
-     * Details als HTML formatieren
-     *
-     * @param {type} data
-     * @returns {String}
-     */
-    _getDetailsHtml(data) {
-        let html = '';
-        html += '<table>';
-        html += '<tr>';
-        html += '<td><b>Erstellt</b></td>';
-        html += '<td>' + data.create.createId + '</td>';
-        html += '<td>' + kijs.Date.format(kijs.Date.create(data.create.createDate), 'd.m.Y H:i') + '</td>';
-        html += '</tr>';
-
-        html += '<tr>';
-        html += '<td><b>Geändert</b></td>';
-        html += '<td></td>';
-        html += '</tr>';
-
-        kijs.Array.each(data.change, function(change) {
-            html += '<tr>';
-            html += '<td></td>';
-            html += '<td>' + change.changeId + '</td>';
-            html += '<td>' + kijs.Date.format(kijs.Date.create(change.changeDate), 'd.m.Y H:i') + '</td>';
-            html += '</tr>';
-        }, this);
-
-        html += '</table>';
-
-
-        return html;
     }
 
     /**
@@ -333,7 +295,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     }
 
     _onQuelleClick(e) {
-        let quelle = new biwi.default.QuelleWindow(
+        let quelle = new biwi.default.source.SourceWindow(
             {
                 target: document.body,
                 field: e.element.parent.name

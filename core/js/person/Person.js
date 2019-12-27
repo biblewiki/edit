@@ -18,7 +18,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
         Object.assign(this._defaultConfig, {
             formFnLoad: 'person.getFormData',
             formFnSave: 'person.saveDetailForm',
-            detailFnLoad: 'person.getDetailData'
+            detailFnLoad: 'person.getDetailHtml',
+            formCaption: this._app.getText('Person')
         });
 
          // Mapping für die Zuweisung der Config-Eigenschaften
@@ -40,9 +41,6 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
 
     // overwrite
     _populateFormPanel(formPanel) {
-
-        // Titel
-        this.formCaption = this._app.getText('Person');
 
         //formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
@@ -144,8 +142,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                             captionField: 'caption',
                             required: true,
                             data: [
-                                { id: 1, caption: this._app.getText('Mann') },
-                                { id: 2, caption: this._app.getText('Frau') },
+                                { id: 1, caption: this._app.getText('Ja') },
+                                { id: 2, caption: this._app.getText('Nein') },
                                 { id: 3, caption: this._app.getText('Unbekannt') }
                             ],
                             elements: [
