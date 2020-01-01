@@ -6,7 +6,7 @@ namespace biwi\edit\person;
 use biwi\edit;
 
 /**
- * Class Facade
+ * Class Person
  */
 class Person {
 

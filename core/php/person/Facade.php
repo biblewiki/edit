@@ -302,9 +302,22 @@ class Facade {
 
     public function getRelationshipGrid(\stdClass $args): edit\Rpc\ResponseGrid {
 
+        $personId = null;
+        $version = null;
+
         // Rechte überprüfen
         if (!$this->app->getLoggedInUserType()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // ID auslesen wenn vorhanden
+        if (property_exists($args, 'personId') && $args->personId) {
+            $personId = $args->personId;
+        }
+
+        // Version auslesen wenn vorhanden
+        if (property_exists($args, 'version') && $args->version) {
+            $version = $args->version;
         }
 
         $loader = new edit\GridLoader($this->app, $args, 'personRelationship');
@@ -320,14 +333,37 @@ class Facade {
         $loader->addFromElement('INNER JOIN person AS secondPerson ON personRelationship.secondPersonId = secondPerson.personId');
         $loader->addFromElement('INNER JOIN relationship ON personRelationship.relationshipId = relationship.relationshipId');
 
-        // Nur die letzte Versionen laden
-        $loader->addWhereElement('personRelationship.version = (SELECT
-            MAX(version)
-        FROM
-            personRelationship AS personVersion
-        WHERE personRelationship.personId = personVersion.personId)');
+        // Wenn eine Person übergeben wurde, nur die Beziehungen für diese Person laden
+        if ($personId) {
+            $loader->addWhereElement('personRelationship.personId = :personId');
+            $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+            $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+        }
 
-        return $loader->load();
+        // Wenn eine Version übergeben wurde, diese laden
+        if ($version) {
+            $loader->addWhereElement('personRelationship.version = :version');
+            $loader->getQueryBuilderForSelect()->addParam(':version', $version, \PDO::PARAM_INT);
+            $loader->getCntQueryBuilderForSelect()->addParam(':version', $version, \PDO::PARAM_INT);
+
+        // Die neuste Version laden
+        } else {
+//            $loader->addWhereElement('personRelationship.version = (SELECT
+//                MAX(version)
+//            FROM
+//                personRelationship AS personRelationshipVersion
+//            WHERE personRelationship.personId = personRelationshipVersion.personId)');
+        }
+
+        // Nur die letzte Version laden
+        $loader->addWhereElement('secondPerson.version = (SELECT
+                    MAX(version)
+                FROM
+                    person AS personVersion
+                WHERE personRelationship.secondPersonId = personVersion.personId)');
+
+        $response = $loader->load();
+        return $response;
     }
 
 
@@ -353,12 +389,15 @@ class Facade {
      * @return edit\Rpc\ResponseDefault
      */
     public function saveDetailForm(\stdClass $args): edit\Rpc\ResponseDefault {
+        $tableName = 'person';
         $formPacket = (array)$args->formData;
 
         // Rechte überprüfen
         if (!$this->app->getLoggedInUserType()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
+
+        $category = edit\app\App::getCategoryByName($this->app, $tableName);
 
         if ($formPacket['personId']) {
             $formPacket['oldVal_personId'] = $formPacket['personId'];
@@ -368,11 +407,16 @@ class Facade {
             $formPacket['oldVal_version'] = $formPacket['version'];
         }
 
-        $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'person');
+        $save = new edit\SaveData($this->app, $this->app->getSession()->userId, $tableName);
         $save->save($formPacket);
         $id = (int)$save->getPrimaryKey()->value;
         $version = (int)$save->getVersion();
         unset ($save);
+
+        // Quellen speichern wenn vorhaden
+        if ($formPacket['sources']) {
+            
+        }
 
         $response = new edit\Rpc\ResponseDefault();
         $response->id = $id;

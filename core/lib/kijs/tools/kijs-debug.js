@@ -1693,7 +1693,7 @@ kijs.Char = class kijs_Char {
         let letters = null;
         if (kijs.isFunction(Array.from)) {
             letters = Array.from(text);
-            
+
         } else { // Fallback für IE
             letters = text.split('');
         }
@@ -3133,7 +3133,7 @@ kijs.Dom = class kijs_Dom {
 
         return false;
     }
-    
+
     /**
      * Entfernt alle Unterelemente eines DOM-Elements
      * @param {HTMLElement} node
@@ -3160,8 +3160,8 @@ kijs.Dom = class kijs_Dom {
 
         context._nodeEventListeners = {};
     }
-    
-    
+
+
     /**
      * Entfernt einen Event-Listener von einem HTMLElement
      * @param {String} eventName
@@ -3233,7 +3233,7 @@ kijs.Dom = class kijs_Dom {
                 break;
         }
     }
-    
+
 };
 
 /* global kijs */
@@ -3679,8 +3679,8 @@ kijs.Grafic = class kijs_Grafic {
      *                                   |             |
      *                                   l      c      r
      *                                   |             |
-     *                                   bl --- b --- br 
-     * 
+     *                                   bl --- b --- br
+     *
      * @param {String} [pos='tl'] Ankerpunkt beim neuen Element
      * @param {Number} [offsetX=0]
      * @param {Number} [offsetY=0]
@@ -3695,23 +3695,23 @@ kijs.Grafic = class kijs_Grafic {
         };
         targetPos = targetPos || 'bl';
         pos = pos || 'tl';
-        
+
         offsetX = offsetX || 0;
         offsetY = offsetY || 0;
-        
+
         // Position des Zielankers ermitteln
         const tAnchor = this.getAnchorPos(targetRect, targetPos);
-        
+
         // Position des Element-Ankers ermitteln
         const eAnchor = this.getAnchorPos({x:0, y:0, w:rect.w, h:rect.h}, pos);
-        
+
         ret.x = tAnchor.x - eAnchor.x + offsetX;
         ret.y = tAnchor.y - eAnchor.y + offsetY;
-        
+
         return ret;
     }
-    
-    
+
+
     /**
      * Gibt die Position eines Ankers zu einem Rechteck zurück
      * @param {Object} rect       Rechteck  im Format: {x:..., y:..., w:..., h:...}
@@ -3720,44 +3720,44 @@ kijs.Grafic = class kijs_Grafic {
      *                            |             |
      *                            l      c      r
      *                            |             |
-     *                            bl --- b --- br 
+     *                            bl --- b --- br
      * @returns {Object} Position im Format {x:..., y:...}
      */
     static getAnchorPos(rect, pos) {
         const ret = { x: 0, y: 0 };
-        
+
         // Y-Achse oben
         if (pos.indexOf('t') !== -1) {
             ret.y = rect.y;
-            
+
         // Y-Achse unten
         } else if (pos.indexOf('b') !== -1) {
             ret.y = rect.y + rect.h;
-            
+
         // Y-Achse mitte
         } else {
             ret.y = rect.y + Math.floor(rect.h / 2);
-            
+
         }
-        
+
         // X-Achse links
         if (pos.indexOf('l') !== -1) {
             ret.x = rect.x;
-            
+
         // X-Achse rechts
         } else if (pos.indexOf('r') !== -1) {
             ret.x = rect.x + rect.w;
-            
+
         // X-Achse mitte
         } else {
             ret.x = rect.x + Math.floor(rect.w / 2);
-            
+
         }
 
         return ret;
     }
-    
-    
+
+
     /**
      * Schaut ob ein Rechteck in einem anderen Platz hat
      * @param {Object} rect Masse des Rechtecks im Format: {x:..., y:..., w:..., h:...}
@@ -3767,30 +3767,30 @@ kijs.Grafic = class kijs_Grafic {
      *                              fitX: false,    // Hat es auf der X-Achse platz?
      *                              fitY: true,     // Hat es auf der Y-Achse platz?
      *                              sizeL: 0,       // Abstand zwischen den linken Rändern der beiden Rechtecke (Minuswert=inneres ragt heraus)
-     *                              sizeR: -10,     
-     *                              sizeT: 10,      
-     *                              sizeB: 0,       
+     *                              sizeR: -10,
+     *                              sizeT: 10,
+     *                              sizeB: 0,
      *                             }
-     *                             
+     *
      */
     static rectsOverlap(rect, rectOuter) {
         const ret = {};
-        
+
         ret.sizeL = rect.x - rectOuter.x;
         ret.sizeR = (rectOuter.x + rectOuter.w) - (rect.x + rect.w);
-        
+
         ret.sizeT = rect.y - rectOuter.y;
         ret.sizeB = (rectOuter.y + rectOuter.h) - (rect.y + rect.h);
-        
-        
+
+
         ret.fitX = ret.sizeL >= 0 && ret.sizeR >= 0;
         ret.fitY = ret.sizeT >= 0 && ret.sizeB >= 0;
-        
+
         ret.fit = ret.fitX && ret.fitY;
-        
+
         return ret;
     }
-    
+
 };
 /* global kijs */
 
@@ -4153,11 +4153,11 @@ kijs.Object = class kijs_Object {
      * @returns {undefined}
      */
     static assignConfig(object, config, configMap) {
-        
+
         // 1. Shortcuts auflösen, Standardwerte übernehmen und configs in temporäres Array 'tmpConfigs' übernehmen
         let tmpConfigs = [];
         kijs.Object.each(config, function(cfgKey, cfgVal){
-            
+
             if (!configMap.hasOwnProperty(cfgKey)) {
                 // Bei unbekannten Config-Eigenschaften kein Fehler ausgeben (wird bei der Zuweisung der defaults vom ki.gui.Container verwendet)
                 if (config.skipUnknownConfig || cfgKey === 'skipUnknownConfig') {
@@ -4166,7 +4166,7 @@ kijs.Object = class kijs_Object {
                     throw new kijs.Error(`Unkown config "${cfgKey}"`);
                 }
             }
-            
+
             // fn und target ermitteln
             // -----------------------
             let prio = Number.MIN_VALUE;
@@ -4174,7 +4174,7 @@ kijs.Object = class kijs_Object {
             let target = '_' + cfgKey;
             let context = object;
             let map = configMap[cfgKey];
-                    
+
             // True
             if (map === true) {
                 // Standards nehmen
@@ -4202,9 +4202,9 @@ kijs.Object = class kijs_Object {
                 }
             } else {
                 throw new kijs.Error(`Unkown format on configMap "${cfgKey}"`);
-                
+
             }
-            
+
             tmpConfigs.push({
                 prio: prio,
                 key: cfgKey,
@@ -4214,15 +4214,15 @@ kijs.Object = class kijs_Object {
                 value: cfgVal
             });
         }, this);
-        
+
         // 2. Sortieren nach Priorität je grösser die Zahl desto später wird die Eigenschaft zugewiesen
         tmpConfigs.sort(function(a, b) {
             return a.prio - b.prio;
         });
-                
+
         // 3. Eigenschjaften in der Reihenfolge ihrer Priorität zuweisen
         kijs.Array.each(tmpConfigs, function(cfg) {
-            
+
             // Je nach fn den Wert zuweisen
             // ----------------------------
             switch (cfg.fn) {
@@ -4291,7 +4291,7 @@ kijs.Object = class kijs_Object {
                         }
                     }
                     break;
-                
+
                 // Objekt mergen (ganze Hierarchie)
                 case 'assignDeep':
                     if (kijs.isObject(cfg.context[cfg.target])) {
@@ -4341,7 +4341,7 @@ kijs.Object = class kijs_Object {
         }, this);
         tmpConfigs = null;
     }
-    
+
     /**
     * Kopiert alle Eigenschaften des source-Objekts in das target-Objekt (rekursiv)
     * @param {Object} target Ziel-Objekt
@@ -4351,7 +4351,7 @@ kijs.Object = class kijs_Object {
     */
     static assignDeep(target, source, overwrite=true) {
         kijs.Object.each(source, function(key, val){
-            
+
             // Object -> mergen oder überschreiben mit Klon
             if (kijs.isObject(val)) {
                 if (kijs.isObject(target[key])) {
@@ -4359,25 +4359,25 @@ kijs.Object = class kijs_Object {
                 } else {
                     target[key] = kijs.Object.clone(val);
                 }
-                
+
             // Array -> überschreiben per Klon
             } else if (kijs.isArray(val)) {
                 if (overwrite || target[key] === undefined) {
                     target[key] = kijs.Array.clone(val);
                 }
-                
+
             // alles andere (inkl. Funktionen) -> überschreiben
             } else {
                 if (overwrite || target[key] === undefined) {
                     target[key] = val;
                 }
-                
+
             }
         }, this);
 
         return target;
     }
-    
+
     /**
      * Klont das übergebene Objekt
      * @param {Object} object
@@ -4386,7 +4386,7 @@ kijs.Object = class kijs_Object {
     static clone(object) {
         return JSON.parse(JSON.stringify(object));
     }
-    
+
     /**
      * Durchläuft ein Objekt ruft pro Element die callback-Funktion auf.
      * Die Iteration kann durch die Rückgabe von false gestoppt werden.
@@ -5074,7 +5074,7 @@ kijs.Storage = class kijs_Storage {
         if (!kijs.isObject(value)) {
             return false;
         }
-        
+
         let oldValue = kijs.Storage.getItem(key, mode, keyPrefix);
         if (!kijs.isObject(oldValue)) {
             oldValue = {};
@@ -5333,8 +5333,8 @@ kijs.String = class kijs_String {
 // kijs.gui (Static)
 // --------------------------------------------------------------
 kijs.gui = class kijs_gui {
-    
-    
+
+
     // --------------------------------------------------------------
     // STATICS
     // --------------------------------------------------------------
@@ -5346,7 +5346,7 @@ kijs.gui = class kijs_gui {
     static getClassFromXtype(xtype) {
         const parts = xtype.split('.');
         let parent = window;
-        
+
         for (let i=0; i<parts.length; i++) {
             let part = parts[i];
             if (!parent[part]) {
@@ -5357,8 +5357,8 @@ kijs.gui = class kijs_gui {
         }
         return parent;
     }
-    
-    
+
+
 };
 
 /* global kijs, HTMLElement */
@@ -5367,9 +5367,9 @@ kijs.gui = class kijs_gui {
 // kijs.gui.LayerManager (Singleton)
 // --------------------------------------------------------------
 // Der Layermanager wird verwendet um den z-index von Fenstern zu managen.
-// Wird ein Fenster angeklickt, so wird der z-index aller Fenster mit dem gleichen 
+// Wird ein Fenster angeklickt, so wird der z-index aller Fenster mit dem gleichen
 // parentNode neu berechnet und es erscheint zuvorderst.
-// Neben kijs.gui.Window können auch Masken (kijs.gui.Mask) in den Layermanager 
+// Neben kijs.gui.Window können auch Masken (kijs.gui.Mask) in den Layermanager
 // aufgenommen werden. Dies ist bei modalen Fenster notwendig. Deren masken werden
 // separat im Layermanager geführt.
 // --------------------------------------------------------------
@@ -5397,7 +5397,7 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
                                         // Die Elemente im Stack sind normalerweise kijs.gui.Window.
                                         // Es können aber auch kijs.gui.Mask sein, dies sind die Mask-Layers von
                                         // modalen Fenstern, die einen eigenen z-index erhalten.
-            
+
             this._startZIndex = 10000;
         }
         return kijs_gui_LayerManager._singletonInstance;
@@ -5414,14 +5414,14 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
      */
     getActive(parentNode) {
         const parentProp =  this._parents.get(parentNode);
-        
+
         if (parentProp && parentProp.activeEl) {
             return parentProp.activeEl;
         } else {
             return null;
         }
     }
-    
+
 
     /**
      * Bringt ein Element in den Vordergrund
@@ -5433,13 +5433,13 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
         if (el === this.getActive(el.parentNode)) {
             return false;
         }
-        
+
         // falls das Element schon drin ist: entfernen
         this.removeElement(el, true);
-        
+
         // und am Ende wieder anfügen
         this.addElement(el);
-        
+
         // z-indexe den Elementen neu zuweisen
         this._assignZIndexes(el.parentNode);
 
@@ -5452,7 +5452,7 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
 
         return true;
     }
-    
+
     /**
      * Fügt eine Element an
      * @param {kijs.gui.Element} el
@@ -5467,20 +5467,20 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
             };
             this._parents.set(el.parentNode, parentProp);
         }
-        
+
         // Wenn das Element schon drin ist: Fehler
         if (kijs.Array.contains(parentProp.stack, el)) {
             throw new kijs.Error(`element is duplicated in layermanager`);
         }
-        
+
         parentProp.stack.push(el);
-        
-        // Listeners erstellen, damit wenn, dass Element entladen wird alles neu geordnet wird 
+
+        // Listeners erstellen, damit wenn, dass Element entladen wird alles neu geordnet wird
         // Wenn die Sichtbarkeit ändert, wird ein anderes element aktiviert
         el.on('destruct', this._onElementDestruct, this);
         el.on('changeVisibility', this._onElementChangeVisibility, this);
     }
-    
+
     /**
      * Entfernt ein Element aus dem LayerManager
      * @param {kijs.gui.Element} el
@@ -5490,11 +5490,11 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
     removeElement(el, preventReorder) {
         let changed = false;
         let parentProp =  this._parents.get(el.parentNode);
-        
+
         if (kijs.isEmpty(parentProp) || kijs.isEmpty(parentProp.stack)) {
             return changed;
         }
-        
+
         const newElements = [];
         for (let i=0; i<parentProp.stack.length; i++) {
             if (parentProp.stack[i] === el) {
@@ -5504,17 +5504,17 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
             }
         }
         parentProp.stack = newElements;
-        
+
         // Evtl. parentNode entfernen, wenn leer
         if (parentProp.stack.length === 0) {
             this._parents.delete(el.parentNode);
             parentProp = null;
         }
-        
+
         // Listeners entfernen
         el.off('destruct', this._onElementDestruct, this);
         el.off('changeVisibility', this._onElementChangeVisibility, this);
-        
+
         // falls was geändert hat
         if (parentProp && changed && !preventReorder) {
             // z-indexe der Fenster neu zuweisen
@@ -5526,7 +5526,7 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
                 parentProp.activeEl.focus();
             }
         }
-        
+
         return changed;
     }
 
@@ -5540,11 +5540,11 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
     _assignZIndexes(parentNode) {
         let zIndex = this._startZIndex;
         const parentProp =  this._parents.get(parentNode);
-        
+
         if (kijs.isEmpty(parentProp) || kijs.isEmpty(parentProp.stack)) {
             return;
         }
-        
+
         kijs.Array.each(parentProp.stack, function(el) {
             el.style.zIndex = zIndex;
             zIndex += 10;
@@ -5558,17 +5558,17 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
      */
     _getTopVisibleElement(parentNode) {
         const parentProp =  this._parents.get(parentNode);
-        
+
         if (kijs.isEmpty(parentProp) || kijs.isEmpty(parentProp.stack)) {
             return;
         }
-        
+
         for (let i=parentProp.stack.length-1; i>=0; i--) {
             if (parentProp.stack[i].visible) {
                 return parentProp.stack[i];
             }
         }
-        
+
         return null;
     }
 
@@ -5581,11 +5581,11 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
     _onElementChangeVisibility(e) {
         const el = e.element;
         const parentProp =  this._parents.get(el.parentNode);
-        
+
         if (kijs.isEmpty(parentProp) || kijs.isEmpty(parentProp.stack)) {
             return;
         }
-        
+
         // Oberstes sichtbares Element aktualisieren und Fokus setzen
         parentProp.activeEl = this._getTopVisibleElement(el.parentNode);
         if (parentProp.activeEl) {
@@ -5604,7 +5604,7 @@ kijs.gui.LayerManager = class kijs_gui_LayerManager {
                 el.off(null, null, this);
             }, this);
         }
-        
+
         this._parents.clear();
         this._parents = null;
     }
@@ -5752,7 +5752,7 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
             ]
         });
     }
-    
+
     /**
      * Zeigt ein Eingabefenster mit OK/Abbrechen-Schaltflächen und einem Achtung-Symbol
      * @param {String} caption
@@ -5771,11 +5771,11 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
         this.show({
             caption: caption,
             msg: msg,
-            
+
             fieldXtype: 'kijs.gui.field.Text',
             label: label,
-            value: value, 
-            
+            value: value,
+
             fn: fn,
             context: context,
             icon: {
@@ -5796,19 +5796,19 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
             ]
         });
     }
-    
+
     /**
      * Zeigt ein individuelles Meldungsfenster
      * Beispiel config:
      * config = {
      *     caption: 'Testmeldung',
      *     msg: 'Hallo Welt!',
-     *     
+     *
      *     // Falls ein Input gewünscht wird, können noch folgende Eigenschaften verwendet werden:
      *     fieldXtype: 'kijs.gui.field.Text',
      *     label: 'Wert',
-     *     value: 'Mein Testwert', 
-     *     
+     *     value: 'Mein Testwert',
+     *
      *     fn: function(e, el) {
      *         alert('Es wurde geklickt auf: ' + e.btn);
      *     },
@@ -5846,7 +5846,7 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
             }
             elements.push(config.icon);
         }
-        
+
         if (config.fieldXtype) {
             // Beschrieb und Textfeld
             elements.push({
@@ -5882,7 +5882,7 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
                     }
                 ]
             });
-            
+
         } else {
             // Text
             elements.push({
@@ -6000,7 +6000,7 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
 // kijs.gui (Static)
 // --------------------------------------------------------------
 kijs.gui.field = class kijs_gui_field {
-    
+
 };
 
 /* global kijs */
@@ -6390,7 +6390,7 @@ kijs.gui.ApertureMask = class kijs_gui_ApertureMask extends kijs.Observable {
     // --------------------------------------------------------------
     constructor(config={}) {
         super(false);
-        
+
         this._targetEl = null;
         this._targetDom = null;
         this._animated = true;
@@ -7694,7 +7694,7 @@ kijs.gui.Dom = class kijs_gui_Dom extends kijs.Observable {
             targetNode.appendChild(this._node);
         }
     }
-    
+
     /**
      * Scrollt den Node in den sichtbaren Bereich
      * @returns {undefined}
@@ -10448,7 +10448,7 @@ kijs.gui.Container = class kijs_gui_Container extends kijs.gui.Element {
 
             // Element erstellen
             obj = new constr(obj);
-            
+
         // Ungültige Übergabe
         } else {
             throw new kijs.Error(`kijs.gui.Container: invalid element.`);
@@ -13581,7 +13581,7 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
 
     get filterable() { return this._filterable; }
     set filterable(val) { this._filterable = !!val; }
-    
+
     get filterVisible() { return this._filter.visible; }
     set filterVisible(val) { this._filter.visible = !!val; }
 
@@ -15895,7 +15895,7 @@ kijs.gui.grid.columnConfig.Icon = class kijs_gui_grid_columnConfig_Icon extends 
             this.applyConfig(config, true);
         }
     }
-    
+
     // --------------------------------------------------------------
     // GETTERS / SETTERS
     // --------------------------------------------------------------
@@ -15911,10 +15911,10 @@ kijs.gui.grid.columnConfig.Icon = class kijs_gui_grid_columnConfig_Icon extends 
 
     get iconColorField() { return this._iconColorField; }
     set iconColorField(val) { this._iconColorField = val; }
-    
+
     get iconsCnt() { return this._iconsCnt; }
     set iconsCnt(val) { this._iconsCnt = val; }
-    
+
     get valueField() { return this._valueField; }
     set valueField(val) { this._valueField = val; }
 };
@@ -18898,7 +18898,7 @@ kijs.gui.Panel = class kijs_gui_Panel extends kijs.gui.Container {
         if (!preventEvent) {
             this.raiseEvent('close');
         }
-        
+
         if (this._parentEl && this._parentEl instanceof kijs.gui.Container && this._parentEl.hasChild(this)) {
             this._parentEl.remove(this);
         } else {
@@ -21490,7 +21490,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
             config = Object.assign({}, this._defaultConfig, config);
             this.applyConfig(config, true);
         }
-        
+
         this.parent.grid.on('afterLoad', this._onAfterLoad, this);
     }
 
@@ -21517,7 +21517,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
         }
         super.reset();
     }
-    
+
     // Private
     _checkIcons() {
         let icons = [];
@@ -21561,7 +21561,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
         }
         return [icons, iconsCheck, dataCnt];
     }
-  
+
     // Events
 
     _onAfterLoad() {;
@@ -21587,7 +21587,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
                 }
             });
             this._menuButton.add(['-', this._checkboxGroup]);
-        
+
         } else if (this._checkboxGroup && icons.length > 0 ) {
 
             // Daten hinzufügen
@@ -21602,7 +21602,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
             }
         }
     }
-    
+
     _onFilterChange() {
        this._applyToGrid();
     }
@@ -21621,7 +21621,7 @@ kijs.gui.grid.filter.Icon = class kijs_gui_grid_filter_Icon extends kijs.gui.gri
         super.render(true);
 
         this._searchField.renderTo(this._searchContainer.node);
-        
+
         // Event afterRender auslösen
         if (!superCall) {
             this.raiseEvent('afterRender');
@@ -21901,7 +21901,12 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
         }, this);
     }
 
-    get fields() { return this._fields; }
+    get fields() {
+        if (kijs.isEmpty(this._fields)) {
+            this.searchFields();
+        }
+        return this._fields;
+    }
 
     get facadeFnLoad() { return this._facadeFnLoad; }
     set facadeFnLoad(val) { this._facadeFnLoad = val; }
@@ -23257,7 +23262,7 @@ kijs.gui.field.Checkbox = class kijs_gui_field_Checkbox extends kijs.gui.field.F
             this.render();
         }
     }
-    
+
     get inputWrapperDom() { return this._inputWrapperDom; }
 
     // overwrite
@@ -25648,7 +25653,7 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
 
     get passwordChar() { return this._passwordChar; }
     set passwordChar(val) { this._passwordChar = val; }
-    
+
     get placeholder() { this._inputDom.nodeAttributeGet('placeholder'); }
     set placeholder(val) { this._inputDom.nodeAttributeSet('placeholder', val); }
 

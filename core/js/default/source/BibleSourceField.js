@@ -5,7 +5,7 @@
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.default.source');
 
-biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceField extends kijs.gui.Container {
+biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceField extends kijs.gui.FormPanel {
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
@@ -13,11 +13,6 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
         super(false);
 
         this._app = new biwi.app.App();
-        this._detailPanel = null;
-        this._formPanel = null;
-        this._selection = null;
-        this._apertureMask = null;
-
         this._books = [];
 
         this._formRemoteParams = {};
@@ -58,36 +53,9 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
     // GETTERS / SETTERS
     // --------------------------------------------------------------
 
-    get detail() { return this._detailPanel.firstChild; }
-    get form() { return this._formPanel.firstChild; }
-
-    set formCaption(val) { this._formPanel.headerBar.html = val; }
-    set detailCaption(val) { this._detailPanel.headerBar.html = val; }
-
-    get isDirty() {
-        return this.form.isDirty;
-    }
-
-    get formRemoteParams() { return this._formRemoteParams; }
-
     // --------------------------------------------------------------
     // MEMBERS
     // --------------------------------------------------------------
-
-    refreshPanel(args) {
-//        if (args && args.restoreSelection){
-//            this.grid.reload(args.restoreSelection);
-//        } else {
-//            this.grid.reload();
-//        }
-
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.selection = this._selection;
-
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true);
-        }
-    }
 
     // PROTECTED
     _createElements() {
@@ -123,21 +91,6 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
                 readOnly: true
             }
         ];
-    }
-
-
-    // overwrite
-    unrender(superCall) {
-        // Event auslösen.
-        if (!superCall) {
-            this.raiseEvent('unrender');
-        }
-
-        if (this._apertureMask) {
-            this._apertureMask.unrender();
-        }
-
-        super.unrender(true);
     }
 
 
@@ -193,16 +146,10 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
             this.raiseEvent('destruct');
         }
 
-        // Maske entfernen
-        this._apertureMask.destruct();
-
         // Basisklasse auch entladen
         super.destruct(true);
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
-        this._formPanel = null;
-        this._gridPanel = null;
-        this._apertureMask = null;
     }
 };

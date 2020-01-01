@@ -13,7 +13,6 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         super(false);
 
         this._app = new biwi.app.App();
-        this._formPanel = null;
         this._field = '';
         this._bibleBooks = [];
 
@@ -48,21 +47,15 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
          // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            field: true,
-            facadeFnLoad: true,
-            facadeFnSave: { target: 'facadeFnSave', context: this._formPanel },
-            rpc: { target: 'rpc', context: this._formPanel }
+            field: true
         });
-
-        // Event-Weiterleitungen von this._formPanel
-        this._eventForwardsAdd('afterSave', this._formPanel);
 
         // Config anwenden
         if (kijs.isObject(config)) {
             this.applyConfig(config, true);
         }
 
-        this._getBibleBooks().then(() =>{;
+        this._getBibleBooks().then(() =>{
 
             // FormPanel erstellen
             this.add(this._createElements());
@@ -73,9 +66,6 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
     // --------------------------------------------------------------
     // GETTERS / SETTERS
     // --------------------------------------------------------------
-    get formPanel() { return this._formPanel; }
-    set formPanel(val) { this._formPanel = val; }
-
 
     // --------------------------------------------------------------
     // MEMBERS
@@ -85,7 +75,7 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
     _createElements() {
         return [
             {
-                xtype: 'kijs.gui.FormPanel',
+                xtype: 'kijs.gui.Panel',
                 name: 'bibleSources',
                 caption: this._app.getText('Bibelstellen'),
                 collapsible: 'top',
@@ -185,8 +175,29 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         );
     }
 
-    _onSaveClick(){
+    _onSaveClick() {
+        let sources = [];
+        sources.values = {};
+        let bibleSources = {};
 
+        // Bibel Quellen auslesen
+        kijs.Array.each(this.down('bibleSources').elements, function(formPanel, i) {
+            bibleSources[i] = {};
+            kijs.Array.each(formPanel.fields, function(field) {
+                bibleSources[i][field.name] = field.value;
+            }, this);
+        }, this);
+
+
+        // Quellen in Array zusammenfügen
+        sources.field = this._field;
+        sources.values.bible = bibleSources;
+
+        // Event werfen
+        this.raiseEvent('saveSource', sources);
+
+        // Fenster schliessen
+        this.close();
     }
 
 
@@ -210,6 +221,5 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         super.destruct(true);
 
         // Variablen (Objekte/Arrays) leeren
-        this._formPanel = null;
     }
 };

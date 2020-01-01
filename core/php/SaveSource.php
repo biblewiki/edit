@@ -56,7 +56,6 @@ class SaveData {
         return $this->primaryKeys;
     }
 
-    
     public function getVersion(): int {
         return $this->version ?: 0;
     }

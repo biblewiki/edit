@@ -6,7 +6,7 @@ namespace biwi\edit\setting;
 /**
  * Class Config
  *
- * @package ki\kgweb\kg\setting
+ * @package biwi\edit\setting
  */
 class Config {
     public $cssFiles = [];
