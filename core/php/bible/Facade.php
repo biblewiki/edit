@@ -47,7 +47,7 @@ class Facade {
 //
 //        return $comboLoader->execute();
 
-        $books = ['names' => [0 => ['caption' => 'TestBuch', 'value' => '1'], 1 => ['caption' => 'TestBuch2', 'value' => '2']]];
+        $books = ['names' => [0 => ['caption' => 'TestBuch', 'value' => 1], 1 => ['caption' => 'TestBuch2', 'value' => 2]]];
         $books['verses'] = [];
 
         foreach ($books['names'] as $book) {
@@ -68,7 +68,7 @@ class Facade {
      * @param string $book
      * @return array
      */
-    public function getChaptersForBook(string $book): array {
+    public function getChaptersForBook(int $book): array {
 
         // TODO: aus DB holen
 
@@ -93,7 +93,7 @@ class Facade {
      * @param string $book
      * @return array
      */
-    public function getVersesForChapter(string $book, int $chapter): array {
+    public function getVersesForChapter(int $book, int $chapter): array {
 
         // TODO: aus DB holen
 

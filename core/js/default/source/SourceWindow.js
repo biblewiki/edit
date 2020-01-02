@@ -14,7 +14,11 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
         this._app = new biwi.app.App();
         this._field = '';
+        this._id = null;
+        this._version = null;
+        this._facadeFnLoad = null;
         this._bibleBooks = [];
+        this._sources = [];
 
         // Config generieren
         config = Object.assign({}, {
@@ -47,7 +51,8 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
          // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            field: true
+            field: true,
+            sources: true
         });
 
         // Config anwenden
@@ -55,10 +60,12 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
             this.applyConfig(config, true);
         }
 
-        this._getBibleBooks().then(() =>{
+        // Biblebücher laden
+        this._getBibleBooks().then(() => {
 
             // FormPanel erstellen
             this.add(this._createElements());
+            this._fillSources();
         });
     }
 
@@ -79,12 +86,6 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                 name: 'bibleSources',
                 caption: this._app.getText('Bibelstellen'),
                 collapsible: 'top',
-                elements:[
-                    {
-                        xtype: 'biwi.default.source.BibleSourceField',
-                        books: this._bibleBooks
-                    }
-                ],
                 footerElements: [
                     {
                         xtype: 'kijs.gui.Button',
@@ -97,22 +98,18 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                 ]
             },{
                 xtype: 'kijs.gui.FormPanel',
-                name: 'websites',
+                name: 'webSources',
                 caption: this._app.getText('Webseiten'),
                 collapsible: 'top',
-                defaults: {
-                    width: 280,
-                    height: 25,
-                    labelWidth: 80,
-                    required: true,
-                    style:{
-                        margin: '10px'
-                   }
-                },
+                elements: [
+                    {
+                        xtype: 'biwi.default.source.WebSourceFields',
+                    }
+                ],
                 footerElements: [
                     {
                         xtype: 'kijs.gui.Button',
-                        caption: this._app.getText('Webseite hinzufügen'),
+                        caption: this._app.getText('Hinzufügen'),
                         on: {
                             click: this._onAddWebsiteSourceClick,
                             context: this
@@ -121,13 +118,18 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                 ]
             },{
                 xtype: 'kijs.gui.FormPanel',
-                name: 'bookSources',
-                caption: this._app.getText('Bücher'),
+                name: 'otherSources',
+                caption: this._app.getText('Andere Quellen'),
                 collapsible: 'top',
+                elements: [
+                    {
+                        xtype: 'biwi.default.source.OtherSourceFields',
+                    }
+                ],
                 footerElements: [
                     {
                         xtype: 'kijs.gui.Button',
-                        caption: this._app.getText('Buch hinzufügen'),
+                        caption: this._app.getText('Hinzufügen'),
                         on: {
                             click: this._onAddOtherBooksClick,
                             context: this
@@ -136,6 +138,43 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                 ]
             }
         ];
+    }
+
+    _deleteBibleSource(e) {
+        this.down('bibleSources').remove(e.element);
+    }
+
+    _fillSources() {
+        let bibleSource = [];
+
+        for (let i=1; i<=this._sources.bible.length; i++) {
+            bibleSource.push(
+                {
+                    xtype: 'biwi.default.source.BibleSourceFields',
+                    books: this._bibleBooks,
+                    on: {
+                        deleteBibleSource: this._deleteBibleSource,
+                        context: this
+                    }
+                }
+            );
+        }
+
+        if (!bibleSource) {
+            bibleSource.push(
+                {
+                    xtype: 'biwi.default.source.BibleSourceFields',
+                    books: this._bibleBooks,
+                    on: {
+                        deleteBibleSource: this._deleteBibleSource,
+                        context: this
+                    }
+                }
+            );
+        }
+
+        this.down('bibleSources').on('add', this._onAfterAdd, this);
+        this.down('bibleSources').add(bibleSource);
     }
 
 
@@ -154,50 +193,90 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
     // EVENTS
 
     _onAddBibleSourceClick() {
-        this.down('bibleSources').add({
-            xtype: 'biwi.default.source.BibleSourceField',
-            books: this._bibleBooks
-        });
-    }
-
-    _onAddOtherBooksClick() {
-        this.down('bookSources').add({
-            xtype: 'biwi.default.source.BookSourceField'
-        });
-    }
-
-    _onAddWebsiteSourceClick() {
-        this.down('websites').add(
+        this.down('bibleSources').add(
             {
-                xtype: 'kijs.gui.field.Text',
-                label: this._app.getText('Url')
+                xtype: 'biwi.default.source.BibleSourceFields',
+                books: this._bibleBooks,
+                on: {
+                    deleteBibleSource: this._deleteBibleSource,
+                    context: this
+                }
             }
         );
     }
 
+    _onAddOtherBooksClick() {
+        this.down('otherSources').add(
+            {
+                xtype: 'biwi.default.source.OtherSourceFields'
+            }
+        );
+    }
+
+    _onAddWebsiteSourceClick() {
+        this.down('webSources').add(
+            {
+                xtype: 'biwi.default.source.WebSourceFields'
+            }
+        );
+    }
+
+    _onAfterAdd(e) {
+        kijs.Array.each(this.down('bibleSources').elements, function(element, i) {
+            this._sources.bible[i].openTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
+            element.values = this._sources.bible[i];
+        }, this);
+    }
+
     _onSaveClick() {
         let sources = [];
+        let error = false;
         sources.values = {};
         let bibleSources = {};
+        let webSources = {};
+        let otherSources = {};
 
         // Bibel Quellen auslesen
         kijs.Array.each(this.down('bibleSources').elements, function(formPanel, i) {
-            bibleSources[i] = {};
-            kijs.Array.each(formPanel.fields, function(field) {
-                bibleSources[i][field.name] = field.value;
-            }, this);
+            if (!error) {
+                if(!formPanel.validate()) {
+                    kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
+                    error = true;
+                    return;
+                } else {
+                    bibleSources[i] = formPanel.data;
+                }
+            }
         }, this);
 
+        // Webseiten Quellen auslesen
+        kijs.Array.each(this.down('webSources').elements, function(formPanel, i) {
+            if (formPanel.validate()) {
+               webSources[i]= formPanel.data;
+            }
+        }, this);
 
-        // Quellen in Array zusammenfügen
-        sources.field = this._field;
-        sources.values.bible = bibleSources;
+        // Andere Quellen auslesen
+        kijs.Array.each(this.down('otherSources').elements, function(formPanel, i) {
+            if (formPanel.validate()) {
+                otherSources[i] = formPanel.data;
+            }
+        }, this);
 
-        // Event werfen
-        this.raiseEvent('saveSource', sources);
+        if (!error) {
 
-        // Fenster schliessen
-        this.close();
+            // Quellen in Array zusammenfügen
+            sources.field = this._field;
+            sources.values.bible = bibleSources;
+            sources.values.web = webSources;
+            sources.values.other = otherSources;
+
+            // Event werfen
+            this.raiseEvent('saveSource', sources);
+
+            // Fenster schliessen
+            this.close();
+        }
     }
 
 
@@ -211,15 +290,16 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
             this.raiseEvent('destruct');
         }
 
-        // reload timeout stoppen
-        if (this._reloadAfterTimeout) {
-            window.clearTimeout(this._reloadAfterTimeout);
-            this._reloadAfterTimeout = null;
-        }
-
         // Basisklasse auch entladen
         super.destruct(true);
 
         // Variablen (Objekte/Arrays) leeren
+        this._app = null;
+        this._field = null;
+        this._id = null;
+        this._version = null;
+        this._facadeFnLoad = null;
+        this._bibleBooks = null;
+        this._sources = null;
     }
 };

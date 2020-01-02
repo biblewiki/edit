@@ -16,15 +16,17 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
         this._app = new biwi.app.App();
         this._personId = null;
         this._version = null;
+        this._gridPanel = null;
 
         // Config generieren
         Object.assign(this._defaultConfig, {
-            elements: this._createElements()
+            //Keine
         });
 
          // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            // Keine
+            personId: true,
+            version: true
         });
 
         if (kijs.isObject(config)) {
@@ -32,6 +34,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
             this.applyConfig(config);
         }
 
+        this.add(this._createElements());
     }
 
     // --------------------------------------------------------------
@@ -48,13 +51,14 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
     // MEMBERS
     // --------------------------------------------------------------
 
-    reload(selectedIds) {
-//        this._selectedIds = selectedIds;
-//        let selection = {};
-//        selection.produktId = this._selectedIds[0];
-//        let grid = this._gridPanel.firstChild;
-//        grid.facadeFnArgs = {selection: selection};
-//        grid.reload();
+    reload(personId, version) {console.log(personId);
+        this._personId = personId;
+        this._version = version;
+
+        let grid = this._gridPanel.firstChild;
+        grid.facadeFnArgs = { personId: personId };
+        grid.reload();
+        console.log('test');
     }
 
     /**
@@ -76,6 +80,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
                     selectType: 'multi',
                     name: 'grid',
                     facadeFnLoad: 'person.getRelationshipGrid',
+                    facadeFnArgs: { personId: this._personId },
                     rpc: this._app.rpc,
                     style: {
                         borderLeft: '1px solid #d2d2d2',
@@ -130,7 +135,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
     _onDeleteClick() {
         this._app.rpc.do('person.deleteRelationship', {selection: this.down('grid').getSelectedIds()}, function() {
             // grid neu laden
-            this.down('grid').reload();
+            //this.down('grid').reload();
         }, this);
     }
 
@@ -141,7 +146,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
             e.element.close();
 
             // grid neu laden
-            this.down('grid').reload();
+            //this.down('grid').reload();
         }, this);
     }
 

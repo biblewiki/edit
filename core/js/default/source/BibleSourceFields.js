@@ -1,11 +1,11 @@
 /* global this, kijs, biwi */
 
 // --------------------------------------------------------------
-// ki.DefaultGridComponent
+// biwi.default.source.BibleSourceFields
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.default.source');
 
-biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceField extends kijs.gui.FormPanel {
+biwi.default.source.BibleSourceFields = class biwi_default_source_BibleSourceFields extends kijs.gui.FormPanel {
     // --------------------------------------------------------------
     // CONSTRUCTOR
     // --------------------------------------------------------------
@@ -15,13 +15,12 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
         this._app = new biwi.app.App();
         this._books = [];
 
-        this._formRemoteParams = {};
-
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
             cls: 'kijs-flexrow',
             style: {
-                flex: 1
+                flex: 1,
+                borderTop: '1px solid #ddd'
             },
             defaults:{
                 width: 280,
@@ -53,6 +52,17 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
     // GETTERS / SETTERS
     // --------------------------------------------------------------
 
+    get values() { return this.data; }
+    set values(vals) {
+        //this.down('bookId').data = this._books.names;
+        this.data = vals;
+
+        this.down('chapterId').data = this._books.chapters[this.down('bookId').value];
+        this.down('verseId').data = this._books.verses[this.down('bookId').value][this.down('chapterId').value];
+
+        this.readOnly = false;
+    }
+
     // --------------------------------------------------------------
     // MEMBERS
     // --------------------------------------------------------------
@@ -62,7 +72,7 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
         return [
             {
                 xtype: 'kijs.gui.field.Combo',
-                name: 'book',
+                name: 'bookId',
                 label: this._app.getText('Bibelbuch'),
                 data: this._books.names,
                 captionField: 'caption',
@@ -73,7 +83,7 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
                 }
             },{
                 xtype: 'kijs.gui.field.Combo',
-                name: 'chapter',
+                name: 'chapterId',
                 label: this._app.getText('Kapitel'),
                 captionField: 'value',
                 valueField: 'value',
@@ -84,11 +94,20 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
                 }
             },{
                 xtype: 'kijs.gui.field.Combo',
-                name: 'verse',
+                name: 'verseId',
                 label: this._app.getText('Vers'),
                 captionField: 'value',
                 valueField: 'value',
                 readOnly: true
+            },{
+                xtype: 'kijs.gui.Button',
+                name: 'deleteBtn',
+                iconChar: '&#xf1f8',
+                width: 25,
+                on: {
+                    click: this._onDeleteClick,
+                    context: this
+                }
             }
         ];
     }
@@ -105,16 +124,16 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
     _onBookChange(e) {
 
         if (e.element.value) {
-            this.down('chapter').data = this._books.chapters[e.element.value];
-            this.down('chapter').readOnly = false;
+            this.down('chapterId').data = this._books.chapters[e.element.value];
+            this.down('chapterId').readOnly = false;
         } else {
-            this.down('chapter').readOnly = true;
+            this.down('chapterId').readOnly = true;
         }
 
-        this.down('chapter').value = null;
+        this.down('chapterId').value = null;
 
-        this.down('verse').value = null;
-        this.down('verse').readOnly = true;
+        this.down('verseId').value = null;
+        this.down('verseId').readOnly = true;
     }
 
     /**
@@ -126,14 +145,19 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
     _onChapterChange(e) {
 
         if (e.element.value) {
-            this.down('verse').data = this._books.verses[this.down('book').value][e.element.value];
-            this.down('verse').value = null;
-            this.down('verse').readOnly = false;
+            this.down('verseId').data = this._books.verses[this.down('bookId').value][e.element.value];
+            this.down('verseId').value = null;
+            this.down('verseId').readOnly = false;
         } else {
-            this.down('verse').readOnly = true;
+            this.down('verseId').readOnly = true;
         }
 
-        this.down('verse').value = null;
+        this.down('verseId').value = null;
+    }
+
+
+    _onDeleteClick() {
+        this.raiseEvent('deleteBibleSource');
     }
 
 
@@ -151,5 +175,6 @@ biwi.default.source.BibleSourceField = class biwi_default_source_BibleSourceFiel
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
+        this._books = null;
     }
 };

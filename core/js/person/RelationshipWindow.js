@@ -151,12 +151,17 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends ki
         ];
     }
 
+    _quelleSave(form) {
+        console.log(form);
+    }
+
     // Events
     _onQuelleClick(e) {
         let quelle = new biwi.default.source.SourceWindow(
             {
                 target: document.body,
-                field: e.element.parent.name
+                field: e.element.parent.name,
+                facadeFnSave: this._quelleSave
             }
         );
         quelle.show();

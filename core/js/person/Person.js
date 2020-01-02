@@ -19,6 +19,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
             formFnLoad: 'person.getFormData',
             formFnSave: 'person.saveDetailForm',
             detailFnLoad: 'person.getDetailHtml',
+            sourceFnLoad: 'person.getSources',
             formCaption: this._app.getText('Person')
         });
 
@@ -76,7 +77,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: this._onQuelleClick,
+                                        click: this._onSourceClick,
                                         context: this
                                     }
                                 }
@@ -92,7 +93,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: this._onQuelleClick,
+                                        click: this._onSourceClick,
                                         context: this
                                     }
                                 }
@@ -128,7 +129,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: this._onQuelleClick,
+                                        click: this._onSourceClick,
                                         context: this
                                     }
                                 }
@@ -153,17 +154,18 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
-                                        click: this._onQuelleClick,
+                                        click: this._onSourceClick,
                                         context: this
                                     }
                                 }
                             ]
                         }
                     ]
-                },
-                {
+                },{
                     xtype: 'biwi.person.RelationshipGridPanel',
-                    name: 'relationshipGrid'
+                    name: 'relationshipGrid',
+                    personId: this._id,
+                    version: this._version
                 }
             ]
         });
@@ -194,8 +196,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
 
     // Events
     _onAfterFormLoad() {
-        this.down('relationshipGrid').personId = this.form.data.personId;
-        this.down('relationshipGrid').version = this.form.data.version;
+        this.down('relationshipGrid').reload(this.form.data.personId, this.form.data.version);
     }
 
 

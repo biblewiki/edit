@@ -21839,6 +21839,11 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
 
     get data() {
         let data = {};
+
+        if (this._fields === null) {
+            this.searchFields();
+        }
+
         // Evtl. Daten aus Formular holen
         if (!kijs.isEmpty(this._fields)) {
             kijs.Array.each(this._fields, function(field) {

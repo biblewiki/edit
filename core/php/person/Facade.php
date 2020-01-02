@@ -213,7 +213,6 @@ class Facade {
      * @return \biwi\edit\Rpc\ResponseForm
      */
     public function getFormData(\stdClass $args): edit\Rpc\ResponseForm {
-
         $personId = null;
         $version = null;
 
@@ -283,7 +282,6 @@ class Facade {
         $return = new edit\Rpc\ResponseForm();
         $return->setFormData($row);
         return $return;
-
     }
 
     public function getPersons(\stdClass $args): edit\Rpc\ResponseCombo {
@@ -382,6 +380,41 @@ class Facade {
     }
 
 
+    public function getSources(\stdClass $args): array {
+
+        $personId = null;
+        $version = null;
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // ID auslesen wenn vorhanden
+        if (property_exists($args, 'id') && $args->id) {
+            $personId = $args->id;
+        }
+
+        // Version auslesen wenn vorhanden
+        if (property_exists($args, 'version') && $args->version) {
+            $version = $args->version;
+        }
+
+        // Überprüfen ob ein Feld übergeben wurde
+        if (!property_exists($args, 'field') && $args->field) {
+            throw new ExceptionNotice($this->app->getText('Es wurde kein Feld übergeben.'));
+        }
+
+        $field = $args->field;
+        $category = edit\app\App::getCategoryByName($this->app, 'person');
+        $sourceId = edit\source\Source::getSourceId($field, $personId, $category);
+
+        $return = edit\source\Source::getSources($this->app, $sourceId, $version);
+
+        return $return;
+    }
+
+
     /**
      * Speichert das Formular
      *
@@ -389,39 +422,56 @@ class Facade {
      * @return edit\Rpc\ResponseDefault
      */
     public function saveDetailForm(\stdClass $args): edit\Rpc\ResponseDefault {
-        $tableName = 'person';
-        $formPacket = (array)$args->formData;
+        try {
+            $tableName = 'person';
+            $formPacket = (array)$args->formData;
 
-        // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
-            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            // Rechte überprüfen
+            if (!$this->app->getLoggedInUserType()) {
+                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            }
+
+            $category = edit\app\App::getCategoryByName($this->app, $tableName);
+
+            $formPacket['categoryId'] = $category['categoryId'];
+
+            if ($formPacket['personId']) {
+                $formPacket['id'] = $formPacket['personId'];
+                $formPacket['oldVal_personId'] = $formPacket['personId'];
+            }
+
+            if ($formPacket['version']) {
+                $formPacket['oldVal_version'] = $formPacket['version'];
+            }
+
+            $save = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), $tableName);
+            $save->save($formPacket);
+            $personId = (int)$save->getPrimaryKey()->value;
+            $version = (int)$save->getVersion();
+            unset ($save);
+
+            // Quellen speichern wenn vorhaden
+            if ($formPacket['sources']) {
+                $formPacket['personId'] = $personId;
+                $formPacket['version'] = $version;
+
+                $saveSource = new edit\SaveSource($this->app, $category);
+                $saveSource->save($formPacket);
+                unset($saveSource);
+            }
+
+            $response = new edit\Rpc\ResponseDefault();
+            $response->id = $personId;
+            $response->version = $version;
+            return $response;
+
+        } catch (\Throwable $e) {
+
+            // Rollback
+            $this->app->getDb()->rollBackIfTransaction();
+
+            throw $e;
         }
-
-        $category = edit\app\App::getCategoryByName($this->app, $tableName);
-
-        if ($formPacket['personId']) {
-            $formPacket['oldVal_personId'] = $formPacket['personId'];
-        }
-
-        if ($formPacket['version']) {
-            $formPacket['oldVal_version'] = $formPacket['version'];
-        }
-
-        $save = new edit\SaveData($this->app, $this->app->getSession()->userId, $tableName);
-        $save->save($formPacket);
-        $id = (int)$save->getPrimaryKey()->value;
-        $version = (int)$save->getVersion();
-        unset ($save);
-
-        // Quellen speichern wenn vorhaden
-        if ($formPacket['sources']) {
-            
-        }
-
-        $response = new edit\Rpc\ResponseDefault();
-        $response->id = $id;
-        $response->version = $version;
-        return $response;
     }
 
 
@@ -432,20 +482,29 @@ class Facade {
      * @return edit\Rpc\ResponseDefault
      */
     public function saveRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
-        $formPacket = (array)$args->formData;
+        try {
+            $formPacket = (array)$args->formData;
 
-        // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
-            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            // Rechte überprüfen
+            if (!$this->app->getLoggedInUserType()) {
+                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            }
+
+            $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'personRelationship');
+            $save->save($formPacket);
+            $personId = (int)$save->getPrimaryKey()->value;
+            unset ($save);
+
+            $response = new edit\Rpc\ResponseDefault();
+            $response->id = $personId;
+            return $response;
+
+        } catch (\Throwable $e) {
+
+            // Rollback
+            $this->app->getDb()->rollBackIfTransaction();
+
+            throw $e;
         }
-
-        $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'personRelationship');
-        $save->save($formPacket);
-        $id = (int)$save->getPrimaryKey()->value;
-        unset ($save);
-
-        $response = new edit\Rpc\ResponseDefault();
-        $response->id = $id;
-        return $response;
     }
 }

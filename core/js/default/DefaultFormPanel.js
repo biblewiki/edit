@@ -21,8 +21,12 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         this._formFnLoad = null;
         this._formFnSave = null;
         this._detailFnLoad = null;
+        this._sourceFnLoad = null;
         this._formCaption = this._app.getText('Formular');
         this._detailCaption = this._app.getText('Details');
+
+        this._id = null;
+        this._version = null;
 
         this._formRemoteParams = {};
 
@@ -39,6 +43,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
             formFnLoad   : true,
             formFnSave   : true,
             detailFnLoad : true,
+            sourceFnLoad: true,
             formCaption: true,
             detailCaption: true
         });
@@ -69,6 +74,10 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     // --------------------------------------------------------------
 
     refreshPanel(args) {
+        if (kijs.isObject(args) && args.id) {
+            this._id = args.id;
+            this._version = args.version ? args.version : null;
+        }
 
         let params = kijs.Object.clone(this._formRemoteParams);
         params.selection = this._selection;
@@ -118,15 +127,21 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
     showPanel(args) {
 
+        // ID  und Version aus den Argumenten holen
+        if (kijs.isObject(args) && args.id) {
+            this._id = args.id;
+            this._version = args.version ? args.version : null;
+        }
+
         // Tabelle und Grid erstellen
         if (!this._formPanel) {
             this.add(this._createElements());
         }
 
-        if (kijs.isObject(args) && args.id) {
+        if (this._id) {
             let params = kijs.Object.clone(this._formRemoteParams);
-            params.id = args.id;
-            params.version = args.version ? args.version : null;
+            params.id = this._id;
+            params.version = this._version;
 
             // Formular laden
             if (this.form.facadeFnLoad) {
@@ -190,12 +205,14 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
                 flex: 1,
                 minWidth: '40px'
             },
-            elements: [{
-                xtype: 'kijs.gui.FormPanel',
-                rpc: this._app.rpc,
-                facadeFnLoad: this._formFnLoad,
-                facadeFnSave: this._formFnSave
-            }]
+            elements: [
+                {
+                    xtype: 'kijs.gui.FormPanel',
+                    rpc: this._app.rpc,
+                    facadeFnLoad: this._formFnLoad,
+                    facadeFnSave: this._formFnSave
+                }
+            ]
         });
 
         // FormPanel mit Elementen füllen
@@ -228,6 +245,35 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         }, this, false, this._detailPanel);
     }
 
+    _getSources(fieldName) {
+        return new Promise((resolve) => {
+            if (this._id) {
+                let params = {};
+                params.id = this._id;
+                params.version = this._version;
+                params.field = fieldName;
+
+                if (!this.form.data.sources) {
+                    this.form.data.sources = {};
+                }
+                this.form.data.sources[fieldName] = {};
+
+                this._app.rpc.do(this._sourceFnLoad, params, function(response) {
+
+                    // Quellen in Form Data schreiben
+                    kijs.Object.each(response, function(sourceType, value) {
+                        this.form.data.sources[fieldName][sourceType] = value;
+                    }, this);
+
+                    resolve(this.form.data.sources[fieldName]);
+
+                }, this);
+            } else {
+                resolve();
+            }
+        });
+    }
+
     /**
      * Kann in abgeleiteter Klasse überschrieben werden,
      * um FormPanel zu füllen
@@ -237,6 +283,23 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
      */
     _populateFormPanel(formPanel) {
 
+    }
+
+    _addSourceToFormData(sources) {
+
+        // Formular Quellenarray hinzufügen
+        if (!this.form.data.sources) {
+            this.form.data.sources = {};
+        }
+        this.form.data.sources[sources.field] = sources.values;
+
+        // On Form Change Funktion aufrufen, da die Formulardaten geändert haben
+        this._onFormChange();
+
+        // Form is Dirty setzen, da die Formulardaten geändert haben
+        this.form.isDirty = true;
+
+        console.log(this.form.data);
     }
 
     // overwrite
@@ -294,14 +357,22 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         }
     }
 
-    _onQuelleClick(e) {
-        let quelle = new biwi.default.source.SourceWindow(
-            {
-                target: document.body,
-                field: e.element.parent.name
-            }
-        );
-        quelle.show();
+    _onSourceClick(e) {
+        let fieldName = e.element.parent.name;
+
+        // Vorhandene Quellen laden
+        this._getSources(fieldName).then((sources) => {
+            let sourceWindow = new biwi.default.source.SourceWindow(
+                {
+                    target: document.body,
+                    field: fieldName,
+                    sources: sources
+                }
+            );
+            sourceWindow.show();
+
+            sourceWindow.on('saveSource', this._addSourceToFormData, this);
+        });
     }
 
 
@@ -322,8 +393,21 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
+        this._detailPanel = null;
         this._formPanel = null;
-        this._gridPanel = null;
+        this._selection = null;
         this._apertureMask = null;
+
+        this._formFnLoad = null;
+        this._formFnSave = null;
+        this._sourceFnSave = null;
+        this._detailFnLoad = null;
+        this._formCaption = null;
+        this._detailCaption = null;
+
+        this._id = null;
+        this._version = null;
+
+        this._formRemoteParams = null;
     }
 };
