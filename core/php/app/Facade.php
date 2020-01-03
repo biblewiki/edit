@@ -215,6 +215,11 @@ class Facade {
         $btn->name = 'biwi_person_Overview';
         $elements[] = $btn;
 
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Tiere');
+        $btn->name = 'biwi_animal_Overview';
+        $elements[] = $btn;
+
         // ****************************
         // Personen
         // ****************************

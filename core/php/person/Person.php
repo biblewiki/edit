@@ -34,7 +34,7 @@ class Person {
 
         // SQL
         $qryBld = new edit\SqlSelector('person');
-        $qryBld->addSelectElement('person.personId AS secondPersonId');
+        $qryBld->addSelectElement('person.personId');
         $qryBld->addSelectElement('person.name');
 
         if ($personId) {

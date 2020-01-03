@@ -102,7 +102,7 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends ki
                         name: 'secondPersonId',
                         label: this._app.getText('Bezugsperson'),
                         captionField: 'name',
-                        valueField: 'secondPersonId',
+                        valueField: 'personId',
                         rpc: this._app.rpc,
                         autoLoad: true,
                         facadeFnLoad: 'person.getPersons',

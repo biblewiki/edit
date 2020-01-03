@@ -23,7 +23,7 @@ $biwi_config = [
 
     'module'  => [
         // [Gruppe/]Modulnamen, Gross-/Kleinschreibung beachten, erster Buchstabe gross schreiben. Hauptmodul nicht auflisten.
-        'names' => ['Bible', 'Dashboard', 'Message', 'Person', 'Setting', 'Source'],
+        'names' => ['Animal', 'Bible', 'Dashboard', 'Message', 'Person', 'Setting', 'Source'],
         'prefix' => 'biwi',
         'DefaultCssFiles' => ['biwi_app.css'],
         'DefaultJsFiles' => ['default/DefaultFormPanel.js', 'default/DefaultGridPanel.js', 'default/DefaultGridFormPanel.js']
