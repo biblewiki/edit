@@ -380,7 +380,7 @@ class Facade {
     }
 
 
-    public function getSources(\stdClass $args): array {
+    public function getSources(\stdClass $args): object {
 
         $personId = null;
         $version = null;

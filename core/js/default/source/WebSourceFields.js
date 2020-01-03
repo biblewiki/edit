@@ -75,6 +75,15 @@ biwi.default.source.WebSourceFields = class biwi_default_source_WebSourceFields 
                         name: 'description',
                         label: this._app.getText('Beschreibung'),
                         maxLength: 255
+                    },{
+                        xtype: 'kijs.gui.Button',
+                        name: 'deleteBtn',
+                        iconChar: '&#xf1f8',
+                        width: 25,
+                        on: {
+                            click: this._onDeleteClick,
+                            context: this
+                        }
                     }
                 ]
             },{
@@ -96,6 +105,16 @@ biwi.default.source.WebSourceFields = class biwi_default_source_WebSourceFields 
                 ]
             }
         ];
+    }
+
+    // Events
+
+    _onDeleteClick(e) {
+        // Element ausblenden
+        e.element.parent.parent.visible = false;
+
+        // Element Status auf gelöscht setzen
+        e.element.parent.parent.data.state = 99;
     }
 
     // --------------------------------------------------------------

@@ -247,24 +247,43 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
     _getSources(fieldName) {
         return new Promise((resolve) => {
-            if (this._id) {
+
+            // Überprüfen, ob Objekt "sources" bereits existiert. Sonst wird es erstellt
+            if (!this.form.data.sources) {
+                this.form.data.sources = {};
+            }
+
+            // Wenn schon Daten für dieses Feld im Datenpacket vorhanden sind, werden diese zurückgegeben
+            if (this.form.data.sources[fieldName]) {
+                resolve(this.form.data.sources[fieldName]);
+
+            // Überprüfen ob eine ID vorhanden ist. Dies bedeutet, dass der Eintrag bereits in der DB ist.
+            // Wenn ja, werden die Quellen vom Server geholt
+            } else if (this._id) {
+
+                // Argumente vorbereiten
                 let params = {};
                 params.id = this._id;
                 params.version = this._version;
                 params.field = fieldName;
 
-                if (!this.form.data.sources) {
-                    this.form.data.sources = {};
-                }
+                // Objekt für Feldnamen im Datenpacket erstellen
                 this.form.data.sources[fieldName] = {};
 
+                // Server Abfrage ausführen
                 this._app.rpc.do(this._sourceFnLoad, params, function(response) {
 
                     // Quellen in Form Data schreiben
-                    kijs.Object.each(response, function(sourceType, value) {
-                        this.form.data.sources[fieldName][sourceType] = value;
+                    kijs.Object.each(response, function(sourceType, values) {
+                        this.form.data.sources[fieldName][sourceType] = {};
+
+                        // Aus dem Array ein Objekt machen
+                        kijs.Array.each(values, function(value, index) {
+                            this.form.data.sources[fieldName][sourceType][index] = value;
+                        }, this);
                     }, this);
 
+                    // Resolve ausführen und Quellen zurückgeben
                     resolve(this.form.data.sources[fieldName]);
 
                 }, this);

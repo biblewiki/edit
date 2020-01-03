@@ -156,8 +156,12 @@ biwi.default.source.BibleSourceFields = class biwi_default_source_BibleSourceFie
     }
 
 
-    _onDeleteClick() {
-        this.raiseEvent('deleteBibleSource');
+    _onDeleteClick(e) {
+        // Element ausblenden
+        e.element.parent.visible = false;
+
+        // Element Status auf gelöscht setzen
+        e.element.parent.data.state = 99;
     }
 
 

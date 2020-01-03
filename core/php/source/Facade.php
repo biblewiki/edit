@@ -92,8 +92,8 @@ class Facade {
         }
 
         $comboLoader = new edit\ComboLoader($this->app, $args, 'otherSource');
-        $comboLoader->setCaptionSql('otherSource.publischCompany');
-        $comboLoader->setValueSql('otherSource.publischCompany');
+        $comboLoader->setCaptionSql('otherSource.publishCompany');
+        $comboLoader->setValueSql('otherSource.publishCompany');
 
         return $comboLoader->execute();
 

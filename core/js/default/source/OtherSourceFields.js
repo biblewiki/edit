@@ -76,6 +76,15 @@ biwi.default.source.OtherSourceFields = class biwi_default_source_OtherSourceFie
                         label: this._app.getText('Name'),
                         maxLength: 45,
                         required: true
+                    },{
+                        xtype: 'kijs.gui.Button',
+                        name: 'deleteBtn',
+                        iconChar: '&#xf1f8',
+                        width: 25,
+                        on: {
+                            click: this._onDeleteClick,
+                            context: this
+                        }
                     }
                 ]
             },{
@@ -277,6 +286,16 @@ biwi.default.source.OtherSourceFields = class biwi_default_source_OtherSourceFie
                 ]
             }
         ];
+    }
+
+    // Events
+
+    _onDeleteClick(e) {
+        // Element ausblenden
+        e.element.parent.parent.visible = false;
+
+        // Element Status auf gelöscht setzen
+        e.element.parent.parent.data.state = 99;
     }
 
     // --------------------------------------------------------------

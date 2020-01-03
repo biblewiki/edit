@@ -10,7 +10,7 @@ use biwi\edit;
  */
 class Source {
 
-    public static function getBibleSources(edit\App $app, string $sourceId, int $version): array {
+    public static function getBibleSources(edit\App $app, string $sourceId, ?int $version = null): array {
 
         $qryBld = new edit\SqlSelector('bibleSource');
         $qryBld->addSelectElement('bibleSource.bibleSourceId');
@@ -20,6 +20,7 @@ class Source {
         $qryBld->addSelectElement('bibleSource.chapterId');
         $qryBld->addSelectElement('bibleSource.verseId');
 
+        $qryBld->addWhereElement('bibleSource.state = 10');
         $qryBld->addWhereElement('bibleSource.sourceId = :sourceId');
         $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
 
@@ -41,15 +42,74 @@ class Source {
         $rows = $qryBld->execute($app->getDb());
         unset ($qryBld);
 
+        foreach ($rows as &$row) {
+            $row['openTS'] = date('Y-m-d H:i:s');
+        }
+
         return $rows;
     }
 
 
-    public static function getSources(edit\App $app, string $sourceId, int $version): array {
+    public static function getOtherSources(edit\App $app, string $sourceId, ?int $version = null): array {
 
-        $return = [];
-        $return['bible'] = self::getBibleSources($app, $sourceId, $version);
-        $return['web'] = self::getWebSources($app, $sourceId, $version);
+        $qryBld = new edit\SqlSelector('otherSource');
+        $qryBld->addSelectElement('otherSource.otherSourceId');
+        $qryBld->addSelectElement('otherSource.sourceId');
+        $qryBld->addSelectElement('otherSource.version');
+        $qryBld->addSelectElement('otherSource.title');
+        $qryBld->addSelectElement('otherSource.name');
+        $qryBld->addSelectElement('otherSource.description');
+        $qryBld->addSelectElement('otherSource.type');
+        $qryBld->addSelectElement('otherSource.workName');
+        $qryBld->addSelectElement('otherSource.medium');
+        $qryBld->addSelectElement('otherSource.number');
+        $qryBld->addSelectElement('otherSource.edition');
+        $qryBld->addSelectElement('otherSource.locality');
+        $qryBld->addSelectElement('otherSource.publishCompany');
+        $qryBld->addSelectElement('otherSource.publishDate');
+        $qryBld->addSelectElement('otherSource.language');
+        $qryBld->addSelectElement('otherSource.isbnDoiIssn');
+        $qryBld->addSelectElement('otherSource.url');
+        $qryBld->addSelectElement('otherSource.downloadDate');
+        $qryBld->addSelectElement('otherSource.rights');
+        $qryBld->addSelectElement('otherSource.extra');
+
+        $qryBld->addWhereElement('otherSource.state = 10');
+        $qryBld->addWhereElement('otherSource.sourceId = :sourceId');
+        $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
+
+        // Wenn eine Version übergeben wurde, diese laden
+        if ($version) {
+            $qryBld->addWhereElement('otherSource.version = :version');
+            $qryBld->addParam(':version', $version, \PDO::PARAM_INT);
+
+        // Die neuste Version laden
+        } else {
+            // Nur die letzte Version laden
+            $qryBld->addWhereElement('otherSource.version = (SELECT
+                MAX(version)
+            FROM
+                otherSource AS personVersion
+            WHERE otherSource.sourceId = personVersion.sourceId)');
+        }
+
+        $rows = $qryBld->execute($app->getDb());
+        unset ($qryBld);
+
+        foreach ($rows as &$row) {
+            $row['openTS'] = date('Y-m-d H:i:s');
+        }
+
+        return $rows;
+    }
+
+
+    public static function getSources(edit\App $app, string $sourceId, ?int $version = null): object {
+
+        $return = new \stdClass;
+        $return->bible = self::getBibleSources($app, $sourceId, $version);
+        $return->web = self::getWebSources($app, $sourceId, $version);
+        $return->other = self::getOtherSources($app, $sourceId, $version);
 
         return $return;
     }
@@ -61,7 +121,7 @@ class Source {
         return $category['categoryId'] . '_' . $personId . '_' . $field;
     }
 
-    public static function getWebSources(edit\App $app, string $sourceId, int $version): array {
+    public static function getWebSources(edit\App $app, string $sourceId, ?int $version = null): array {
 
         $qryBld = new edit\SqlSelector('webSource');
         $qryBld->addSelectElement('webSource.webSourceId');
@@ -71,6 +131,7 @@ class Source {
         $qryBld->addSelectElement('webSource.description');
         $qryBld->addSelectElement('webSource.url');
 
+        $qryBld->addWhereElement('webSource.state = 10');
         $qryBld->addWhereElement('webSource.sourceId = :sourceId');
         $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
 
@@ -91,6 +152,10 @@ class Source {
 
         $rows = $qryBld->execute($app->getDb());
         unset ($qryBld);
+
+        foreach ($rows as &$row) {
+            $row['openTS'] = date('Y-m-d H:i:s');
+        }
 
         return $rows;
     }

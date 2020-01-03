@@ -114,8 +114,8 @@ class SaveSource{
     private function _saveEntry(string $field, array $formPacket, string $tableName): void {
 
         // Wenn eine ID übergeben wurde, diese als oldVal weitergeben
-        if ($formPacket['bibleSourceId']) {
-            $formPacket['oldVal_bibleSourceId'] = $formPacket['bibleSourceId'];
+        if ($formPacket[$tableName . 'Id']) {
+            $formPacket['oldVal_' . $tableName . 'Id'] = $formPacket[$tableName . 'Id'];
         }
 
         // Eindeutige ID erstellen wenn nicht vorhanden
