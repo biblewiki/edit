@@ -365,10 +365,10 @@ class App {
      *
      * @return string
      */
-    public function getLoggedInUserId(): string {
+    public function getLoggedInUserId(): int {
         $userId = $this->getSession()->userId;
         if (!$userId || $userId === "guest") {
-            return "";
+            return 0;
         }
 
         return $userId;

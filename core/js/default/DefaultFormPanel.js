@@ -1,7 +1,7 @@
 /* global this, kijs, biwi */
 
 // --------------------------------------------------------------
-// ki.DefaultGridComponent
+// biwi.default.DefaultFormPanel
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.default');
 
@@ -32,7 +32,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
-            cls: ['kijs-flexrow', 'ki-defaultgridcomponent'],
+            cls: ['kijs-flexrow'],
             style: {
                 flex: 1
             }
@@ -133,25 +133,24 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
             this._version = args.version ? args.version : null;
         }
 
-        // Tabelle und Grid erstellen
+        // Tabelle erstellen
         if (!this._formPanel) {
             this.add(this._createElements());
         }
 
-        if (this._id) {
-            let params = kijs.Object.clone(this._formRemoteParams);
-            params.id = this._id;
-            params.version = this._version;
 
-            // Formular laden
-            if (this.form.facadeFnLoad) {
-                this.form.load(params, true, true);
-            }
+        let params = kijs.Object.clone(this._formRemoteParams);
+        params.id = this._id;
+        params.version = this._version;
 
-            // Details laden
-            if (this._detailFnLoad) {
-                this._getDetailData(args.id);
-            }
+        // Formular laden
+        if (this.form.facadeFnLoad) {
+            this.form.load(params, true, true);
+        }
+
+        // Details laden
+        if (this._id && this._detailFnLoad) {
+            this._getDetailData(this._id);
         }
     }
 

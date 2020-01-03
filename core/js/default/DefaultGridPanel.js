@@ -251,7 +251,7 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
 
     /**
      * Klick auf den 'Neu' - Button
-     * 
+     *
      * @returns {undefined}
      */
     _onAddClick() {

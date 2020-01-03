@@ -37,7 +37,7 @@ class SaveData {
     // -------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------
-    public function __construct(App $app, string $userId, string $tableName) {
+    public function __construct(App $app, int $userId, string $tableName) {
         $this->app = $app;
         $this->userId = $userId;
         $this->tableName = $tableName;
@@ -56,7 +56,7 @@ class SaveData {
         return $this->primaryKeys;
     }
 
-    
+
     public function getVersion(): int {
         return $this->version ?: 0;
     }

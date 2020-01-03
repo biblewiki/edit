@@ -196,6 +196,8 @@ class Facade {
         $loader->addColumn($this->app->getText('Author'), 'person.createId');
         $loader->addColumn($this->app->getText('Zuletzt bearbeitet'), 'person.changeDate', ['width' => 120, 'xtype' => 'kijs.gui.grid.columnConfig.Date', 'format' => 'd.m.Y H:i']);
 
+        $loader->addSort('name');
+
         // Nur die letzte Versionen laden
         $loader->addWhereElement('person.version = (SELECT
             MAX(version)
@@ -490,7 +492,7 @@ class Facade {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 
-            $save = new edit\SaveData($this->app, $this->app->getSession()->userId, 'personRelationship');
+            $save = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personRelationship');
             $save->save($formPacket);
             $personId = (int)$save->getPrimaryKey()->value;
             unset ($save);
