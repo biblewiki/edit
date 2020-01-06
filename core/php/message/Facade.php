@@ -8,7 +8,7 @@ use biwi\edit;
 /**
  * Class Facade
  *
- * @package edit\kgweb\kg\message
+ * @package biwi\edit\message
  */
 class Facade {
     /**

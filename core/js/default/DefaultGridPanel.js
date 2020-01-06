@@ -112,7 +112,7 @@ biwi.default.DefaultGridPanel = class biwi_default_DefaultGridPanel extends kijs
                 xtype: 'kijs.gui.grid.Grid',
                 selectType: 'multi',
                 filterable: true,
-                filterVisible: false,
+                filterVisible: true,
                 facadeFnLoad: this._gridFnLoad,
                 rpc: this._app.rpc,
                 style: {

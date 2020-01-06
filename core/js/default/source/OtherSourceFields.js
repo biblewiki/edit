@@ -120,7 +120,7 @@ biwi.default.source.OtherSourceFields = class biwi_default_source_OtherSourceFie
                     {
                         xtype: 'kijs.gui.field.Combo',
                         name: 'type',
-                        label: this._app.getText('Type'),
+                        label: this._app.getText('Typ'),
                         remoteSort: true,
                         forceSelection: false,
                         rpc: this._app.rpc,

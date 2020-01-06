@@ -190,6 +190,13 @@ class ComboLoader {
     }
 
     /**
+     * @param $value
+     */
+    public function setDistinct(bool $value): void {
+        $this->qryBld->setDistinct((bool)$value);
+    }
+
+    /**
      * Setzt das Limit. Null = unbeschränkt
      * @param int|null $limit
      * @return void

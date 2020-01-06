@@ -95,8 +95,8 @@ biwi.default.DefaultGridFormPanel = class biwi_default_DefaultGridFormPanel exte
             p = this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
 
                 // kiOpenTS zurücksetzen
-                if (this.form.data.kiOpenTS) {
-                    this.form.data.kiOpenTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
+                if (this.form.data.openTS) {
+                    this.form.data.openTS = kijs.Date.format(new Date(), 'Y-m-d H:i:s');
                 }
 
                 if (response.newId !== response.oldId){

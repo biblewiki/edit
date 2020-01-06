@@ -163,7 +163,7 @@ biwi.animal.Animal = class biwi_animal_Animal extends biwi.default.DefaultFormPa
                                 valueField: 'personId',
                                 rpc: this._app.rpc,
                                 autoLoad: true,
-                                facadeFnLoad: 'person.getPersons',
+                                facadeFnLoad: 'person.getForCombo'
                             }
                         ]
                     }

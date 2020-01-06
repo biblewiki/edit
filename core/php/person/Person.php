@@ -11,6 +11,44 @@ use biwi\edit;
 class Person {
 
     /**
+     * Gibt eine Person zurück
+     *
+     * @param \biwi\edit\App $app
+     * @param int $personId
+     * @return array
+     * @throws edit\ExceptionNotice
+     */
+    public static function getPerson(edit\App $app, int $personId): array {
+
+        // Überprüfen ob einen ID übergeben wurde
+        if (!$personId) {
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
+        }
+
+        // SQL
+        $qryBld = new edit\SqlSelector('person');
+        $qryBld->addSelectElement('person.personId');
+        $qryBld->addSelectElement('person.name');
+        $qryBld->addSelectElement('person.sex');
+
+        $qryBld->addWhereElement('person.personId = :personId');
+        $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
+
+        // Nur die erste Version laden
+        $qryBld->addWhereElement('person.version = (SELECT
+                MIN(version)
+            FROM
+                person AS personVersion
+            WHERE person.personId = personVersion.personId)');
+
+        $row = $qryBld->execute($app->getDb(), false);
+        unset ($qryBld);
+
+        return $row;
+    }
+
+
+    /**
      * Gibt die Personen zurück
      *
      * @param \biwi\edit\App $app
@@ -36,6 +74,7 @@ class Person {
         $qryBld = new edit\SqlSelector('person');
         $qryBld->addSelectElement('person.personId');
         $qryBld->addSelectElement('person.name');
+        $qryBld->addSelectElement('person.sex');
 
         if ($personId) {
 
@@ -63,26 +102,4 @@ class Person {
 
         return $rows;
     }
-
-
-    /**
-     * Gibt die Beziehungsarten zurück
-     *
-     * @param \biwi\edit\App $app
-     * @param \stdClass $args
-     * @return array
-     */
-    public static function getRelationships(edit\App $app, \stdClass $args): array {
-
-        // SQL
-        $qryBld = new edit\SqlSelector('relationship');
-        $qryBld->addSelectElement('relationship.relationshipId');
-        $qryBld->addSelectElement('relationship.name');
-
-        $rows = $qryBld->execute($app->getDb());
-        unset ($qryBld);
-
-        return $rows;
-    }
-
 }

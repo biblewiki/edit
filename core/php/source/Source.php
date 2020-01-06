@@ -115,10 +115,16 @@ class Source {
     }
 
 
-    public static function getSourceId($field, $personId, $category): string {
+    public static function getSourceId(string $field, int $entryId, array $category, ?string $assignTableName = null): string {
 
         // Eindeutige ID erstellen bestehend aus: Kategorie ID _ Eintrag ID _ Feldname
-        return $category['categoryId'] . '_' . $personId . '_' . $field;
+        $sourceId = $category['categoryId'] . '_' . $entryId . '_' . $field;
+
+        if ($assignTableName) {
+            $sourceId .= '_' . $assignTableName;
+        }
+
+        return $sourceId;
     }
 
     public static function getWebSources(edit\App $app, string $sourceId, ?int $version = null): array {

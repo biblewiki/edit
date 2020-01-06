@@ -254,6 +254,11 @@ class Facade {
             $elements[] = $administration;
 
             $btn = new \stdClass();
+            $btn->caption = $this->app->getText('Beziehungen');
+            $btn->name = 'biwi_relationship_Relationship';
+            $administration->elements[] = $btn;
+
+            $btn = new \stdClass();
             $btn->caption = $this->app->getText('Mitteilungen');
             $btn->name = 'biwi_message_Message';
             $administration->elements[] = $btn;

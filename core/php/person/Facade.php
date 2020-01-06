@@ -26,53 +26,6 @@ class Facade {
         $this->app = $app;
     }
 
-
-    public function deleteRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
-        try {
-            $ids = \property_exists($args, 'selection') ? $args->selection : [];
-
-            // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType()) {
-                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
-            }
-
-            if (!$ids) {
-                throw new edit\ExceptionNotice($this->app->getText('Es wurde kein Datensatz ausgewählt.'));
-            }
-
-            if (!$this->app->isIgnoreWarnings()) {
-                throw new edit\Rpc\Warning($this->app->getText('Möchten Sie die ausgewählten Datensätze wirklich löschen?'), $this->app->getText('Löschen') . '?');
-            }
-
-            // Transaktion starten
-            $this->app->getDb()->beginTransaction();
-
-            // sql
-            $st = $this->app->getDb()->prepare('DELETE FROM personRelationship WHERE relationshipId = :relationshipId');
-
-            foreach ($ids as $id) {
-                $st->bindValue(':relationshipId', $id, \PDO::PARAM_INT);
-                $st->execute();
-            }
-            unset ($st);
-
-            // Transaktion beenden
-            $this->app->getDb()->commit();
-
-            $response = new edit\Rpc\ResponseDefault();
-            $response->return = $ids;
-            return $response;
-
-        } catch (\Throwable $e) {
-
-            // Rollback
-            $this->app->getDb()->rollBackIfTransaction();
-
-            throw $e;
-        }
-    }
-
-
     /**
      * Details von ID aus DB holen
      *
@@ -208,7 +161,8 @@ class Facade {
         return $loader->load();
     }
 
-        /**
+
+    /**
      * Gibt das Formular zurück
      *
      * @param \stdClass $args
@@ -242,6 +196,9 @@ class Facade {
             $qryBld->addSelectElement('person.description');
             $qryBld->addSelectElement('person.sex');
             $qryBld->addSelectElement('person.believer');
+            $qryBld->addSelectElement('personProficiency.proficiency');
+
+            $qryBld->addFromElement('LEFT JOIN personProficiency ON personProficiency.personId = person.personId AND personProficiency.version = person.version');
 
             $qryBld->addWhereElement('person.personId = :personId');
             $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
@@ -286,7 +243,15 @@ class Facade {
         return $return;
     }
 
-    public function getPersons(\stdClass $args): edit\Rpc\ResponseCombo {
+
+    /**
+     * Personen für Combo zurückgeben
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseCombo
+     * @throws edit\ExceptionNotice
+     */
+    public function getForCombo(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
         if (!$this->app->getLoggedInUserType()) {
@@ -300,6 +265,65 @@ class Facade {
         return $response;
     }
 
+
+     /**
+     * Gibt die schon vorhandenen Berufe aus der DB zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseCombo
+     * @throws edit\ExceptionNotice
+     */
+    public function getPersonProficiency(\stdClass $args): edit\Rpc\ResponseCombo {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        $comboLoader = new edit\ComboLoader($this->app, $args, 'personProficiency');
+        $comboLoader->setCaptionSql('personProficiency.proficiency');
+        $comboLoader->setValueSql('personProficiency.proficiency');
+        $comboLoader->setDistinct(true);
+
+        return $comboLoader->execute();
+    }
+
+
+    /**
+     * Beziehungen nach Geschlecht für Combo zurückgeben
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseCombo
+     * @throws edit\ExceptionNotice
+     */
+    public function getRelationshipForCombo(\stdClass $args): edit\Rpc\ResponseCombo {
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // Überprüfen ob einen ID übergeben wurde
+        if (!property_exists($args, 'personId') || !$args->personId) {
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
+        }
+
+        $person = edit\person\Person::getPerson($this->app, $args->personId);
+
+        $relationships = edit\relationship\Relationship::getRelationships($this->app, $person['sex']);
+
+        $response = new edit\Rpc\ResponseCombo();
+        $response->addRows($relationships);
+        return $response;
+    }
+
+
+    /**
+     * Gibt das Beziehungs Grid zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseGrid
+     * @throws edit\ExceptionNotice
+     */
     public function getRelationshipGrid(\stdClass $args): edit\Rpc\ResponseGrid {
 
         $personId = null;
@@ -322,16 +346,24 @@ class Facade {
 
         $loader = new edit\GridLoader($this->app, $args, 'personRelationship');
 
-        // Primary Keys
-        $loader->addPrimaryColumn('personRelationship.relationshipId', $this->app->getText('Beziehung') . ' ' . $this->app->getText('ID'));
+        // Primary Key
+        $loader->addPrimaryColumn('personRelationship.personRelationshipId', $this->app->getText('Beziehungs') . ' ' . $this->app->getText('ID'));
 
+        $loader->addColumn($this->app->getText('Person') . ' ' . $this->app->getText('ID'), 'personRelationship.personId', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Version'), 'personRelationship.version', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Bezugsperson') . ' ' . $this->app->getText('ID'), 'personRelationship.secondPersonId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Bezugsperson'), 'secondPerson.name');
-        $loader->addColumn($this->app->getText('Beschreibung'), 'secondPerson.description');
-        $loader->addColumn($this->app->getText('Beziehungsart'), 'relationship.name');
+        $loader->addColumn($this->app->getText('Beziehungart'), 'secondPerson.description');
+        $loader->addColumn($this->app->getText('Beziehungsart') . ' ' . $this->app->getText('ID'), 'relationship.relationshipId', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Beziehungsart'), 'relationship.name', null, 'relationshipName');  // Umgekehrte Beziehung
         $loader->addColumn($this->app->getText('Alter Vater'), 'personRelationship.fatherAge');
 
+        // Person auslesen
         $loader->addFromElement('INNER JOIN person AS secondPerson ON personRelationship.secondPersonId = secondPerson.personId');
+
+        // Bezeihung auslesen
         $loader->addFromElement('INNER JOIN relationship ON personRelationship.relationshipId = relationship.relationshipId');
+
 
         // Wenn eine Person übergeben wurde, nur die Beziehungen für diese Person laden
         if ($personId) {
@@ -348,36 +380,24 @@ class Facade {
 
         // Die neuste Version laden
         } else {
-//            $loader->addWhereElement('personRelationship.version = (SELECT
-//                MAX(version)
-//            FROM
-//                personRelationship AS personRelationshipVersion
-//            WHERE personRelationship.personId = personRelationshipVersion.personId)');
+            $loader->addWhereElement('personRelationship.version = (
+            SELECT
+                MAX(version)
+            FROM
+                personRelationship AS personRelationshipVersion
+            WHERE personRelationship.personId = personRelationshipVersion.personId)');
         }
 
         // Nur die letzte Version laden
-        $loader->addWhereElement('secondPerson.version = (SELECT
-                    MAX(version)
-                FROM
-                    person AS personVersion
-                WHERE personRelationship.secondPersonId = personVersion.personId)');
+        $loader->addWhereElement('secondPerson.version = (
+            SELECT
+                MAX(version)
+            FROM
+                person AS personVersion
+            WHERE personRelationship.secondPersonId = personVersion.personId)');
 
         $response = $loader->load();
-        return $response;
-    }
-
-
-    public function getRelationships(\stdClass $args): edit\Rpc\ResponseCombo {
-
-        // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
-            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
-        }
-
-        $relationships = edit\person\Person::getRelationships($this->app, $args);
-
-        $response = new edit\Rpc\ResponseCombo();
-        $response->addRows($relationships);
+        $response->addRows(edit\relationship\Relationship::getReverseRelationshipGridData($this->app, $personId, $version));
         return $response;
     }
 
@@ -452,6 +472,12 @@ class Facade {
             $version = (int)$save->getVersion();
             unset ($save);
 
+            if ($formPacket['proficiency']) {
+                $saveProfeciency = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personProficiency');
+                $saveProfeciency->save($formPacket);
+                unset ($saveProfeciency);
+            }
+
             // Quellen speichern wenn vorhaden
             if ($formPacket['sources']) {
                 $formPacket['personId'] = $personId;
@@ -492,13 +518,30 @@ class Facade {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 
+            if ($formPacket['personRelationshipId']) {
+                $formPacket['oldVal_personRelationshipId'] = $formPacket['personRelationshipId'];
+            }
+
+            if ($formPacket['version']) {
+                $formPacket['oldVal_version'] = $formPacket['version'];
+            }
+
             $save = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personRelationship');
             $save->save($formPacket);
-            $personId = (int)$save->getPrimaryKey()->value;
+            $personRelationshipId = (int)$save->getPrimaryKey()->value;
             unset ($save);
 
+            // Quellen speichern wenn vorhaden
+            if ($formPacket['sources']) {
+                $formPacket['id'] = $personRelationshipId;
+                $category = edit\app\App::getCategoryByName($this->app, 'person');
+                $saveSource = new edit\SaveSource($this->app, $category, 'personRelationship');
+                $saveSource->save($formPacket);
+                unset($saveSource);
+            }
+
             $response = new edit\Rpc\ResponseDefault();
-            $response->id = $personId;
+            $response->id = $personRelationshipId;
             return $response;
 
         } catch (\Throwable $e) {

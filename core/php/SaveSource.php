@@ -18,22 +18,29 @@ class SaveSource{
      */
     private $app;
     /**
-     * @var string
+     * @var array
      */
     private $category;
     /**
      * @var string
      */
-    private $userId;
+    private $assignTableName;
 
 
     // -------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------
-    public function __construct(edit\App $app, array $category) {
+
+    /**
+     *
+     * @param \biwi\edit\App $app
+     * @param array $category
+     * @param string|null $assignTableName  // Zuweisungstabellenname für eine eindeutige Identifizierung des Quellenfeldes
+     */
+    public function __construct(edit\App $app, array $category, ?string $assignTableName = null) {
         $this->app = $app;
         $this->category = $category;
-        $this->userId = $userId;
+        $this->assignTableName = $assignTableName;
     }
 
 
@@ -122,7 +129,7 @@ class SaveSource{
         if ($formPacket['sourceId']) {
             $formPacket['oldVal_sourceId'] = $formPacket['sourceId'];
         } else {
-            $formPacket['sourceId'] = edit\source\Source::getSourceId($field, $formPacket['id'], $this->category);
+            $formPacket['sourceId'] = edit\source\Source::getSourceId($field, $formPacket['id'], $this->category, $this->assignTableName);
         }
 
         // Einträge speichern

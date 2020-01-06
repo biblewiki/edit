@@ -44,7 +44,6 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
     _populateFormPanel(formPanel) {
 
         formPanel.on('afterLoad', this._onAfterFormLoad, this);
-        //formPanel.on('add', this._onAfterAdd, this);
 
         // Felder hinzufügen
         formPanel.add(
@@ -164,67 +163,152 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                             }
                         ]
                     },{
+                        xtype: 'kijs.gui.Container',
+                        cls: 'biwi-form-row',
+                        defaults: {
+                            width: 800,
+                            labelWidth: 120,
+                            style: {marginBottom: '4px'}
+                        },
+                        elements: [
+                            {
+                                xtype: 'kijs.gui.field.Combo',
+                                name: 'proficiency',
+                                label: this._app.getText('Beruf'),
+                                remoteSort: true,
+                                forceSelection: false,
+                                rpc: this._app.rpc,
+                                facadeFnLoad: 'person.getPersonProficiency',
+                                minChars: 1,
+                                elements: [
+                                    {
+                                        xtype: 'kijs.gui.Button',
+                                        iconChar: '&#xf039',
+                                        toolTip: this._app.getText('Quelle'),
+                                        on: {
+                                            click: this._onSourceClick,
+                                            context: this
+                                        }
+                                    }
+                                ]
+                            },{
+                                xtype: 'kijs.gui.field.Text',
+                                label: this._app.getText('Beschreibung'),
+                                name: 'personGroup',
+                                elements: [
+                                    {
+                                        xtype: 'kijs.gui.Button',
+                                        iconChar: '&#xf039',
+                                        toolTip: this._app.getText('Quelle'),
+                                        on: {
+                                            click: this._onSourceClick,
+                                            context: this
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },{
+                        xtype: 'kijs.gui.Container',
+                        cls: 'biwi-form-row',
+                        defaults: {
+                            width: 800,
+                            labelWidth: 120,
+                            style: {marginBottom: '4px'}
+                        },
+                        elements: [
+                            {
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'dayBirth',
+                                label: this._app.getText('Geburt Tag'),
+                                minValue: 1,
+                                maxValue: 31
+                            },{
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'monthBirth',
+                                label: this._app.getText('Monat'),
+                                minValue: 1,
+                                maxValue: 12
+                            },{
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'yearBirth',
+                                label: this._app.getText('Jahr')
+                            },{
+                                xtype: 'kijs.gui.field.Checkbox',
+                                name: 'beforeChristBirth',
+                                label: this._app.getText('vor Christus'),
+                                elements: [
+                                    {
+                                        xtype: 'kijs.gui.Button',
+                                        iconChar: '&#xf039',
+                                        toolTip: this._app.getText('Quelle'),
+                                        on: {
+                                            click: this._onSourceClick,
+                                            context: this
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },{
+                        xtype: 'kijs.gui.Container',
+                        cls: 'biwi-form-row',
+                        defaults: {
+                            width: 800,
+                            labelWidth: 120,
+                            style: {marginBottom: '4px'}
+                        },
+                        elements: [{
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'dayDeath',
+                                label: this._app.getText('Tod Tag'),
+                                minValue: 1,
+                                maxValue: 31
+                            },{
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'monthDeath',
+                                label: this._app.getText('Monat'),
+                                minValue: 1,
+                                maxValue: 12
+                            },{
+                                xtype: 'kijs.gui.field.Number',
+                                name: 'yearDeath',
+                                label: this._app.getText('Jahr')
+                            },{
+                                xtype: 'kijs.gui.field.Checkbox',
+                                name: 'beforeChristDeath',
+                                label: this._app.getText('vor Christus'),
+                                elements: [
+                                    {
+                                        xtype: 'kijs.gui.Button',
+                                        iconChar: '&#xf039',
+                                        toolTip: this._app.getText('Quelle'),
+                                        on: {
+                                            click: this._onSourceClick,
+                                            context: this
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },{
                         xtype: 'biwi.person.RelationshipGridPanel',
                         name: 'relationshipGrid',
                         personId: this._id,
-                        version: this._version,
-                        on: {
-                            afterRender: this._onAfterRender,
-                            context: this
-                        }
+                        version: this._version
                     }
                 ]
             }
         );
     }
 
-    _createHeaderElements() {
-        return [
-            {
-                xtype: 'kijs.gui.Button',
-                name: 'add',
-                caption: this._app.getText('Neu'),
-                iconChar: '&#xf055',
-                on: {
-                    click: this._onAddClick,
-                    context: this
-                }
-            },{
-                xtype: 'kijs.gui.Button',
-                caption: this._app.getText('Löschen'),
-                iconChar: '&#xf1f8',
-                on: {
-                    click: this._onDeleteClick,
-                    context: this
-                }
-            }
-        ];
-    }
 
     // Events
     _onAfterFormLoad() {
-        //this.down('relationshipGrid').reload(this._id, this._version);
+        this.down('relationshipGrid').personId = this._id;
+        this.down('relationshipGrid').version = this._version;
+        this.down('relationshipGrid').reload();
     }
-
-    _onAfterAdd(e) {
-        //console.log(this._id);
-//        e.element.grid.facadeFnArgs = {
-//            personId: this._id,
-//            version: this._version
-//        };
-        //this.down('relationshipGrid').version = this._version;
-    }
-
-    _onAfterRender(e) {
-
-//        e.element.grid.facadeFnArgs = {
-//            personId: this._id,
-//            version: this._version
-//        };
-        console.log(e.element.grid.facadeFnArgs);
-        //this.down('relationshipGrid').reload(this._id, this._version);
-    }
-
 
 
     // --------------------------------------------------------------

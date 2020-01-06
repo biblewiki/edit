@@ -1,18 +1,17 @@
 <?php
 declare(strict_types = 1);
 
-namespace biwi\edit\message;
+namespace biwi\edit\relationship;
 
 /**
  * Class Config
  *
- * @package biwi\edit\message
+ * @package biwi\edit\relationship
  */
 class Config {
     public $cssFiles = [];
     public $jsFiles = [
-        'message/Message.js',
-        'message/MessageContainer.js',
+        'relationship/Relationship.js'
     ];
     public $isAutoLoadJavaScriptModule = false;
 }

@@ -122,7 +122,7 @@ class SqlSelector {
 
                         default:
                             if (is_numeric($value)) {
-                                $value = (float)$value;
+                                $value = (int)$value;
 
                             // Datum: 2018-01-01 10:22:111
                             } else if (preg_match('/^\d{4}\-\d{2}\-\d{2}(?: \d{2}\:\d{2}(?:\:\d{2}){0,1}){0,1}$/u', $value)) {

@@ -80,20 +80,14 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
     // MEMBERS
     // --------------------------------------------------------------
 
-    reload(personId, version) { console.log('reload');
-        this._personId = personId;
-        this._version = version;
-
-        this.grid.facadeFnArgs = {
-            personId: personId,
-            version: version
-        };
-        console.log(this.grid.facadeFnArgs);
+    reload() {
+        this.grid.facadeFnArgs = { personId: this._personId };
         this.grid.reload();
     }
 
     /**
      * Erstellt die Elemente
+     *
      * @returns {Array}
      */
     _createElements() {
@@ -103,28 +97,28 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
                 selectType: 'multi',
                 name: 'grid',
                 facadeFnLoad: 'person.getRelationshipGrid',
-                facadeFnArgs: { personId: this._personId },
+                autoLoad: false,
                 rpc: this._app.rpc,
                 style: {
                     borderLeft: '1px solid #d2d2d2',
                     borderRight: '1px solid #d2d2d2',
                     borderBottom: '1px solid #d2d2d2',
                     minHeight: '100px'
+                },
+                on: {
+                    rowDblClick: this._onRowDoubleClick,
+                    context: this
                 }
             }
         ];
     }
 
-    _onAddClick() {
+    _showAddWindow(data) {
         if (this._personId) {
             let win = new biwi.person.RelationshipWindow({
                 personId: this._personId,
-                dataRow: {
-                    personId: this._personId,
-                    version: this._version
-                }
+                dataRow: data
             });
-            win.on('save', this._onRelationshipSave, this);
             win.show();
         } else {
             kijs.gui.MsgBox.alert(
@@ -134,24 +128,27 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
         }
     }
 
+    // Events
+    _onAddClick() {
+        let data = {
+            personId: this._personId,
+            version: this._version
+        };
+        this._showAddWindow(data);
+    }
+
+
     _onDeleteClick() {
-        this._app.rpc.do('person.deleteRelationship', { selection: this.down('grid').getSelectedIds() }, function() {
-            // grid neu laden
-            //this.down('grid').reload();
+        this._app.rpc.do('relationship.deleteRelationship', { selection: this.down('grid').getSelectedIds() }, function() {
+
+            // Grid neu laden
+            this.down('grid').reload();
         }, this);
     }
 
-    _onRelationshipSave(e) {
-        this._app.rpc.do('person.saveRelationship', {formData: e.dataRow}, function(response) {
-
-            // Fenster schliessen
-            e.element.close();
-
-            // grid neu laden
-            //this.down('grid').reload();
-        }, this);
+    _onRowDoubleClick() {
+        this._showAddWindow(this.down('grid').current.dataRow);
     }
-
 
     // --------------------------------------------------------------
     // DESTRUCTOR

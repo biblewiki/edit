@@ -13410,6 +13410,7 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
         this._focusable = true;       // ob das grid focusiert weden kann
         this._editable = false;       // editierbare zeilen?
         this._filterable = false;
+        this._autoLoad = true;
 
         // Intersection Observer (endless grid loader)
         this._intersectionObserver = null;
@@ -13468,6 +13469,7 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
             facadeFnSave        : true,
             facadeFnArgs        : true,
             facadeFnBeforeMsgFn : true,
+            autoLoad: true,
 
             columnConfigs:  { fn: 'function', target: this.columnConfigAdd, context: this },
             primaryKeys:    { target: 'primaryKeys' },
@@ -14518,7 +14520,9 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
         }
 
         // Daten laden
-        this._remoteLoad();
+        if (this._autoLoad) {
+            this._remoteLoad();
+        }
     }
 
     // overwrite
@@ -21940,6 +21944,20 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
         for (let i=0; i<this._fields.length; i++) {
             this._fields[i].isDirty = !!val;
         }
+    }
+
+    get isEmpty() {
+        let empty = true;
+        kijs.Array.each(this.fields, function(element) {
+            if (element instanceof kijs.gui.field.Field) {
+                if (!kijs.isEmpty(element.value)){
+                    empty = false;
+                    return;
+                }
+            }
+        }, this);
+
+        return empty;
     }
 
     get readOnly(){

@@ -259,27 +259,39 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
         // Bibel Quellen auslesen
         kijs.Array.each(this.down('bibleSources').elements, function(formPanel, i) {
-            if(!formPanel.validate()) {
+
+            // Wenn Formular nicht leer ist und es nicht valid ist
+            if (!formPanel.isEmpty && !formPanel.validate()) {
                 error = true;
-            } else {
+
+            // Wenn eine ID übergeben wurde oder das Formular nicht leer ist, Daten in Array schreiben
+            } else if (formPanel.data.bibleSourceId || !formPanel.isEmpty) {
                 bibleSources[i] = formPanel.data;
             }
         }, this);
 
         // Webseiten Quellen auslesen
         kijs.Array.each(this.down('webSources').elements, function(formPanel, i) {
-            if(!formPanel.validate()) {
+
+            // Wenn Formular nicht leer ist und es nicht valid ist
+            if (!formPanel.isEmpty && !formPanel.validate()) {
                 error = true;
-            } else {
+
+            // Wenn eine ID übergeben wurde oder das Formular nicht leer ist, Daten in Array schreiben
+            } else if (formPanel.data.webSourceId || !formPanel.isEmpty) {
                webSources[i]= formPanel.data;
             }
         }, this);
 
         // Andere Quellen auslesen
         kijs.Array.each(this.down('otherSources').elements, function(formPanel, i) {
-            if(!formPanel.validate()) {
+
+            // Wenn Formular nicht leer ist und es nicht valid ist
+            if (!formPanel.isEmpty && !formPanel.validate()) {
                 error = true;
-            } else {
+
+            // Wenn eine ID übergeben wurde oder das Formular nicht leer ist, Daten in Array schreiben
+            } else if (formPanel.data.otherSourceId || !formPanel.isEmpty) {
                 otherSources[i] = formPanel.data;
             }
         }, this);
