@@ -12,12 +12,6 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
     constructor(config={}) {
         super(false);
 
-        this._app = new biwi.app.App();
-        this._personId = null;
-        this._formFnLoad = null;
-        this._formFnSave = 'person.saveRelationship';
-        this._dataRow = null;
-
         // Config generieren
         Object.assign(this._defaultConfig, {
             caption: this._app.getText('Neue Beziehung hinzufügen'),
@@ -26,8 +20,7 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
 
         // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            personId: true,
-            dataRow: true
+            // keine
         });
 
         // Config anwenden
@@ -35,6 +28,9 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
             config = Object.assign({}, this._defaultConfig, config);
             this.applyConfig(config, true);
         }
+
+        // FacadeFnSave zuweisen
+        this.form.facadeFnSave = 'person.saveRelationship';
 
         // Formular mit Daten füllen
         if (this._dataRow) {
@@ -70,7 +66,7 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
                     autoLoad: true,
                     facadeFnLoad: 'person.getForCombo',
                     facadeFnArgs: {
-                        personId: this._personId,
+                        personId: this._id,
                         onlyOthers: true
                     },
                     on: {

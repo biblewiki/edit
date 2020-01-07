@@ -169,7 +169,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     _createDetailPanel() {
         return this._detailPanel = new kijs.gui.Panel({
             caption: this._detailCaption,
-            width: 700,
+            width: 500,
             cls: ['kijs-flexcolumn', 'biwi-detail-panel'],
             elements: [
                 {
@@ -203,10 +203,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
             rpc: this._app.rpc,
             facadeFnLoad: this._formFnLoad,
             facadeFnSave: this._formFnSave,
-            style: {
-                flex: 1,
-                minWidth: '40px'
-            }
+            cls: 'biwi-default-from-panel'
         });
 
         // FormPanel mit Elementen füllen

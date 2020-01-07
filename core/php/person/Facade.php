@@ -26,6 +26,117 @@ class Facade {
         $this->app = $app;
     }
 
+
+    /**
+     * Personengrupp (en) löschen
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     * @throws \Throwable
+     * @throws edit\ExceptionNotice
+     * @throws edit\Rpc\Warning
+     */
+        public function deleteGroup(\stdClass $args): edit\Rpc\ResponseDefault {
+        try {
+            $ids = \property_exists($args, 'selection') ? $args->selection : [];
+
+            // Rechte überprüfen
+            if (!$this->app->getLoggedInUserType()) {
+                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            }
+
+            if (!$ids) {
+                throw new edit\ExceptionNotice($this->app->getText('Es wurde kein Datensatz ausgewählt.'));
+            }
+
+            if (!$this->app->isIgnoreWarnings()) {
+                throw new edit\Rpc\Warning($this->app->getText('Möchten Sie die ausgewählten Datensätze wirklich löschen?'), $this->app->getText('Löschen') . '?');
+            }
+
+            // Transaktion starten
+            $this->app->getDb()->beginTransaction();
+
+            // sql
+            $st = $this->app->getDb()->prepare('DELETE FROM personGroup WHERE personGroupId = :personGroupId');
+
+            foreach ($ids as $id) {
+                $st->bindValue(':personGroupId', $id, \PDO::PARAM_INT);
+                $st->execute();
+            }
+            unset ($st);
+
+            // Transaktion beenden
+            $this->app->getDb()->commit();
+
+            $response = new edit\Rpc\ResponseDefault();
+            $response->return = $ids;
+            return $response;
+
+        } catch (\Throwable $e) {
+
+            // Rollback
+            $this->app->getDb()->rollBackIfTransaction();
+
+            throw $e;
+        }
+    }
+
+
+    /**
+     * Beziehung(en) löschen
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     * @throws \Throwable
+     * @throws edit\ExceptionNotice
+     * @throws edit\Rpc\Warning
+     */
+        public function deleteRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
+        try {
+            $ids = \property_exists($args, 'selection') ? $args->selection : [];
+
+            // Rechte überprüfen
+            if (!$this->app->getLoggedInUserType()) {
+                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+            }
+
+            if (!$ids) {
+                throw new edit\ExceptionNotice($this->app->getText('Es wurde kein Datensatz ausgewählt.'));
+            }
+
+            if (!$this->app->isIgnoreWarnings()) {
+                throw new edit\Rpc\Warning($this->app->getText('Möchten Sie die ausgewählten Datensätze wirklich löschen?'), $this->app->getText('Löschen') . '?');
+            }
+
+            // Transaktion starten
+            $this->app->getDb()->beginTransaction();
+
+            // sql
+            $st = $this->app->getDb()->prepare('DELETE FROM personRelationship WHERE personRelationshipId = :personRelationshipId');
+
+            foreach ($ids as $id) {
+                $st->bindValue(':personRelationshipId', $id, \PDO::PARAM_INT);
+                $st->execute();
+            }
+            unset ($st);
+
+            // Transaktion beenden
+            $this->app->getDb()->commit();
+
+            $response = new edit\Rpc\ResponseDefault();
+            $response->return = $ids;
+            return $response;
+
+        } catch (\Throwable $e) {
+
+            // Rollback
+            $this->app->getDb()->rollBackIfTransaction();
+
+            throw $e;
+        }
+    }
+
+
     /**
      * Details von ID aus DB holen
      *
@@ -262,6 +373,87 @@ class Facade {
 
         $response = new edit\Rpc\ResponseCombo();
         $response->addRows($persons);
+        return $response;
+    }
+
+
+    /**
+     * Gibt das Personengruppen Grid zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseGrid
+     * @throws edit\ExceptionNotice
+     */
+    public function getGroupGrid(\stdClass $args): edit\Rpc\ResponseGrid {
+
+        $personId = null;
+        $version = null;
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // ID auslesen wenn vorhanden
+        if (property_exists($args, 'personId') && $args->personId) {
+            $personId = $args->personId;
+        }
+
+        // Version auslesen wenn vorhanden
+        if (property_exists($args, 'version') && $args->version) {
+            $version = $args->version;
+        }
+
+        $loader = new edit\GridLoader($this->app, $args, 'personGroup');
+
+        // Primary Key
+        $loader->addPrimaryColumn('personGroup.personGroupId', $this->app->getText('Beziehungs') . ' ' . $this->app->getText('ID'));
+
+        $loader->addColumn($this->app->getText('Person') . ' ' . $this->app->getText('ID'), 'personGroup.personId', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Version'), 'personGroup.version', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Gruppe') . ' ' . $this->app->getText('ID'), 'personGroup.groupId', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Gruppe'), 'group.name');
+
+        // Person auslesen
+        $loader->addFromElement('INNER JOIN person AS secondPerson ON personRelationship.secondPersonId = secondPerson.personId');
+
+        // Bezeihung auslesen
+        $loader->addFromElement('INNER JOIN group ON personGroup.groupId = group.groupId');
+
+
+        // Wenn eine Person übergeben wurde, nur die Beziehungen für diese Person laden
+        if ($personId) {
+            $loader->addWhereElement('personRelationship.personId = :personId');
+            $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+            $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+        }
+
+        // Wenn eine Version übergeben wurde, diese laden
+        if ($version) {
+            $loader->addWhereElement('personRelationship.version = :version');
+            $loader->getQueryBuilderForSelect()->addParam(':version', $version, \PDO::PARAM_INT);
+            $loader->getCntQueryBuilderForSelect()->addParam(':version', $version, \PDO::PARAM_INT);
+
+        // Die neuste Version laden
+        } else {
+            $loader->addWhereElement('personRelationship.version = (
+            SELECT
+                MAX(version)
+            FROM
+                personRelationship AS personRelationshipVersion
+            WHERE personRelationship.personId = personRelationshipVersion.personId)');
+        }
+
+        // Nur die letzte Version laden
+        $loader->addWhereElement('secondPerson.version = (
+            SELECT
+                MAX(version)
+            FROM
+                person AS personVersion
+            WHERE personRelationship.secondPersonId = personVersion.personId)');
+
+        $response = $loader->load();
+        $response->addRows(edit\relationship\Relationship::getReverseRelationshipGridData($this->app, $personId, $version));
         return $response;
     }
 

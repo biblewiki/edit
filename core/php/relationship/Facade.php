@@ -58,10 +58,10 @@ class Facade {
             $this->app->getDb()->beginTransaction();
 
             // sql
-            $st = $this->app->getDb()->prepare('DELETE FROM personRelationship WHERE personRelationshipId = :personRelationshipId');
+            $st = $this->app->getDb()->prepare('DELETE FROM relationship WHERE relationshipId = :relationshipId');
 
             foreach ($ids as $id) {
-                $st->bindValue(':personRelationshipId', $id, \PDO::PARAM_INT);
+                $st->bindValue(':relationshipId', $id, \PDO::PARAM_INT);
                 $st->execute();
             }
             unset ($st);

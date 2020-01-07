@@ -1,11 +1,11 @@
 /* global kijs, biwi */
 
 // --------------------------------------------------------------
-// biwi.person.RelationshipGridPanel
+// biwi.person.GroupGridPanel
 // --------------------------------------------------------------
 kijs.createNamespace('biwi.person');
 
-biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel extends kijs.gui.Panel {
+biwi.person.GroupGridPanel = class biwi_person_GroupGridPanel extends kijs.gui.Panel {
 
     // --------------------------------------------------------------
     // CONSTRUCTOR
@@ -19,8 +19,8 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
 
         // Config generieren
         Object.assign(this._defaultConfig, {
-            caption: this._app.getText('Beziehungen'),
-            iconChar: '&#xf0c1',
+            caption: this._app.getText('Personengruppen'),
+            iconChar: '&#xf0c0',
             style: {
                 flex: 1
 
@@ -29,7 +29,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
                 {
                     xtype: 'kijs.gui.Button',
                     caption: this._app.getText('Neu'),
-                    toolTip: this._app.getText('Neue Beziehung hinzufügen'),
+                    toolTip: this._app.getText('Neue Gruppe hinzufügen'),
                     iconChar: '&#xf055',
                     on: {
                         click: this._onAddClick,
@@ -38,7 +38,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
                 },{
                     xtype: 'kijs.gui.Button',
                     caption: this._app.getText('Löschen'),
-                    toolTip: this._app.getText('Beziehung löschen'),
+                    toolTip: this._app.getText('Gruppe löschen'),
                     iconChar: '&#xf1f8',
                     on: {
                         click: this._onDeleteClick,
@@ -94,7 +94,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
                 xtype: 'kijs.gui.grid.Grid',
                 selectType: 'multi',
                 name: 'grid',
-                facadeFnLoad: 'person.getRelationshipGrid',
+                facadeFnLoad: 'person.getGroupGrid',
                 autoLoad: false,
                 rpc: this._app.rpc,
                 style: {
@@ -113,7 +113,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
 
     _showAddWindow(data) {
         if (this._personId) {
-            let win = new biwi.person.RelationshipWindow({
+            let win = new biwi.person.GroupWindow({
                 id: this._personId,
                 dataRow: data
             });
@@ -122,7 +122,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
         } else {
             kijs.gui.MsgBox.alert(
                 this._app.getText('Fehler'),
-                this._app.getText('Person muss gespeichert werden um Beziehungen hinzuzufügen.')
+                this._app.getText('Person muss gespeichert werden um Gruppen hinzuzufügen.')
             );
         }
     }
@@ -136,8 +136,9 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
         this._showAddWindow(data);
     }
 
+
     _onDeleteClick() {
-        this._app.rpc.do('person.deleteRelationship', { selection: this.down('grid').getSelectedIds() }, function() {
+        this._app.rpc.do('person.deletePersonGroup', { selection: this.down('grid').getSelectedIds() }, function() {
 
             // Grid neu laden
             this.down('grid').reload();

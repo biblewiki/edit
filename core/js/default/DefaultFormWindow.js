@@ -19,6 +19,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._formFnLoad = null;
         this._formFnSave = null;
         this._sourceFnLoad = null;
+        this._dataRow = null;
 
         this._id = null;
         this._version = null;
@@ -62,7 +63,10 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         Object.assign(this._configMap, {
             formFnLoad   : true,
             formFnSave   : true,
-            sourceFnLoad: true
+            sourceFnLoad: true,
+            dataRow: true,
+            id: true,
+            version: true
         });
 
         // Config anwenden
@@ -99,7 +103,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         }
 
         let params = kijs.Object.clone(this._formRemoteParams);
-        params.selection = this._selection;
 
         if (this.form.facadeFnLoad) {
             this.form.load(params, true, true);
@@ -114,6 +117,9 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     saveData(force=false) {
         if (force || this.form.isDirty) {
             this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
+
+                // Event werfen
+                this.raiseEvent('afterSave');
 
                 // Fenster Schliessen
                 this.close();
@@ -322,17 +328,11 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
-        this._detailPanel = null;
         this._formPanel = null;
-        this._selection = null;
         this._apertureMask = null;
 
         this._formFnLoad = null;
         this._formFnSave = null;
-        this._sourceFnSave = null;
-        this._detailFnLoad = null;
-        this._formCaption = null;
-        this._detailCaption = null;
 
         this._id = null;
         this._version = null;

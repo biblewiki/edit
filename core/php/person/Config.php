@@ -14,7 +14,9 @@ class Config {
             'person/Overview.js',
             'person/Person.js',
             'person/RelationshipGridPanel.js',
-            'person/RelationshipWindow.js'
+            'person/GroupGridPanel.js',
+            'person/RelationshipWindow.js',
+            'person/GroupWindow.js'
         ];
     public $isAutoLoadJavaScriptModule = false;
 }

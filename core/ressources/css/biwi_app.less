@@ -199,9 +199,29 @@ span.biwi-logo-header {
    * Formular
    ****************** */
 
+.biwi-default-from-panel {
+    flex: 1;
+    min-width: 50%;
+    
+    > .kijs-container-inner {
+        padding: 10px;
+        overflow-y: auto;
+    }
+}
+
 .biwi-form-row {
     > .kijs-container-inner {
         display: flex;
+    }
+    
+    .kijs-field {
+        flex: 1;
+        margin-right: 20px;
+        margin-bottom: 10px;
+        
+        .kijs-label {
+            width: 100px;
+        }
     }
 }
 
