@@ -258,7 +258,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                             version: this._version
                         },{
                             xtype: 'biwi.person.GroupGridPanel',
-                            name: 'relationshipGrid',
+                            name: 'groupGrid',
                             personId: this._id,
                             version: this._version
                         }
@@ -274,6 +274,10 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
         this.down('relationshipGrid').personId = this._id;
         this.down('relationshipGrid').version = this._version;
         this.down('relationshipGrid').reload();
+
+        this.down('groupGrid').personId = this._id;
+        this.down('groupGrid').version = this._version;
+        this.down('groupGrid').reload();
     }
 
 

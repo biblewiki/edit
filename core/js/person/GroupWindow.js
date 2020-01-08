@@ -15,7 +15,9 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
         // Config generieren
         Object.assign(this._defaultConfig, {
             caption: this._app.getText('Neue Personengruppe hinzufügen'),
-            iconChar: '&#xf0c1'
+            iconChar: '&#xf0c1',
+            sourceFnLoad: 'person.getSources',
+            sourceFnArgs: {assignTable: 'personGroup'}
         });
 
         // Mapping für die Zuweisung der Config-Eigenschaften
@@ -59,11 +61,22 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
                     xtype: 'kijs.gui.field.Combo',
                     name: 'groupId',
                     label: this._app.getText('Gruppe'),
-                    captionField: 'name',
-                    valueField: 'groupId',
+                    captionField: 'caption',
+                    valueField: 'value',
                     rpc: this._app.rpc,
                     autoLoad: true,
-                    facadeFnLoad: 'group.getForCombo'
+                    facadeFnLoad: 'group.getForCombo',
+                    elements: [
+                        {
+                            xtype: 'kijs.gui.Button',
+                            iconChar: '&#xf039',
+                            toolTip: this._app.getText('Quelle'),
+                            on: {
+                                click: this._onSourceClick,
+                                context: this
+                            }
+                        }
+                    ]
                 }
             ]
         );

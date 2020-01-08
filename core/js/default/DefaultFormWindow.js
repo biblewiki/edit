@@ -19,6 +19,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._formFnLoad = null;
         this._formFnSave = null;
         this._sourceFnLoad = null;
+        this._sourceFnArgs = null;
         this._dataRow = null;
 
         this._id = null;
@@ -64,6 +65,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             formFnLoad   : true,
             formFnSave   : true,
             sourceFnLoad: true,
+            sourceFnArgs: true,
             dataRow: true,
             id: true,
             version: true
@@ -96,19 +98,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     // MEMBERS
     // --------------------------------------------------------------
 
-    refreshPanel(args) {
-        if (kijs.isObject(args) && args.id) {
-            this._id = args.id;
-            this._version = args.version ? args.version : null;
-        }
-
-        let params = kijs.Object.clone(this._formRemoteParams);
-
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true);
-        }
-    }
-
     /**
      * Speichert das Formular
      * @param {boolean} [force=false] true: Auch speichern, wenn nicht dirty
@@ -116,7 +105,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
      */
     saveData(force=false) {
         if (force || this.form.isDirty) {
-            this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then((response) => {
+            this.form.save(false, kijs.Object.clone(this._formRemoteParams)).then(() => {
 
                 // Event werfen
                 this.raiseEvent('afterSave');
@@ -131,29 +120,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         }
     }
 
-    showPanel(args) {
-
-        // ID  und Version aus den Argumenten holen
-        if (kijs.isObject(args) && args.id) {
-            this._id = args.id;
-            this._version = args.version ? args.version : null;
-        }
-
-        // Tabelle erstellen
-        if (!this._formPanel) {
-            this.add(this._createElements());
-        }
-
-
-        let params = kijs.Object.clone(this._formRemoteParams);
-        params.id = this._id;
-        params.version = this._version;
-
-        // Formular laden
-        if (this.form.facadeFnLoad) {
-            this.form.load(params, true, true);
-        }
-    }
 
     // PROTECTED
     _createElements() {
@@ -186,6 +152,14 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     _getSources(fieldName) {
         return new Promise((resolve) => {
 
+            if (kijs.isEmpty(this._sourceFnLoad)) {
+                kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Es wurden keine Source Load Funktion angegeben.'));
+            }
+
+            if (kijs.isEmpty(this._sourceFnLoad) || kijs.isEmpty(this._sourceFnArgs.assignTable)) {
+                kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Es wurde keine assignTable in den sourceFnArgs angegeben.'));
+            }
+
             // Überprüfen, ob Objekt "sources" bereits existiert. Sonst wird es erstellt
             if (!this.form.data.sources) {
                 this.form.data.sources = {};
@@ -200,10 +174,11 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             } else if (this._id) {
 
                 // Argumente vorbereiten
-                let params = {};
-                params.id = this._id;
-                params.version = this._version;
-                params.field = fieldName;
+                let params = Object.assign(this._sourceFnArgs, {
+                    id: this._id,
+                    version: this._version,
+                    field: fieldName
+                });
 
                 // Objekt für Feldnamen im Datenpacket erstellen
                 this.form.data.sources[fieldName] = {};
@@ -333,6 +308,9 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
 
         this._formFnLoad = null;
         this._formFnSave = null;
+        this._sourceFnLoad = null;
+        this._sourceFnArgs = null;
+        this._dataRow = null;
 
         this._id = null;
         this._version = null;

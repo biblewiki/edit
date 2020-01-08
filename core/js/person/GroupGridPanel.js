@@ -115,6 +115,7 @@ biwi.person.GroupGridPanel = class biwi_person_GroupGridPanel extends kijs.gui.P
         if (this._personId) {
             let win = new biwi.person.GroupWindow({
                 id: this._personId,
+                version: this._version,
                 dataRow: data
             });
             win.on('afterSave', this.reload, this);

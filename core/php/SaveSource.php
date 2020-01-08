@@ -7,10 +7,7 @@ namespace biwi\edit;
 use biwi\edit;
 
 /**
- * Hilfsklasse zum Speichern der x_text Tabellen. Die Daten in unterschiedlichen
- * Sprachen müssen im formPacket mit _<code> vorhanden sein. Bsp:
- * (lieferantId => 1, name_de => suissetec, name_fr => suissetec, name_it => suissetec)
- * Die Klasse erstellt danach 3 Zeilen. Bestehende Rows werden überschrieben.
+ * Hilfsklasse zum Speichern der Sources. Hier werden alle verschiedenen Arten automatisch gespeichert
  */
 class SaveSource{
     /**
