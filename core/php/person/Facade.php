@@ -277,12 +277,13 @@ class Facade {
 
         $loader->addSort('name');
 
-        // Nur die letzte Versionen laden
+        // Nur die letzte Version laden
         $loader->addWhereElement('person.version = (SELECT
-            MAX(version)
-        FROM
-            person AS personVersion
-        WHERE person.personId = personVersion.personId)');
+                MAX(version)
+            FROM
+                person AS personVersion
+            WHERE person.personId = personVersion.personId)
+        ');
 
         return $loader->load();
     }
@@ -393,6 +394,70 @@ class Facade {
 
 
     /**
+     * Gibt Infos für einen neue Geruppe im Grid zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     * @throws edit\ExceptionNotice
+     */
+    public function getForGroupGrid(\stdClass $args): edit\Rpc\ResponseDefault {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // Überprüfen ob einen groupId übergeben wurde
+        if (!property_exists($args, 'groupId') || !$args->groupId) {
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
+        }
+
+        $return = new edit\Rpc\ResponseDefault();
+        $return->data = edit\group\Group::getGroup($this->app, $args->groupId);
+
+        return $return;
+    }
+
+
+    /**
+     * Gibt Infos für einen neue Beziehung im Grid zurück
+     *
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     * @throws edit\ExceptionNotice
+     */
+    public function getForRelationshipGrid(\stdClass $args): edit\Rpc\ResponseDefault {
+
+        // Rechte überprüfen
+        if (!$this->app->getLoggedInUserType()) {
+            throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
+        }
+
+        // Überprüfen ob einen personId übergeben wurde
+        if (!property_exists($args, 'personId') || !$args->personId) {
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
+        }
+
+        // Überprüfen ob einen relationshipId übergeben wurde
+        if (!property_exists($args, 'relationshipId') || !$args->relationshipId) {
+            throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
+        }
+
+        $personData = edit\person\Person::getPerson($this->app, $args->personId);
+        $relationshipData = edit\relationship\Relationship::getRelationship($this->app, $args->relationshipId);
+
+        $data['relationshipName'] = $relationshipData['name'];
+        $data['name'] = $personData['name'];
+        $data['description'] = $personData['description'];
+
+        $return = new edit\Rpc\ResponseDefault();
+        $return->data = $data;
+
+        return $return;
+    }
+
+
+    /**
      * Gibt das Personengruppen Grid zurück
      *
      * @param \stdClass $args
@@ -432,6 +497,9 @@ class Facade {
         // Gruppe auslesen
         $loader->addFromElement('INNER JOIN `group` ON personGroup.groupId = group.groupId');
 
+        // Nur Einträge mit 'normalem' Staus laden
+        $loader->addWhereElement('personGroup.`state` < 100');
+
         // Wenn eine Person übergeben wurde, nur die Gruppen für diese Person laden
         if ($personId) {
             $loader->addWhereElement('personGroup.personId = :personId');
@@ -439,20 +507,27 @@ class Facade {
             $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
         }
 
-        // Nur die letzte Version laden von Gruppe
-        $loader->addWhereElement('group.version = (
-        SELECT
-            MAX(version)
-        FROM
-            `group` AS groupVersion
-        WHERE group.groupId = groupVersion.groupId)');
+        // Nur die letzte Versionen laden
+        $loader->addWhereElement('personGroup.versionPerson = (SELECT
+                MAX(versionPerson)
+            FROM
+                personGroup AS personGroupVersion
+            WHERE personGroup.personGroupId = personGroupVersion.personGroupId)
+        ');
+
+        $loader->addWhereElement('personGroup.versionGroup = (SELECT
+                MAX(versionGroup)
+            FROM
+                personGroup AS personGroupVersion
+            WHERE personGroup.personGroupId = personGroupVersion.personGroupId)
+        ');
 
         $response = $loader->load();
         return $response;
     }
 
 
-     /**
+    /**
      * Gibt die schon vorhandenen Berufe aus der DB zurück
      *
      * @param \stdClass $args
@@ -550,6 +625,8 @@ class Facade {
         // Beziehung auslesen
         $loader->addFromElement('INNER JOIN relationship ON personRelationship.relationshipId = relationship.relationshipId');
 
+        // Nur Einträge mit 'normalem' Staus laden
+        $loader->addWhereElement('personRelationship.`state` < 100');
 
         // Wenn eine Person übergeben wurde, nur die Beziehungen für diese Person laden
         if ($personId) {
@@ -670,6 +747,16 @@ class Facade {
                 unset ($saveProfeciency);
             }
 
+            // Beziehungen speichern wenn vorhaden
+            if ($formPacket['relationships']) {
+                $saveRelationship = edit\person\Person::saveRelationship($this->app, $formPacket);
+            }
+
+            // Gruppen speichern wenn vorhaden
+            if ($formPacket['groups']) {
+                $saveRelationship = edit\person\Person::saveGroup($this->app, $formPacket);
+            }
+
             // Quellen speichern wenn vorhaden
             if ($formPacket['sources']) {
                 $formPacket['personId'] = $personId;
@@ -683,114 +770,6 @@ class Facade {
             $response = new edit\Rpc\ResponseDefault();
             $response->id = $personId;
             $response->version = $version;
-            return $response;
-
-        } catch (\Throwable $e) {
-
-            // Rollback
-            $this->app->getDb()->rollBackIfTransaction();
-
-            throw $e;
-        }
-    }
-
-
-    /**
-     * Speichert die Personen Gruppe
-     * @param \stdClass $args
-     * @return \biwi\edit\Rpc\ResponseDefault
-     * @throws \Throwable
-     * @throws edit\ExceptionNotice
-     */
-    public function savePersonGroup(\stdClass $args): edit\Rpc\ResponseDefault {
-        try {
-            $formPacket = (array)$args->formData;
-
-            // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType()) {
-                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
-            }
-
-            if ($formPacket['personGroupId']) {
-                $formPacket['oldVal_personGroupId'] = $formPacket['personGroupId'];
-            }
-
-            if ($formPacket['version']) {
-                $formPacket['versionPerson'] = $formPacket['version'];
-                $formPacket['oldVal_version'] = $formPacket['version'];
-            }
-
-            if ($formPacket['versionPerson']) {
-                $formPacket['version'] = $formPacket['versionPerson'];
-            }
-
-            $save = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personGroup');
-            $save->save($formPacket);
-            $personGroupId = (int)$save->getPrimaryKey()->value;
-            unset ($save);
-
-            // Quellen speichern wenn vorhaden
-            if ($formPacket['sources']) {
-                $formPacket['id'] = $personGroupId;
-                $category = edit\app\App::getCategoryByName($this->app, 'person');
-                $saveSource = new edit\SaveSource($this->app, $category, 'personGroup');
-                $saveSource->save($formPacket);
-                unset($saveSource);
-            }
-
-            $response = new edit\Rpc\ResponseDefault();
-            $response->id = $personGroupId;
-            return $response;
-
-        } catch (\Throwable $e) {
-
-            // Rollback
-            $this->app->getDb()->rollBackIfTransaction();
-
-            throw $e;
-        }
-    }
-
-
-    /**
-     * Speichert das Beziehungs-Formular
-     *
-     * @param \stdClass $args
-     * @return edit\Rpc\ResponseDefault
-     */
-    public function saveRelationship(\stdClass $args): edit\Rpc\ResponseDefault {
-        try {
-            $formPacket = (array)$args->formData;
-
-            // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType()) {
-                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
-            }
-
-            if ($formPacket['personRelationshipId']) {
-                $formPacket['oldVal_personRelationshipId'] = $formPacket['personRelationshipId'];
-            }
-
-            if ($formPacket['version']) {
-                $formPacket['oldVal_version'] = $formPacket['version'];
-            }
-
-            $save = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personRelationship');
-            $save->save($formPacket);
-            $personRelationshipId = (int)$save->getPrimaryKey()->value;
-            unset ($save);
-
-            // Quellen speichern wenn vorhaden
-            if ($formPacket['sources']) {
-                $formPacket['id'] = $personRelationshipId;
-                $category = edit\app\App::getCategoryByName($this->app, 'person');
-                $saveSource = new edit\SaveSource($this->app, $category, 'personRelationship');
-                $saveSource->save($formPacket);
-                unset($saveSource);
-            }
-
-            $response = new edit\Rpc\ResponseDefault();
-            $response->id = $personRelationshipId;
             return $response;
 
         } catch (\Throwable $e) {

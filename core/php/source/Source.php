@@ -20,7 +20,7 @@ class Source {
         $qryBld->addSelectElement('bibleSource.chapterId');
         $qryBld->addSelectElement('bibleSource.verseId');
 
-        $qryBld->addWhereElement('bibleSource.state = 10');
+        $qryBld->addWhereElement('bibleSource.state < 100');
         $qryBld->addWhereElement('bibleSource.sourceId = :sourceId');
         $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
 
@@ -74,7 +74,7 @@ class Source {
         $qryBld->addSelectElement('otherSource.rights');
         $qryBld->addSelectElement('otherSource.extra');
 
-        $qryBld->addWhereElement('otherSource.state = 10');
+        $qryBld->addWhereElement('otherSource.state < 100');
         $qryBld->addWhereElement('otherSource.sourceId = :sourceId');
         $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
 
@@ -137,7 +137,7 @@ class Source {
         $qryBld->addSelectElement('webSource.description');
         $qryBld->addSelectElement('webSource.url');
 
-        $qryBld->addWhereElement('webSource.state = 10');
+        $qryBld->addWhereElement('webSource.state < 100');
         $qryBld->addWhereElement('webSource.sourceId = :sourceId');
         $qryBld->addParam(':sourceId', $sourceId, \PDO::PARAM_STR);
 

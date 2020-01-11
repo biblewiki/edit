@@ -12,6 +12,31 @@ class Relationship {
 
 
     /**
+     * Gibt eine Beziehungsart zurück
+     *
+     * @param \biwi\edit\App $app
+     * @param int $relationshipId
+     * @return array
+     */
+    public static function getRelationship(edit\App $app, int $relationshipId): array {
+
+        // SQL
+        $qryBld = new edit\SqlSelector('relationship');
+        $qryBld->addSelectElement('relationship.relationshipId');
+        $qryBld->addSelectElement('relationship.name');
+
+        $qryBld->addWhereElement('relationship.relationshipId = :relationshipId');
+        $qryBld->addParam(':relationshipId', $relationshipId);
+
+
+        $row = $qryBld->execute($app->getDb(), false);
+        unset ($qryBld);
+
+        return $row;
+    }
+
+
+    /**
      * Gibt die Beziehungsarten zurück
      *
      * @param \biwi\edit\App $app

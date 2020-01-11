@@ -46,14 +46,17 @@ class SaveSource{
         // Alle Quellen durchgehen
         foreach ($formPacket['sources'] as $field => $sourceType) {
 
+            // Überprüfen ob Array sonst eins machen
+            if (!is_array($sourceType)) {$sourceType = json_decode(json_encode($sourceType), true);}
+
             // Wenn Bibelquellen verfügbar sind
-            if (property_exists($sourceType, 'bible') && $sourceType->bible) {
+            if ($sourceType['bible'] && count($sourceType['bible'])) {
 
                 // Transaktion starten
                 $this->app->getDb()->beginTransaction();
 
                 // Alle Einträge durchgehen
-                foreach ($sourceType->bible as $entry) {
+                foreach ($sourceType['bible'] as $entry) {
 
                     // stdClass in Array umwandeln
                     $entry = json_decode(json_encode($entry), true);
@@ -69,13 +72,13 @@ class SaveSource{
             }
 
             // Wenn Webquellen verfügbar sind
-            if (property_exists($sourceType, 'web') && $sourceType->web) {
+            if ($sourceType['web'] && count($sourceType['web'])) {
 
                 // Transaktion starten
                 $this->app->getDb()->beginTransaction();
 
                 // Alle Einträge durchgehen
-                foreach ($sourceType->web as $entry) {
+                foreach ($sourceType['web'] as $entry) {
 
                    // stdClass in Array umwandeln
                     $entry = json_decode(json_encode($entry), true);
@@ -91,13 +94,13 @@ class SaveSource{
             }
 
             // Wenn andere Quellen verfügbar sind
-            if (property_exists($sourceType, 'other') && $sourceType->other) {
+            if ($sourceType['other'] && count($sourceType['other'])) {
 
                 // Transaktion starten
                 $this->app->getDb()->beginTransaction();
 
                 // Alle Einträge durchgehen
-                foreach ($sourceType->other as $entry) {
+                foreach ($sourceType['other'] as $entry) {
 
                     // stdClass in Array umwandeln
                     $entry = json_decode(json_encode($entry), true);

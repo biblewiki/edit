@@ -47,7 +47,7 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
 
         // Felder hinzufügen
         formPanel.add(
-                [
+            [
                 {
                     xtype: 'kijs.gui.Container',
                     cls: 'biwi-form-row',
@@ -255,12 +255,20 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                             xtype: 'biwi.person.RelationshipGridPanel',
                             name: 'relationshipGrid',
                             personId: this._id,
-                            version: this._version
+                            version: this._version,
+                            on: {
+                                save: this._addToFormData,
+                                context: this
+                            }
                         },{
                             xtype: 'biwi.person.GroupGridPanel',
                             name: 'groupGrid',
                             personId: this._id,
-                            version: this._version
+                            version: this._version,
+                            on: {
+                                save: this._addToFormData,
+                                context: this
+                            }
                         }
                     ]
                 }

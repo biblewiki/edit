@@ -26,7 +26,7 @@ $biwi_config = [
         'names' => ['Animal', 'Bible', 'Dashboard', 'Group', 'Message', 'Person', 'Relationship', 'Setting', 'Source'],
         'prefix' => 'biwi',
         'DefaultCssFiles' => ['biwi_app.css'],
-        'DefaultJsFiles' => ['default/DefaultFormPanel.js', 'default/DefaultFormWindow.js', 'default/DefaultGridPanel.js', 'default/DefaultGridFormPanel.js']
+        'DefaultJsFiles' => ['default/DefaultFormPanel.js', 'default/DefaultFormWindow.js', 'default/DefaultGridField.js', 'default/DefaultGridPanel.js', 'default/DefaultGridFormPanel.js']
     ],
 
     // ------------------------------------------

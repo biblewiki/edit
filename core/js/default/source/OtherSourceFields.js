@@ -295,7 +295,7 @@ biwi.default.source.OtherSourceFields = class biwi_default_source_OtherSourceFie
         e.element.parent.parent.visible = false;
 
         // Element Status auf gelöscht setzen
-        e.element.parent.parent.data.state = 99;
+        e.element.parent.parent.data.state = 100;
     }
 
     // --------------------------------------------------------------

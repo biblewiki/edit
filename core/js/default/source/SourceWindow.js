@@ -35,9 +35,8 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                 {
                     xtype: 'kijs.gui.Button',
                     name: 'btnLogin',
-                    iconChar: '&#xf00c',
                     isDefault: true,
-                    caption: this._app.getText('Speichern'),
+                    caption: this._app.getText('Hinzufügen'),
                     on: {
                         click: this._onSaveClick,
                         context: this
@@ -298,14 +297,19 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
         if (!error) {
 
-            // Quellen in Array zusammenfügen
+            // Quellen in Objekt zusammenfügen
             sources.field = this._field;
             sources.values.bible = bibleSources;
             sources.values.web = webSources;
             sources.values.other = otherSources;
 
+            let ret = {
+                name: 'sources',
+                data: sources
+            };
+
             // Event werfen
-            this.raiseEvent('saveSource', sources);
+            this.raiseEvent('saveSource', ret);
 
             // Fenster schliessen
             this.close();

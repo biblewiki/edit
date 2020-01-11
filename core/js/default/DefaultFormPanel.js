@@ -296,13 +296,22 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
     }
 
-    _addSourceToFormData(sources) {
+    _addToFormData(e) {
 
-        // Formular Quellenarray hinzufügen
-        if (!this.form.data.sources) {
-            this.form.data.sources = {};
+        let name = e.name;
+        let data = e.data;
+
+        // Formular Array hinzufügen
+        if (!this.form.data[name]) {
+            this.form.data[name] = {};
         }
-        this.form.data.sources[sources.field] = sources.values;
+
+        if (data.field && data.values) {
+            this.form.data[name][data.field] = data.values;
+        } else {
+            let lenght = Object.keys(this.form.data[name]).length;
+            this.form.data[name][lenght] = data;
+        }
 
         // On Form Change Funktion aufrufen, da die Formulardaten geändert haben
         this._onFormChange();
@@ -363,7 +372,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
             );
             sourceWindow.show();
 
-            sourceWindow.on('saveSource', this._addSourceToFormData, this);
+            sourceWindow.on('saveSource', this._addToFormData, this);
         });
     }
 

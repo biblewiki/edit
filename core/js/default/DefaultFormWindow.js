@@ -40,7 +40,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             footerElements:[
                 {
                     xtype: 'kijs.gui.Button',
-                    caption: this._app.getText('Speichern'),
+                    caption: this._app.getText('Hinzufügen'),
                     isDefault: true,
                     on: {
                         click: this._onSaveClick,
@@ -76,9 +76,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             config = Object.assign({}, this._defaultConfig, config);
             this.applyConfig(config, true);
         }
-
-        // FormPanel erstellen
-        this.add(this._createElements());
     }
 
 
@@ -223,7 +220,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         if (!this.form.data.sources) {
             this.form.data.sources = {};
         }
-        this.form.data.sources[sources.field] = sources.values;
+        this.form.data.sources[sources.data.field] = sources.data.values;
 
         // Form is Dirty setzen, da die Formulardaten geändert haben
         this.form.isDirty = true;
@@ -259,11 +256,21 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     }
 
     _onSaveClick() {
-        if (!this.form.validate()) {
-            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
+
+        // Überprüfen ob das Formular valid ist
+        if (this._formPanel.validate()) {
+            let data = [];
+            data.values = this._formPanel.data;
+
+            // Event werfen mit den Daten
+            this.raiseEvent('save', data);
+
+            // Fenster schliessen
+            this.close();
+
+        // Fehler anzeigen
         } else {
-             // Speichern
-            this.saveData();
+            kijs.gui.MsgBox.alert(this._app.getText('Fehler'), this._app.getText('Es wurden noch nicht alle Felder korrekt ausgefüllt.'));
         }
     }
 

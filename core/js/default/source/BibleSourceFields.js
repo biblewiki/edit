@@ -161,7 +161,7 @@ biwi.default.source.BibleSourceFields = class biwi_default_source_BibleSourceFie
         e.element.parent.visible = false;
 
         // Element Status auf gelöscht setzen
-        e.element.parent.data.state = 99;
+        e.element.parent.data.state = 100;
     }
 
 

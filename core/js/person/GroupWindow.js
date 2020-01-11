@@ -31,6 +31,9 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
             this.applyConfig(config, true);
         }
 
+        // FormPanel erstellen
+        this.add(this._createElements());
+
         // FacadeFnSave zuweisen
         this.form.facadeFnSave = 'person.savePersonGroup';
 
@@ -82,11 +85,6 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
         );
     }
 
-    // Events
-
-    _onPersonChange(e) {
-
-    }
 
     // --------------------------------------------------------------
     // DESTRUCTOR

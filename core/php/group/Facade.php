@@ -48,7 +48,13 @@ class Facade {
         $loader = new edit\ComboLoader($this->app, $args, 'group');
         $loader->setCaptionSql('group.name');
         $loader->setValueSql('group.groupId', true);
-        $loader->setDistinct(true);
+
+        // Nur die letzte Version laden
+        $loader->getQueryBuilder()->addWhereElement('`group`.version = (SELECT
+                MAX(version)
+            FROM
+                `group` AS groupVersion
+            WHERE `group`.groupId = groupVersion.groupId)');
 
         return $loader->execute();
     }
