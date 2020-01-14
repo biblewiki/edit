@@ -324,6 +324,15 @@ class Facade {
             $qryBld->addSelectElement('person.sex');
             $qryBld->addSelectElement('person.believer');
             $qryBld->addSelectElement('personProficiency.proficiency');
+            $qryBld->addSelectElement('person.dayBirth');
+            $qryBld->addSelectElement('person.monthBirth');
+            $qryBld->addSelectElement('person.yearBirth');
+            $qryBld->addSelectElement('person.beforeChristBirth');
+            $qryBld->addSelectElement('person.dayDeath');
+            $qryBld->addSelectElement('person.monthDeath');
+            $qryBld->addSelectElement('person.yearDeath');
+            $qryBld->addSelectElement('person.beforeChristDeath');
+            $qryBld->addSelectElement('person.text');
 
             $qryBld->addFromElement('LEFT JOIN personProficiency ON personProficiency.personId = person.personId AND personProficiency.version = person.version');
 
@@ -356,6 +365,16 @@ class Facade {
             $row['description'] = null;
             $row['sex'] = null;
             $row['believer'] = null;
+            $row['dayBirth'] = null;
+            $row['monthBirth'] = null;
+            $row['yearBirth'] = null;
+            $row['beforeChristBirth'] = null;
+            $row['dayDeath'] = null;
+            $row['monthDeath'] = null;
+            $row['yearDeath'] = null;
+            $row['beforeChristDeath'] = null;
+            $row['proficiency'] = null;
+            $row['text'] = null;
         }
 
         // neuer Datensatz?
@@ -386,6 +405,11 @@ class Facade {
         }
 
         $persons = edit\person\Person::getPersons($this->app, $args);
+
+        // Name mit Beschreibung für Combo erstellen
+        foreach ($persons as &$person) {
+            $person['comboName'] = $person['name'] . ':  ' .$person['description'];
+        }
 
         $response = new edit\Rpc\ResponseCombo();
         $response->addRows($persons);
@@ -500,12 +524,10 @@ class Facade {
         // Nur Einträge mit 'normalem' Staus laden
         $loader->addWhereElement('personGroup.`state` < 100');
 
-        // Wenn eine Person übergeben wurde, nur die Gruppen für diese Person laden
-        if ($personId) {
-            $loader->addWhereElement('personGroup.personId = :personId');
-            $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
-            $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
-        }
+        // Nur die Gruppen für diese Person laden
+        $loader->addWhereElement('personGroup.personId = :personId');
+        $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+        $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
 
         // Nur die letzte Versionen laden
         $loader->addWhereElement('personGroup.versionPerson = (SELECT
@@ -523,6 +545,49 @@ class Facade {
         ');
 
         $response = $loader->load();
+        return $response;
+    }
+
+
+    /**
+     * Gibt die vorhandenen Namen aus der DB zurück
+     * @param \stdClass $args
+     * @return \biwi\edit\Rpc\ResponseDefault
+     */
+    public function getNames(\stdClass $args): edit\Rpc\ResponseDefault {
+        $names = [];
+
+        // ID auslesen wenn vorhanden
+        if (property_exists($args, 'personId') && $args->personId) {
+            $personId = $args->personId;
+        }
+
+        // Version auslesen wenn vorhanden
+        if (property_exists($args, 'version') && $args->version) {
+            $version = $args->version;
+        }
+
+        if ($personId) {
+            $sqlSelector = new edit\SqlSelector('personName');
+            $sqlSelector->addSelectElement('personName.personNameId');
+            $sqlSelector->addSelectElement('personName.name');
+            $sqlSelector->addSelectElement('personName.description');
+            $sqlSelector->addSelectElement('personName.visible');
+
+            $sqlSelector->addWhereElement('personName.personId = :personId');
+            $sqlSelector->addParam('personId', $personId);
+
+            if ($version) {
+                $sqlSelector->addWhereElement('personName.version = :version');
+                $sqlSelector->addParam('version', $version);
+            }
+            $names = $sqlSelector->execute($this->app->getDb());
+            unset($sqlSelector);
+        }
+
+        $response = new edit\Rpc\ResponseDefault();
+        $response->names = $names;
+
         return $response;
     }
 
@@ -628,12 +693,10 @@ class Facade {
         // Nur Einträge mit 'normalem' Staus laden
         $loader->addWhereElement('personRelationship.`state` < 100');
 
-        // Wenn eine Person übergeben wurde, nur die Beziehungen für diese Person laden
-        if ($personId) {
-            $loader->addWhereElement('personRelationship.personId = :personId');
-            $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
-            $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
-        }
+        // Nur die Beziehungen für diese Person laden
+        $loader->addWhereElement('personRelationship.personId = :personId');
+        $loader->getQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
+        $loader->getCntQueryBuilderForSelect()->addParam(':personId', $personId, \PDO::PARAM_INT);
 
         // Wenn eine Version übergeben wurde, diese laden
         if ($version) {
@@ -651,7 +714,7 @@ class Facade {
             WHERE personRelationship.personId = personRelationshipVersion.personId)');
         }
 
-        // Nur die letzte Version laden
+        // Nur die neuste Version der Person laden
         $loader->addWhereElement('secondPerson.version = (
             SELECT
                 MAX(version)
@@ -741,6 +804,9 @@ class Facade {
             $version = (int)$save->getVersion();
             unset ($save);
 
+            $formPacket['personId'] = $personId;
+            $formPacket['version'] = $version;
+
             if ($formPacket['proficiency']) {
                 $saveProfeciency = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personProficiency');
                 $saveProfeciency->save($formPacket);
@@ -754,14 +820,16 @@ class Facade {
 
             // Gruppen speichern wenn vorhaden
             if ($formPacket['groups']) {
-                $saveRelationship = edit\person\Person::saveGroup($this->app, $formPacket);
+                $saveGroups = edit\person\Person::saveGroup($this->app, $formPacket);
+            }
+
+            // Namen speichern
+            if ($formPacket['names']) {
+                $saveNames = edit\person\Person::saveNames($this->app, $formPacket);
             }
 
             // Quellen speichern wenn vorhaden
             if ($formPacket['sources']) {
-                $formPacket['personId'] = $personId;
-                $formPacket['version'] = $version;
-
                 $saveSource = new edit\SaveSource($this->app, $category);
                 $saveSource->save($formPacket);
                 unset($saveSource);

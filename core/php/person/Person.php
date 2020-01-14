@@ -75,6 +75,7 @@ class Person {
         $qryBld = new edit\SqlSelector('person');
         $qryBld->addSelectElement('person.personId');
         $qryBld->addSelectElement('person.name');
+        $qryBld->addSelectElement('person.description');
         $qryBld->addSelectElement('person.sex');
 
         if ($personId) {
@@ -111,7 +112,7 @@ class Person {
      * @param \stdClass $args
      * @return edit\Rpc\ResponseDefault
      */
-    public function saveGroup(edit\App $app, array $formPacket): edit\Rpc\ResponseDefault {
+    public static function saveGroup(edit\App $app, array $formPacket): edit\Rpc\ResponseDefault {
 
         foreach($formPacket['groups'] as $group) {
 
@@ -152,7 +153,48 @@ class Person {
      * @param \stdClass $args
      * @return edit\Rpc\ResponseDefault
      */
-    public function saveRelationship(edit\App $app, array $formPacket): edit\Rpc\ResponseDefault {
+    public static function saveNames(edit\App $app, array $formPacket): edit\Rpc\ResponseDefault {
+
+        foreach($formPacket['names'] as $name) {
+
+            // stdClass in Array umwandeln
+            $name = json_decode(json_encode($name), true);
+
+            // Personen ID und Version übernehmen
+            $name['personId'] = $formPacket['personId'];
+            $name['version'] = $formPacket['version'];
+
+            if ($name['personNameId']) {
+                $name['oldVal_personNameId'] = $name['personNameId'];
+            }
+
+            $save = new edit\SaveData($app, $app->getLoggedInUserId(), 'personName');
+            $save->save($name);
+            $nameId = (int)$save->getPrimaryKey()->value;
+            unset ($save);
+
+            // Quellen speichern wenn vorhaden
+            if ($name['sources']) {
+                $name['id'] = $nameId;
+                $category = edit\app\App::getCategoryByName($app, 'person');
+                $saveSource = new edit\SaveSource($app, $category, 'personName');
+                $saveSource->save($name);
+                unset($saveSource);
+            }
+        }
+
+        $response = new edit\Rpc\ResponseDefault();
+        return $response;
+    }
+
+
+    /**
+     * Speichert das Beziehungs-Formular
+     *
+     * @param \stdClass $args
+     * @return edit\Rpc\ResponseDefault
+     */
+    public static function saveRelationship(edit\App $app, array $formPacket): edit\Rpc\ResponseDefault {
 
         foreach($formPacket['relationships'] as $relationship) {
 

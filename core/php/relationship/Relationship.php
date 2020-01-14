@@ -95,11 +95,9 @@ class Relationship {
         $qryBld->addFromElement('INNER JOIN relationship AS returnRelationship ON (person.sex = 2 AND returnRelationship.relationshipId = relationship.returnWRelationshipId) '
                 . 'OR (person.sex <> 2 AND returnRelationship.relationshipId = relationship.returnMRelationshipId)');
 
-        // Wenn eine Person übergeben wurde, nur die Bezihungen von dieser Person laden
-        if ($personId) {
-            $qryBld->addWhereElement('personRelationship.secondPersonId = :personId');
-            $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
-        }
+        // Nur die Beziehungen von dieser Person laden
+        $qryBld->addWhereElement('personRelationship.secondPersonId = :personId');
+        $qryBld->addParam(':personId', $personId, \PDO::PARAM_INT);
 
         // Wenn eine Version mitgegeben wurde, diese laden
         if ($version) {

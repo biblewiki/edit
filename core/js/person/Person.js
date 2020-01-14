@@ -59,6 +59,14 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                             elements: [
                                 {
                                     xtype: 'kijs.gui.Button',
+                                    iconChar: '&#xf067',
+                                    toolTip: this._app.getText('Zusätzliche Namen hinzufügen'),
+                                    on: {
+                                        click: this._onAddNameClick,
+                                        context: this
+                                    }
+                                },{
+                                    xtype: 'kijs.gui.Button',
                                     iconChar: '&#xf039',
                                     toolTip: this._app.getText('Quelle'),
                                     on: {
@@ -162,21 +170,6 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                                     }
                                 }
                             ]
-                        },{
-                            xtype: 'kijs.gui.field.Text',
-                            label: this._app.getText('Beschreibung'),
-                            name: 'personGroup',
-                            elements: [
-                                {
-                                    xtype: 'kijs.gui.Button',
-                                    iconChar: '&#xf039',
-                                    toolTip: this._app.getText('Quelle'),
-                                    on: {
-                                        click: this._onSourceClick,
-                                        context: this
-                                    }
-                                }
-                            ]
                         }
                     ]
                 },{
@@ -252,6 +245,18 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                     cls: 'biwi-form-row',
                     elements: [
                         {
+                            xtype: 'kijs.gui.field.Memo',
+                            name: 'text',
+                            label: 'Fliesstext',
+                            trimValue: true,
+                            height: 200
+                        }
+                    ]
+                },{
+                    xtype: 'kijs.gui.Container',
+                    cls: 'biwi-form-row',
+                    elements: [
+                        {
                             xtype: 'biwi.person.RelationshipGridPanel',
                             name: 'relationshipGrid',
                             personId: this._id,
@@ -278,6 +283,18 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
 
 
     // Events
+    _onAddNameClick() {
+        let nameWindow = new biwi.person.NameWindow({
+            target: document.body,
+            id: this._id,
+            version: this._version,
+            names: this.form.data.names
+        });
+        nameWindow.show();
+
+        nameWindow.on('saveName', this._addToFormData, this);
+    }
+
     _onAfterFormLoad() {
         this.down('relationshipGrid').personId = this._id;
         this.down('relationshipGrid').version = this._version;

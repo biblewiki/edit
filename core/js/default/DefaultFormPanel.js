@@ -131,6 +131,9 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
         if (kijs.isObject(args) && args.id) {
             this._id = args.id;
             this._version = args.version ? args.version : null;
+        } else {
+            this._id = null;
+            this._version = null;
         }
 
         // Tabelle erstellen
@@ -308,6 +311,8 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
         if (data.field && data.values) {
             this.form.data[name][data.field] = data.values;
+        } else if (kijs.isArray(data)) {
+            this.form.data[name] = data;
         } else {
             let lenght = Object.keys(this.form.data[name]).length;
             this.form.data[name][lenght] = data;

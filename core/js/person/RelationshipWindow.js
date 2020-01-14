@@ -67,7 +67,7 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
                     xtype: 'kijs.gui.field.Combo',
                     name: 'secondPersonId',
                     label: this._app.getText('Bezugsperson'),
-                    captionField: 'name',
+                    captionField: 'comboName',
                     valueField: 'personId',
                     rpc: this._app.rpc,
                     autoLoad: true,

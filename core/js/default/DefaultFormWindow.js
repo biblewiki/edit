@@ -21,6 +21,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._sourceFnLoad = null;
         this._sourceFnArgs = null;
         this._dataRow = null;
+        this._activeFormPanel = null;
 
         this._id = null;
         this._version = null;
@@ -146,7 +147,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     }
 
     // Quellen vom Server holen
-    _getSources(fieldName) {
+    _getSources(fieldName, formPanel) {
         return new Promise((resolve) => {
 
             if (kijs.isEmpty(this._sourceFnLoad)) {
@@ -158,13 +159,13 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             }
 
             // Überprüfen, ob Objekt "sources" bereits existiert. Sonst wird es erstellt
-            if (!this.form.data.sources) {
-                this.form.data.sources = {};
+            if (!this._activeFormPanel.data.sources) {
+                this._activeFormPanel.data.sources = {};
             }
 
             // Wenn schon Daten für dieses Feld im Datenpacket vorhanden sind, werden diese zurückgegeben
-            if (this.form.data.sources[fieldName]) {
-                resolve(this.form.data.sources[fieldName]);
+            if (this._activeFormPanel.data.sources[fieldName]) {
+                resolve(this._activeFormPanel.data.sources[fieldName]);
 
             // Überprüfen ob eine ID vorhanden ist. Dies bedeutet, dass der Eintrag bereits in der DB ist.
             // Wenn ja, werden die Quellen vom Server geholt
@@ -178,23 +179,23 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
                 });
 
                 // Objekt für Feldnamen im Datenpacket erstellen
-                this.form.data.sources[fieldName] = {};
+                this._activeFormPanel.data.sources[fieldName] = {};
 
                 // Server Abfrage ausführen
                 this._app.rpc.do(this._sourceFnLoad, params, function(response) {
 
                     // Quellen in Form Data schreiben
                     kijs.Object.each(response, function(sourceType, values) {
-                        this.form.data.sources[fieldName][sourceType] = {};
+                        this._activeFormPanel.data.sources[fieldName][sourceType] = {};
 
                         // Aus dem Array ein Objekt machen
                         kijs.Array.each(values, function(value, index) {
-                            this.form.data.sources[fieldName][sourceType][index] = value;
+                            this._activeFormPanel.data.sources[fieldName][sourceType][index] = value;
                         }, this);
                     }, this);
 
                     // Resolve ausführen und Quellen zurückgeben
-                    resolve(this.form.data.sources[fieldName]);
+                    resolve(this._activeFormPanel.data.sources[fieldName]);
 
                 }, this);
             } else {
@@ -217,13 +218,13 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     _addSourceToFormData(sources) {
 
         // Formular Quellenarray hinzufügen
-        if (!this.form.data.sources) {
-            this.form.data.sources = {};
+        if (!this._activeFormPanel.data.sources) {
+            this._activeFormPanel.data.sources = {};
         }
-        this.form.data.sources[sources.data.field] = sources.data.values;
+        this._activeFormPanel.data.sources[sources.data.field] = sources.data.values;
 
         // Form is Dirty setzen, da die Formulardaten geändert haben
-        this.form.isDirty = true;
+        this._activeFormPanel.isDirty = true;
     }
 
     // overwrite
@@ -277,6 +278,12 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
     _onSourceClick(e) {
         let fieldName = e.element.parent.name;
 
+        if (e.element.parent.parent instanceof kijs.gui.FormPanel) {
+            this._activeFormPanel = e.element.parent.parent;
+        } else if (this.form) {
+            this._activeFormPanel = this.form;
+        }
+
         // Vorhandene Quellen laden
         this._getSources(fieldName).then((sources) => {
             let sourceWindow = new biwi.default.source.SourceWindow(
@@ -318,6 +325,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._sourceFnLoad = null;
         this._sourceFnArgs = null;
         this._dataRow = null;
+        this._activeFormPanel = null;
 
         this._id = null;
         this._version = null;

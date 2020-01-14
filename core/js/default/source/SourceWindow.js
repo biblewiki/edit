@@ -34,7 +34,6 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
             footerElements:[
                 {
                     xtype: 'kijs.gui.Button',
-                    name: 'btnLogin',
                     isDefault: true,
                     caption: this._app.getText('Hinzufügen'),
                     on: {
@@ -213,7 +212,7 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         let params = {};
 
         return new Promise((resolve) => {
-            this._app.rpc.do('bible.getBibleBooks', params, function(response) {
+            this._app.rpc.do('book.getForCombo', params, function(response) {
                this._bibleBooks = response.books;
                resolve();
             }, this, false, 'none');

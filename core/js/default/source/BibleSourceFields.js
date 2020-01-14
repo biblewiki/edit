@@ -54,7 +54,6 @@ biwi.default.source.BibleSourceFields = class biwi_default_source_BibleSourceFie
 
     get values() { return this.data; }
     set values(vals) {
-        //this.down('bookId').data = this._books.names;
         this.data = vals;
 
         this.down('chapterId').data = this._books.chapters[this.down('bookId').value];
