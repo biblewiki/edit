@@ -94,6 +94,9 @@
 
 @field-error-bkgrndColor: #ffdaec;
 
+/* Range */
+@range-bkgrndColor: #aaa;
+@range-btnColor: #555;
 
 /* Item */
 @item-bkgrndColor: #fff;
@@ -1941,6 +1944,80 @@ div.kijs-spinbox > .kijs-container-inner {
 
 
 /* ******************
+   * Field Range
+   ****************** */
+div.kijs-field-range {
+
+    > .kijs-inputwrapper {
+        height: 25px;
+
+        > input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 1px;
+            margin: 0px;
+            background: @range-bkgrndColor;
+            outline: none;
+        }
+
+
+        > input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            background: @range-btnColor;
+            cursor: pointer;
+        }
+
+        > input::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border: 0;
+            border-radius: 15px;
+            background-color: @range-btnColor;
+            cursor: pointer;
+        }
+
+        > input:hover::-webkit-slider-thumb {
+            background-color: @field-focus-borderColor;
+        }
+
+        > input:hover::-moz-range-thumb {
+            background-color: @field-focus-borderColor;
+        }
+    }
+
+    &.kijs-error  > .kijs-inputwrapper > input {
+        background-color: @field-error-bkgrndColor;
+    }
+
+    &.kijs-disabled > .kijs-inputwrapper , &.kijs-readonly > .kijs-inputwrapper {
+        > input {
+            background-color: @field-disabled-bkgrndColor;
+        }
+
+        > input::-webkit-slider-thumb {
+            background-color: @field-disabled-fontColor;
+            cursor: default;
+        }
+
+        > input:hover::-webkit-slider-thumb {
+            background-color: @field-disabled-fontColor;
+            cursor: default;
+        }
+
+        > input::-moz-range-thumb {
+            background-color: @field-disabled-fontColor;
+            cursor: default;
+        }
+    }
+}
+
+
+/* ******************
    * Checkbox
    ****************** */
 div.kijs-field-checkbox {
@@ -2039,10 +2116,18 @@ div.kijs-field-display {
         > .kijs-inputwrapper > * {
                 color: @field-disabled-fontColor;
         }
+        .kijs-link {
+            cursor: default;
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
     }
 
     .kijs-link {
         cursor: pointer;
+        display: inline;
     }
 
     .kijs-link:hover {

@@ -49,6 +49,7 @@ biwi.person.RelationshipGridPanel = class biwi_person_RelationshipGridPanel exte
 
             // Eintrags ID aus der Zuweisungstabelle
             id: data.personRelationshipId,
+            version: this._version,
             personId: this._personId,
             dataRow: data
         });

@@ -676,6 +676,7 @@ class Facade {
         $loader->addPrimaryColumn('personRelationship.personRelationshipId', $this->app->getText('Beziehungs') . ' ' . $this->app->getText('ID'));
 
         $loader->addColumn($this->app->getText('Person') . ' ' . $this->app->getText('ID'), 'personRelationship.personId', ['visible' => false]);
+        $loader->addColumn($this->app->getText('Max relationshipId'), 'MAX(personRelationshipId) AS maxId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Version'), 'personRelationship.version', ['visible' => false]);
         $loader->addColumn($this->app->getText('Bezugsperson') . ' ' . $this->app->getText('ID'), 'personRelationship.secondPersonId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Bezugsperson'), 'secondPerson.name');

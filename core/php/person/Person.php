@@ -135,6 +135,20 @@ class Person {
             // Quellen speichern wenn vorhaden
             if ($group['sources']) {
                 $group['id'] = $personRelationshipId;
+
+                // Wenn keine Version angegeben wurde
+                if (!$group['version']) {
+
+                    // Alle Einträge durchgehen
+                    foreach ($group as $key => $entry) {
+
+                        // Wenn in einem Key das Wort Version vorkommt, dieses in den Eintrag "Version" schreiben
+                        if (strpos($key, 'version') !== false) {
+                            $group['version'] = $entry;
+                        }
+                    }
+                }
+
                 $category = edit\app\App::getCategoryByName($app, 'person');
                 $saveSource = new edit\SaveSource($app, $category, 'personGroup');
                 $saveSource->save($group);

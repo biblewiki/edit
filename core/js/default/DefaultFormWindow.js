@@ -19,9 +19,8 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._formFnLoad = null;
         this._formFnSave = null;
         this._sourceFnLoad = null;
-        this._sourceFnArgs = null;
-        this._dataRow = null;
-        this._activeFormPanel = null;
+        this._assignTable = null;
+        this._primaryKey = null;
 
         this._id = null;
         this._version = null;
@@ -66,10 +65,11 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             formFnLoad   : true,
             formFnSave   : true,
             sourceFnLoad: true,
-            sourceFnArgs: true,
+            assignTable: true,
             dataRow: true,
             id: true,
-            version: true
+            version: true,
+            primaryKey: true
         });
 
         // Config anwenden
@@ -146,64 +146,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         return this._formPanel;
     }
 
-    // Quellen vom Server holen
-    _getSources(fieldName, formPanel) {
-        return new Promise((resolve) => {
-
-            if (kijs.isEmpty(this._sourceFnLoad)) {
-                kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Es wurden keine Source Load Funktion angegeben.'));
-            }
-
-            if (kijs.isEmpty(this._sourceFnLoad) || kijs.isEmpty(this._sourceFnArgs.assignTable)) {
-                kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Es wurde keine assignTable in den sourceFnArgs angegeben.'));
-            }
-
-            // Überprüfen, ob Objekt "sources" bereits existiert. Sonst wird es erstellt
-            if (!this._activeFormPanel.data.sources) {
-                this._activeFormPanel.data.sources = {};
-            }
-
-            // Wenn schon Daten für dieses Feld im Datenpacket vorhanden sind, werden diese zurückgegeben
-            if (this._activeFormPanel.data.sources[fieldName]) {
-                resolve(this._activeFormPanel.data.sources[fieldName]);
-
-            // Überprüfen ob eine ID vorhanden ist. Dies bedeutet, dass der Eintrag bereits in der DB ist.
-            // Wenn ja, werden die Quellen vom Server geholt
-            } else if (this._id) {
-
-                // Argumente vorbereiten
-                let params = Object.assign(this._sourceFnArgs, {
-                    id: this._id,
-                    version: this._version,
-                    field: fieldName
-                });
-
-                // Objekt für Feldnamen im Datenpacket erstellen
-                this._activeFormPanel.data.sources[fieldName] = {};
-
-                // Server Abfrage ausführen
-                this._app.rpc.do(this._sourceFnLoad, params, function(response) {
-
-                    // Quellen in Form Data schreiben
-                    kijs.Object.each(response, function(sourceType, values) {
-                        this._activeFormPanel.data.sources[fieldName][sourceType] = {};
-
-                        // Aus dem Array ein Objekt machen
-                        kijs.Array.each(values, function(value, index) {
-                            this._activeFormPanel.data.sources[fieldName][sourceType][index] = value;
-                        }, this);
-                    }, this);
-
-                    // Resolve ausführen und Quellen zurückgeben
-                    resolve(this._activeFormPanel.data.sources[fieldName]);
-
-                }, this);
-            } else {
-                resolve();
-            }
-        });
-    }
-
     /**
      * Kann in abgeleiteter Klasse überschrieben werden,
      * um FormPanel zu füllen
@@ -213,18 +155,6 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
      */
     _populateFormPanel(formPanel) {
 
-    }
-
-    _addSourceToFormData(sources) {
-
-        // Formular Quellenarray hinzufügen
-        if (!this._activeFormPanel.data.sources) {
-            this._activeFormPanel.data.sources = {};
-        }
-        this._activeFormPanel.data.sources[sources.data.field] = sources.data.values;
-
-        // Form is Dirty setzen, da die Formulardaten geändert haben
-        this._activeFormPanel.isDirty = true;
     }
 
     // overwrite
@@ -277,26 +207,27 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
 
     _onSourceClick(e) {
         let fieldName = e.element.parent.name;
+        let formPanel = null;
 
         if (e.element.parent.parent instanceof kijs.gui.FormPanel) {
-            this._activeFormPanel = e.element.parent.parent;
+            formPanel = e.element.parent.parent;
         } else if (this.form) {
-            this._activeFormPanel = this.form;
+            formPanel = this.form;
         }
 
-        // Vorhandene Quellen laden
-        this._getSources(fieldName).then((sources) => {
-            let sourceWindow = new biwi.default.source.SourceWindow(
-                {
-                    target: document.body,
-                    field: fieldName,
-                    sources: sources
-                }
-            );
-            sourceWindow.show();
-
-            sourceWindow.on('saveSource', this._addSourceToFormData, this);
-        });
+        // Quellenfenster anzeigen
+        let sourceWindow = new biwi.default.source.SourceWindow(
+            {
+                target: document.body,
+                field: fieldName,
+                version: this._version,
+                formPanel: formPanel,
+                primaryKey: this._primaryKey,
+                assignTable: this._assignTable,
+                sourceFnLoad: this._sourceFnLoad
+            }
+        );
+        sourceWindow.show();
     }
 
 
@@ -323,9 +254,8 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._formFnLoad = null;
         this._formFnSave = null;
         this._sourceFnLoad = null;
-        this._sourceFnArgs = null;
-        this._dataRow = null;
-        this._activeFormPanel = null;
+        this._assignTable = null;
+        this._primaryKey = null;
 
         this._id = null;
         this._version = null;

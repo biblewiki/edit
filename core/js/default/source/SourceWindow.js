@@ -18,7 +18,10 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         this._version = null;
         this._facadeFnLoad = null;
         this._bibleBooks = [];
-        this._sources = [];
+        this._formPanel = null;
+        this._primaryKey = null;
+        this._assignTable = null;
+        this._sourceFnLoad = null;
 
         // Config generieren
         config = Object.assign({}, {
@@ -49,8 +52,13 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
          // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
+            id: true,
+            version: true,
             field: true,
-            sources: true
+            formPanel: true,
+            primaryKey: true,
+            assignTable: true,
+            sourceFnLoad: true
         });
 
         // Config anwenden
@@ -61,9 +69,13 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         // Biblebücher laden
         this._getBibleBooks().then(() => {
 
-            // FormPanel erstellen
-            this.add(this._createElements());
-            this._fillSources();
+            // Vorhandene Quellen laden
+            this._getSources(this._field).then(() => {
+
+                // FormPanel erstellen
+                this.add(this._createElements());
+                this._fillSources();
+            });
         });
     }
 
@@ -128,85 +140,56 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         ];
     }
 
-    _fillSources() {
+    // Quellen vom Server holen
+    _getSources() {
+        return new Promise((resolve) => {
 
-        // Bibelquellen
-        if (this._sources && !kijs.isEmpty(this._sources.bible)){
-            let bibleSource = [];
+            // Überprüfen, ob Objekt "sources" bereits existiert. Sonst wird es erstellt
+            if (!this._formPanel.data.sources) {
+                this._formPanel.data.sources = {};
+            }
 
-            // Für alle Quellen ein FormPanel in das Array pushen
-            kijs.Object.each(this._sources.bible, function() {
-                bibleSource.push(
-                    {
-                        xtype: 'biwi.default.source.BibleSourceFields',
-                        books: this._bibleBooks
-                    }
-                );
-            }, this);
+            // Wenn schon Daten für dieses Feld im Datenpacket vorhanden sind, werden diese zurückgegeben
+            if (this._formPanel.data.sources[this._field]) {
+                resolve(this._formPanel.data.sources[this._field]);
 
-            // Elemente hinzufügen
-            this.down('bibleSources').add(bibleSource);
+            // Überprüfen ob eine ID vorhanden ist. Dies bedeutet, dass der Eintrag bereits in der DB ist.
+            // Wenn ja, werden die Quellen vom Server geholt
+            } else if (this._primaryKey || this._id) {
 
-            // Alle neu hinzugefügten Panel mit Daten abfüllen
-            kijs.Array.each(this.down('bibleSources').elements, function(element, i) {
-                element.values = this._sources.bible[i];
-            }, this);
+                // Argumente vorbereiten
+                let params = {};
+                params.id = this._primaryKey ? this._formPanel.data[this._primaryKey] : this._id
+                params.version = this._version;
+                params.field = this._field;
+                params.assignTable = this._assignTable;
 
-        // Standardmässig ein FormPanel hinzufügen
-        } else {
-            this.down('bibleSources').add(
-                {
-                    xtype: 'biwi.default.source.BibleSourceFields',
-                    books: this._bibleBooks
-                }
-            );
-        }
+                // Objekt für Feldnamen im Datenpacket erstellen
+                this._formPanel.data.sources[this._field] = {};
 
-        // Webquellen
-        if (this._sources && !kijs.isEmpty(this._sources.web)){
-            let webSource = [];
+                // Server Abfrage ausführen
+                this._app.rpc.do(this._sourceFnLoad, params, function(response) {
 
-            // Für alle Quellen ein FormPanel in das Array pushen
-            kijs.Object.each(this._sources.web, function() {
-                webSource.push(
-                    {
-                        xtype: 'biwi.default.source.WebSourceFields'
-                    }
-                );
-            }, this);
+                    // Quellen in Form Data schreiben
+                    kijs.Object.each(response, function(sourceType, values) {
+                        this._formPanel.data.sources[this._field][sourceType] = {};
 
-            // Elemente hinzufügen
-            this.down('webSources').add(webSource);
+                        // Aus dem Array ein Objekt machen
+                        kijs.Array.each(values, function(value, index) {
+                            this._formPanel.data.sources[this._field][sourceType][index] = value;
+                        }, this);
+                    }, this);
 
-            // Alle neu hinzugefügten Panel mit Daten abfüllen
-            kijs.Array.each(this.down('webSources').elements, function(element, i) {
-                element.data = this._sources.web[i];
-            }, this);
-        }
+                    // Resolve ausführen
+                    resolve();
 
-        // Andere Quellen
-        if (this._sources && !kijs.isEmpty(this._sources.other)){
-            let otherSource = [];
-
-            // Für alle Quellen ein FormPanel in das Array pushen
-            kijs.Object.each(this._sources.other, function() {
-                otherSource.push(
-                    {
-                        xtype: 'biwi.default.source.OtherSourceFields'
-                    }
-                );
-            }, this);
-
-            // Elemente hinzufügen
-            this.down('otherSources').add(otherSource);
-
-            // Alle neu hinzugefügten Panel mit Daten abfüllen
-            kijs.Array.each(this.down('otherSources').elements, function(element, i) {
-                element.data = this._sources.other[i];
-            }, this);
-        }
+                }, this);
+            } else {
+                kijs.gui.MsgBox.error('Kein Primary Key oder ID angegeben um die Quellen zu laden');
+                resolve();
+            }
+        });
     }
-
 
     _getBibleBooks() {
         let params = {};
@@ -217,6 +200,72 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
                resolve();
             }, this, false, 'none');
         });
+    }
+
+    // Vorhandene Quellen abfüllen
+    _fillSources() {
+
+        // Bibelquellen
+        if (this._formPanel.data.sources[this._field] && !kijs.isEmpty(this._formPanel.data.sources[this._field].bible)){
+
+            // Für alle Quellen ein FormPanel in das Array pushen
+            kijs.Object.each(this._formPanel.data.sources[this._field].bible, function(id, source) {
+                if (!source.state || source.state < 100) {
+                    this.down('bibleSources').add(
+                        {
+                            xtype: 'biwi.default.source.BibleSourceFields',
+                            books: this._bibleBooks,
+                            name: 'bibleSource_' + id
+                        }
+                    );
+                    this.down('bibleSources').down('bibleSource_' + id).data = source;
+                }
+            }, this);
+
+        // Standardmässig ein FormPanel hinzufügen
+        } else {
+            this.down('bibleSources').add(
+                {
+                    xtype: 'biwi.default.source.BibleSourceFields',
+                    books: this._bibleBooks,
+                    name: 'bibleSource_1'
+                }
+            );
+        }
+
+        // Webquellen
+        if (this._formPanel.data.sources[this._field] && !kijs.isEmpty(this._formPanel.data.sources[this._field].web)){
+
+            // Für alle Quellen ein FormPanel in das Array pushen
+            kijs.Object.each(this._formPanel.data.sources[this._field].web, function(id, source) {
+                if (!source.state || source.state < 100) {
+                    this.down('webSources').add(
+                        {
+                            xtype: 'biwi.default.source.WebSourceFields',
+                            name: 'webSource_' + id
+                        }
+                    );
+                    this.down('webSources').down('webSource_' + id).data = source;
+                }
+            }, this);
+        }
+
+        // Andere Quellen
+        if (this._formPanel.data.sources[this._field] && !kijs.isEmpty(this._formPanel.data.sources[this._field].other)){
+
+            // Für alle Quellen ein FormPanel in das Array pushen
+            kijs.Object.each(this._formPanel.data.sources[this._field].other, function(id, source) {
+                if (!source.state || source.state < 100) {
+                    this.down('otherSources').add(
+                        {
+                            xtype: 'biwi.default.source.OtherSourceFields',
+                            name: 'otherSource_' + id
+                        }
+                    );
+                    this.down('otherSources').down('otherSource_' + id).data = source;
+                }
+            }, this);
+        }
     }
 
 
@@ -248,9 +297,8 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
     }
 
     _onSaveClick() {
-        let sources = [];
+        let sources = {};
         let error = false;
-        sources.values = {};
         let bibleSources = {};
         let webSources = {};
         let otherSources = {};
@@ -297,18 +345,18 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         if (!error) {
 
             // Quellen in Objekt zusammenfügen
-            sources.field = this._field;
-            sources.values.bible = bibleSources;
-            sources.values.web = webSources;
-            sources.values.other = otherSources;
+            sources.bible = bibleSources;
+            sources.web = webSources;
+            sources.other = otherSources;
 
-            let ret = {
-                name: 'sources',
-                data: sources
-            };
+            // Sources in FormPanel Data schreiben
+            this._formPanel.data.sources[this._field]= sources;
+
+            // Form is Dirty setzen, da die Formulardaten geändert haben
+            this._formPanel.isDirty = true;
 
             // Event werfen
-            this.raiseEvent('saveSource', ret);
+            this.raiseEvent('saved');
 
             // Fenster schliessen
             this.close();
@@ -338,6 +386,9 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
         this._version = null;
         this._facadeFnLoad = null;
         this._bibleBooks = null;
-        this._sources = null;
+        this._formPanel = null;
+        this._primaryKey = null;
+        this._assignTable = null;
+        this._sourceFnLoad = null;
     }
 };

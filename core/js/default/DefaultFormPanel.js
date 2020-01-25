@@ -320,9 +320,6 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
         // On Form Change Funktion aufrufen, da die Formulardaten geändert haben
         this._onFormChange();
-
-        // Form is Dirty setzen, da die Formulardaten geändert haben
-        this.form.isDirty = true;
     }
 
     // overwrite
@@ -348,6 +345,9 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     _onFormChange() {
         this._detailPanel.footer.down('saveBtn').disabled = false;
         this._detailPanel.footer.down('saveBtn').badgeText = ' ';
+
+        // Form is Dirty setzen, da die Formulardaten geändert haben
+        this.form.isDirty = true;
     }
 
     _onSaveClick() {
@@ -366,19 +366,20 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
     _onSourceClick(e) {
         let fieldName = e.element.parent.name;
 
-        // Vorhandene Quellen laden
-        this._getSources(fieldName).then((sources) => {
-            let sourceWindow = new biwi.default.source.SourceWindow(
-                {
-                    target: document.body,
-                    field: fieldName,
-                    sources: sources
-                }
-            );
-            sourceWindow.show();
+        // Quellen Fenster anzeigen
+        let sourceWindow = new biwi.default.source.SourceWindow(
+            {
+                target: document.body,
+                field: fieldName,
+                id: this._id,
+                version: this._version,
+                formPanel: this.form,
+                sourceFnLoad: this._sourceFnLoad
+            }
+        );
+        sourceWindow.show();
 
-            sourceWindow.on('saveSource', this._addToFormData, this);
-        });
+        sourceWindow.on('saved', this._onFormChange, this);
     }
 
 
@@ -399,11 +400,17 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
 
         // Variablen (Objekte/Arrays) leeren
         this._app = null;
+        this._detailPanel = null;
+        this._formPanel = null;
+        this._selection = null;
         this._apertureMask = null;
 
         this._formFnLoad = null;
         this._formFnSave = null;
-        this._sourceFnSave = null;
+        this._detailFnLoad = null;
+        this._sourceFnLoad = null;
+        this._formCaption = null;
+        this._detailCaption = null;
 
         this._id = null;
         this._version = null;

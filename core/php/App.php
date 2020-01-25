@@ -96,13 +96,18 @@ class App {
             die($msg . PHP_EOL);echo $msg;
         }
 
+        require_once 'Session.php';
+
+        // Eigener SessionHandler: Sessions werden in DB gespeichert
+        $sessionHandler = new SessionHandler($this);
+
         // Session auslesen
         $this->session = null;
         session_start();
-        if (\array_key_exists("biwi", $_SESSION) && ($_SESSION["biwi"] instanceof Session)) {
+        if (\array_key_exists("biwi", $_SESSION) && ($_SESSION["biwi"])) {
             $this->session = $_SESSION["biwi"];
         } else {
-            $this->session = new Session();
+            $this->session = new \Session();
         }
 
         // Sprache herausfinden
@@ -201,7 +206,7 @@ class App {
 
         // Sprache aus User-Config in DB ermitteln
         if ($this->getLoggedInUserId()) {
-            $st = $this->getDb()->prepare('SELECT languageId FROM user_config WHERE userId = :userId');
+            $st = $this->getDb()->prepare('SELECT languageId FROM user WHERE userId = :userId');
             $st->bindValue(':userId', $this->getLoggedInUserId(), \PDO::PARAM_STR);
             $st->execute();
             $row = $st->fetch(\PDO::FETCH_ASSOC);
@@ -258,7 +263,7 @@ class App {
     /**
      * @return Session
      */
-    public function getSession(): Session {
+    public function getSession() {
         return $this->session;
     }
 
@@ -361,7 +366,6 @@ class App {
 
     /**
      * Gibt die UserId des eingeloggten Benutzers zurück
-     * oder ein Leerstring falls guest
      *
      * @return string
      */
@@ -376,26 +380,17 @@ class App {
 
 
     /**
-     * Gibt die aktuelle Benutzergruppe zurück.
-     * 1 für Lieferant, 2 für Fachbereich und 3 für Admins und 0 für undefiniert (z.B. guest)
+     * Gibt die UserType des eingeloggten Benutzers zurück
      *
      * @return int
      */
     public function getLoggedInUserType(): int {
-//        if ($this->checkRights($this->getConfig('rights, adminFunction'))) {
-//            return 3;
-//        }
-//        if ($this->checkRights($this->getConfig('rights, fachbereichFunction'))) {
-//            return 2;
-//        }
-//        if ($this->getLoggedInLieferantId() && $this->checkRights($this->getConfig('rights, lieferantFunction'))) {
-//            return 1;
-//        }
-//
-//        $loggenInLieferantId = $this->getLoggedInLieferantId();
-//        $hasRights = $this->checkRights($this->getConfig('rights, lieferantFunction'));
+        $userType = $this->getSession()->userType;
+        if (!$userType) {
+            return 0;
+        }
 
-        return 99;
+        return $userType;
     }
 
 
@@ -462,8 +457,7 @@ class App {
      * @return bool
      */
     public function isLoggedIn(): bool {
-        //return (bool)$this->getLoggedInUserId();
-        return true;
+        return (bool)$this->getLoggedInUserId();
     }
 
 

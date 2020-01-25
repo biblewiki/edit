@@ -52,9 +52,9 @@ biwi.default.source.BibleSourceFields = class biwi_default_source_BibleSourceFie
     // GETTERS / SETTERS
     // --------------------------------------------------------------
 
-    get values() { return this.data; }
-    set values(vals) {
-        this.data = vals;
+    get data() { return super.data; }
+    set data(vals) {
+        super.data = vals;
 
         this.down('chapterId').data = this._books.chapters[this.down('bookId').value];
         this.down('verseId').data = this._books.verses[this.down('bookId').value][this.down('chapterId').value];

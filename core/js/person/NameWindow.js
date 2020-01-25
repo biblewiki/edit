@@ -17,7 +17,8 @@ biwi.person.NameWindow = class biwi_person_NameWindow extends biwi.default.Defau
         // Config generieren
         config = Object.assign({}, {
             sourceFnLoad: 'person.getSources',
-            sourceFnArgs: {assignTable: 'personName'},
+            assignTable: 'personName',
+            primaryKey: 'personNameId',
             caption: this._app.getText('Namen hinzufügen'),
             cls: 'kg-app-person-nameWindow',
             iconChar: '&#xf2bc',

@@ -156,41 +156,29 @@ biwi.app.App = class biwi_app_App {
      */
     run() {
 
-
         // TODO
-        this._config.isLoggedIn = true;
         this._config.isUser = true;
-        this._config.isFachbereich = true;
         this._config.isAdmin = true;
-
-
-
-
-        // ViewPort erstellen
-        this._viewport = new kijs.gui.ViewPort({
-            cls: 'kijs-flexcolumn'
-        });
-        this._viewport.render();
 
         // load translations
         this._rpc.do('app.getTexts', this.languageId, function(ret) {
             this._texts = ret.texts;
 
             // start app
-//            if (!this._config.isLoggedIn) {
-//
-//                // Login anzeigen
-//                let loginWin = new kg.app.LoginWindow({
-//                    authToken: this._authToken
-//                });
-//                loginWin.on('login', this._onLogin, this);
-//                loginWin.show();
-//
-//                // App anzeigen
-//            } else {
-//                this._startApp(false);
-//            }
-            this._startApp(false);
+            if (!this._config.isLoggedIn) {
+
+                window.location.href = this._config.loginUrl;
+
+                // App anzeigen
+            } else {
+                // ViewPort erstellen
+                this._viewport = new kijs.gui.ViewPort({
+                    cls: 'kijs-flexcolumn'
+                });
+                this._viewport.render();
+
+                this._startApp(false);
+            }
         }, this);
 
     }

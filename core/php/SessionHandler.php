@@ -37,6 +37,15 @@ class SessionHandler {
             [&$this, "destroy"],
             [&$this, "gc"]
         );
+
+        $rootDomain = '.' . $_SERVER['HTTP_HOST'];
+
+        $currentCookieParams = session_get_cookie_params();
+        $currentCookieParams['domain'] = $rootDomain;
+        $currentCookieParams['httponly'] = true;
+        $currentCookieParams['samesite'] = 'Strict';
+
+        session_set_cookie_params($currentCookieParams);
     }
 
 

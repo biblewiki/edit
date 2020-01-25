@@ -128,6 +128,9 @@ class Html implements RouterInterface {
         // isLoggedIn
         $data->isLoggedIn = $this->app->isLoggedIn();
 
+        // Login Seite
+        $data->loginUrl = $this->app->getConfig('url, login');
+
         // !!! Die folgenden Angaben müssen auch bei Login zurückgegeben werden !!!
 
         // userId

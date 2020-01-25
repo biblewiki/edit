@@ -186,7 +186,7 @@ biwi.default.DefaultGridField = class biwi_default_DefaultGridField extends kijs
     _onSave(data) {
         if (this._saveName) {
 
-            // Neue Personendaten vom Server holen
+            // Neue Daten für Grid vom Server holen
             this._app.rpc.do(this._getForGridAddFnLoad, this._getForGridAddFnArgs, function(response) {
 
                 kijs.Object.each(response.data, function(key, value) {

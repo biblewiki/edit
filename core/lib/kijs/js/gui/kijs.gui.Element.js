@@ -548,7 +548,7 @@ kijs.gui.Element = class kijs_gui_Element extends kijs.Observable {
 
         // Objekt versiegeln
         // Bewirkt, dass keine neuen propertys hinzugefügt werden dürfen.
-        //Object.seal(this);
+        Object.seal(this);
     }
 
     /**

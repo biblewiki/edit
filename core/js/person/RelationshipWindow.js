@@ -19,7 +19,8 @@ biwi.person.RelationshipWindow = class biwi_person_RelationshipWindow extends bi
             caption: this._app.getText('Neue Beziehung hinzufügen'),
             iconChar: '&#xf0c1',
             sourceFnLoad: 'person.getSources',
-            sourceFnArgs: {assignTable: 'personRelationship'}
+            assignTable: 'personRelationship',
+            primaryKey: 'personRelationshipId'
         });
 
         // Mapping für die Zuweisung der Config-Eigenschaften

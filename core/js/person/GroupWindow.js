@@ -17,7 +17,8 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
             caption: this._app.getText('Neue Personengruppe hinzufügen'),
             iconChar: '&#xf0c1',
             sourceFnLoad: 'person.getSources',
-            sourceFnArgs: {assignTable: 'personGroup'}
+            assignTable: 'personGroup',
+            primaryKey: 'personGroupId'
         });
 
         // Mapping für die Zuweisung der Config-Eigenschaften
