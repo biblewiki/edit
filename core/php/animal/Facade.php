@@ -37,7 +37,7 @@ class Facade {
     public function getDetailHtml(\stdClass $args): edit\Rpc\ResponseDefault {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -113,7 +113,7 @@ class Facade {
     public function getGridData(\stdClass $args): edit\Rpc\ResponseGrid {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -173,7 +173,7 @@ class Facade {
         $version = null;
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -245,7 +245,7 @@ class Facade {
     public function getAnimals(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -263,7 +263,7 @@ class Facade {
         $version = null;
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -304,7 +304,7 @@ class Facade {
             $formPacket = (array)$args->formData;
 
             // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType()) {
+            if (!$this->app->getLoggedInUserRole()) {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 

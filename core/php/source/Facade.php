@@ -41,7 +41,7 @@ class Facade {
     public function getOtherSourceLanguage(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -64,7 +64,7 @@ class Facade {
     public function getOtherSourceMedium(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -87,7 +87,7 @@ class Facade {
     public function getOtherSourcePublishCompany(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -110,7 +110,7 @@ class Facade {
     public function getOtherSourceType(\stdClass $args): edit\Rpc\ResponseCombo {
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType()) {
+        if (!$this->app->getLoggedInUserRole()) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 

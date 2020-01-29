@@ -187,7 +187,7 @@ class Facade {
         $return->msg = $msg;
         $return->reload = $reload;
         $return->loggedInUserId = $this->app->getLoggedInUserId();
-        $return->loggedInUserType = $this->app->getLoggedInUserType();
+        $return->loggedInUserType = $this->app->getLoggedInUserRole();
         $return->loggedInLieferantId = $this->app->getLoggedInLieferantId();
 
         // Sprache von user-config
@@ -246,7 +246,7 @@ class Facade {
         // Administration
         // ****************************
 
-        if ($this->app->getLoggedInUserType() === 99) {
+        if ($this->app->getLoggedInUserRole() === 99) {
             $administration = new \stdClass();
             $administration->caption = $this->app->getText('Administration');
             $administration->name = 'administration';

@@ -34,7 +34,7 @@ class Facade {
             $ids = \property_exists($args, 'selection') ? $args->selection : [];
 
             // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType() === 3) {
+            if (!$this->app->getLoggedInUserRole() === 3) {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 
@@ -83,7 +83,7 @@ class Facade {
     public function getDetailForm(\stdClass $args): edit\Rpc\ResponseForm {
 
             // Rechte überprüfen
-            if (!$this->app->getLoggedInUserType() === 3) {
+            if (!$this->app->getLoggedInUserRole() === 3) {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 
@@ -138,7 +138,7 @@ class Facade {
         $loader = new edit\GridLoader($this->app, $args, 'message');
 
         // Rechte überprüfen
-        if (!$this->app->getLoggedInUserType() === 3) {
+        if (!$this->app->getLoggedInUserRole() === 3) {
             throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
         }
 
@@ -164,7 +164,7 @@ class Facade {
             $formPacket = (array)$args->formData;
 
             // Rechte überprüfen
-            if ($this->app->getLoggedInUserType() !== 99) {
+            if ($this->app->getLoggedInUserRole() !== 99) {
                 throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
             }
 

@@ -350,17 +350,19 @@ class App {
     }
 
 
-    public function getUserName(int $userId): string {
-        return 'Joel Kohler';
-    }
-
-
     /**
-     * Gibt die App-Version zurück
+     * Gibt den User Vor- und Nachname zurück
+     * @param int $userId
      * @return string
      */
-    public function getVersion(): string {
-        return $this->version;
+    public function getUserName(int $userId): string {
+        $st = $this->getDb()->prepare('SELECT firstName, lastName FROM user WHERE userId = :userId');
+        $st->bindParam(':userId', $userId);
+        $st->execute();
+        $row = $st->fetch();
+        unset($st);
+
+        return $row['firstName'] . ' ' . $row['lastName'];
     }
 
 
@@ -384,13 +386,22 @@ class App {
      *
      * @return int
      */
-    public function getLoggedInUserType(): int {
-        $userType = $this->getSession()->userType;
+    public function getLoggedInUserRole(): int {
+        $userType = $this->getSession()->userRole;
         if (!$userType) {
             return 0;
         }
 
         return $userType;
+    }
+
+
+    /**
+     * Gibt die App-Version zurück
+     * @return string
+     */
+    public function getVersion(): string {
+        return $this->version;
     }
 
 
@@ -538,4 +549,25 @@ class App {
         return $return;
     }
 
+
+    /**
+     * Schreibt einen Eintrag in das Log File
+     * @param int $code
+     * @param string $table
+     * @param int $entryId
+     * @param string $action
+     * @param string $msg
+     * @param string $logName
+     */
+    public function writeToLogFile(int $code, string $table, int $entryId, string $action, string $msg, string $logName = 'action') {
+
+        $path = ($this->getConfig('paths, log') ?: 'log') . DIRECTORY_SEPARATOR;
+        $userName = $this->getUserName($this->getLoggedInUserId());
+
+        $entry = date('d.m.Y H:i:s') . ' ' . $userName . ' ' . $code . ' ' . $table . ' ' . $entryId . ' ' . $action . ' ' . $msg;
+
+        try {
+            file_put_contents($path . $logName . '.log', $entry, FILE_APPEND);
+        } catch (\Throwable $e) {}
+    }
 }
