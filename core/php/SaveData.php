@@ -176,6 +176,8 @@ class SaveData {
                 $primaryKey->value = $this->app->getDb()->lastInsertId();
             }
         }
+
+        $this->app->writeToEventLog($this->tableName, $formPacket);
     }
 
 
@@ -489,5 +491,7 @@ class SaveData {
 
         $this->app->getDb()->bindParams($st);
         $st->execute();
+
+        $this->app->writeToEventLog($this->tableName, $formPacket);
     }
 }

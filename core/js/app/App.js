@@ -146,8 +146,8 @@ biwi.app.App = class biwi_app_App {
      */
     logout() {
         this._rpc.do('app.logout', null, function() {
-           window.location.reload();
-        });
+           window.location.href = this._config.loginUrl;
+        }, this);
     }
 
     /**

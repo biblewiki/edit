@@ -137,7 +137,7 @@ class Html implements RouterInterface {
         $data->loggedInUserId = $this->app->getLoggedInUserId();
 
         // Rechte
-        $data->loggedInUserType = $this->app->getLoggedInUserRole();
+        $data->loggedInuserRole = $this->app->getLoggedInUserRole();
 
         // LieferantId
         //$data->loggedInLieferantId = $this->app->getLoggedInLieferantId();

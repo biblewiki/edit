@@ -128,7 +128,6 @@ class Router {
 
             // Default: wenn keine gültigen Argumente übergeben wurden, die HTML-Seite zurückgeben
             $router = new Html($this->app);
-
         }
 
         $router->handleRequest($request, $response);

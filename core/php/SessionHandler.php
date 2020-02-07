@@ -6,7 +6,7 @@ namespace biwi\edit;
 /**
  * Class SessionHandler
  *
- * @package ki\kgweb\ki
+ * @package biwi\edit
  */
 class SessionHandler {
 
@@ -276,14 +276,14 @@ class SessionHandler {
         // Variablen initialisieren
         $ret = true;
 
-        // data de-serialisieren, damit die userId und loginId ermittelt werden kann
+        // data de-serialisieren, damit die userId und loginType ermittelt werden kann
         $sessionArr = $this->unserialize_session($data);
-        $session = empty($sessionArr["kg"]) ? null : $sessionArr["kg"];
+        $session = empty($sessionArr["biwi"]) ? null : $sessionArr["biwi"];
         unset($sessionArr);
 
-        // UserId & loginId ermitteln
-        $userId = $session->userId ?? "";
-        $loginId = $session->loginId ?? "";
+        // UserId & loginType ermitteln
+        $userId = $session->userId ?? 0;
+        $loginType = $session->loginType ?? "";
 
         if ($userId) {
             $st = $this->app->getDb()->prepare("
@@ -292,20 +292,20 @@ class SessionHandler {
                     `lastAccess`,
                     `data`,
                     `userId`,
-                    `loginId`
+                    `loginType`
                 )
                 VALUES (
                     :sessionId,
                     NOW(),
                     :data,
                     :userId,
-                    :loginId
+                    :loginType
                 )
             ");
             $st->bindParam(":sessionId", $sessionId, \PDO::PARAM_STR);
             $st->bindParam(":data", $data, \PDO::PARAM_STR);
             $st->bindParam(":userId", $userId, \PDO::PARAM_STR);
-            $st->bindParam(":loginId", $loginId, \PDO::PARAM_STR);
+            $st->bindParam(":loginType", $loginType, \PDO::PARAM_STR);
             $ret = (bool)$st->execute();
             unset($st);
         }
@@ -336,14 +336,13 @@ class SessionHandler {
             $offset = $value[1];
             if ($lastOffset !== null) {
                 $valueText = mb_substr($data, (int)$lastOffset, $offset - $lastOffset);
-                $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [Session::class]]);
+                $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
             }
             $currentKey = $value[0];
             $lastOffset = $offset + mb_strlen($currentKey) + 1;
         }
         $valueText = mb_substr($data, (int)$lastOffset);
-        $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [Session::class]]);
+        $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
         return $returnArray;
     }
-
 }

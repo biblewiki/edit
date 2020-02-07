@@ -467,12 +467,19 @@ class Facade {
             throw new edit\ExceptionNotice($this->app->getText('Es wurde keine ID übergeben'));
         }
 
+        // Höchste ID in Tabelle auslesen
+        $st = new edit\SqlSelector('personRelationship');
+        $st->addSelectElement('MAX(personRelationshipId) AS maxId');
+        $row = $st->execute($this->app->getDb(), false);
+        unset ($st);
+
         $personData = edit\person\Person::getPerson($this->app, $args->personId);
         $relationshipData = edit\relationship\Relationship::getRelationship($this->app, $args->relationshipId);
 
         $data['relationshipName'] = $relationshipData['name'];
         $data['name'] = $personData['name'];
         $data['description'] = $personData['description'];
+        $data['personRelationshipId'] = $row['maxId'] + 1;
 
         $return = new edit\Rpc\ResponseDefault();
         $return->data = $data;
@@ -675,15 +682,18 @@ class Facade {
         // Primary Key
         $loader->addPrimaryColumn('personRelationship.personRelationshipId', $this->app->getText('Beziehungs') . ' ' . $this->app->getText('ID'));
 
-        $loader->addColumn($this->app->getText('Person') . ' ' . $this->app->getText('ID'), 'personRelationship.personId', ['visible' => false]);
-        $loader->addColumn($this->app->getText('Max relationshipId'), 'MAX(personRelationshipId) AS maxId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Version'), 'personRelationship.version', ['visible' => false]);
-        $loader->addColumn($this->app->getText('Bezugsperson') . ' ' . $this->app->getText('ID'), 'personRelationship.secondPersonId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Bezugsperson'), 'secondPerson.name');
         $loader->addColumn($this->app->getText('Beziehungart'), 'secondPerson.description');
-        $loader->addColumn($this->app->getText('Beziehungsart') . ' ' . $this->app->getText('ID'), 'relationship.relationshipId', ['visible' => false]);
         $loader->addColumn($this->app->getText('Beziehungsart'), 'relationship.name', null, 'relationshipName');  // Umgekehrte Beziehung
         $loader->addColumn($this->app->getText('Alter Vater'), 'personRelationship.fatherAge');
+
+        $loader->getQueryBuilderForSelect()->addSelectElement('personRelationship.personId');
+        $loader->getCntQueryBuilderForSelect()->addSelectElement('personRelationship.personId');
+                $loader->getQueryBuilderForSelect()->addSelectElement('personRelationship.secondPersonId');
+        $loader->getCntQueryBuilderForSelect()->addSelectElement('personRelationship.secondPersonId');
+                $loader->getQueryBuilderForSelect()->addSelectElement('relationship.relationshipId');
+        $loader->getCntQueryBuilderForSelect()->addSelectElement('relationship.relationshipId');
 
         // Person auslesen
         $loader->addFromElement('INNER JOIN person AS secondPerson ON personRelationship.secondPersonId = secondPerson.personId');

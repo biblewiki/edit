@@ -187,7 +187,7 @@ class Facade {
         $return->msg = $msg;
         $return->reload = $reload;
         $return->loggedInUserId = $this->app->getLoggedInUserId();
-        $return->loggedInUserType = $this->app->getLoggedInUserRole();
+        $return->loggedInuserRole = $this->app->getLoggedInUserRole();
         $return->loggedInLieferantId = $this->app->getLoggedInLieferantId();
 
         // Sprache von user-config
@@ -246,7 +246,7 @@ class Facade {
         // Administration
         // ****************************
 
-        if ($this->app->getLoggedInUserRole() === 99) {
+        if ($this->app->getLoggedInUserRole() >= 50) {
             $administration = new \stdClass();
             $administration->caption = $this->app->getText('Administration');
             $administration->name = 'administration';
@@ -261,6 +261,11 @@ class Facade {
             $btn = new \stdClass();
             $btn->caption = $this->app->getText('Mitteilungen');
             $btn->name = 'biwi_message_Message';
+            $administration->elements[] = $btn;
+
+            $btn = new \stdClass();
+            $btn->caption = $this->app->getText('Benutzer');
+            $btn->name = 'biwi_user_User';
             $administration->elements[] = $btn;
         }
 
@@ -304,16 +309,9 @@ class Facade {
      * Logout
      * @return edit\RpcResponseDefault
      */
-    public function logout(): edit\RpcResponseDefault {
-        $msg = App::logout($this->app);
-        if ($msg) {
-            if ($this->app->getConfig('exceptionHandling, showDetails')) {
-                throw new \Exception($this->app->getText("Logout fehlgeschlagen") . ': ' . $msg);
-            }
-            throw new \Exception($this->app->getText("Logout fehlgeschlagen"));
-        }
-
-        return new edit\RpcResponseDefault();
+    public function logout(): edit\Rpc\ResponseDefault {
+        session_destroy();
+        return new edit\Rpc\ResponseDefault();
     }
 
 

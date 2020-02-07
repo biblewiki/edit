@@ -23,7 +23,7 @@ $biwi_config = [
 
     'module'  => [
         // [Gruppe/]Modulnamen, Gross-/Kleinschreibung beachten, erster Buchstabe gross schreiben. Hauptmodul nicht auflisten.
-        'names' => ['Animal', 'Book', 'Dashboard', 'Group', 'Message', 'Person', 'Relationship', 'Setting', 'Source'],
+        'names' => ['Animal', 'Book', 'Dashboard', 'Group', 'Message', 'Person', 'Relationship', 'Setting', 'Source', 'User'],
         'prefix' => 'biwi',
         'DefaultCssFiles' => ['biwi_app.css'],
         'DefaultJsFiles' => ['default/DefaultFormPanel.js', 'default/DefaultFormWindow.js', 'default/DefaultGridField.js', 'default/DefaultGridPanel.js', 'default/DefaultGridFormPanel.js']
@@ -34,7 +34,7 @@ $biwi_config = [
     // ------------------------------------------
     'url'  => [
         // Edit Webseite
-        'login' => 'http://bss.ifmx.ch/login'
+        'login' => 'http://joelkohler.ifmx.ch/login'
     ],
 
     // ------------------------------------------

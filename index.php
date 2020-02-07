@@ -30,7 +30,7 @@ ini_set('display_errors', false);
 // Autoloader
 //--------------------------------------------------------
 require __DIR__ . '/core/php/AutoLoader.php';
-$loader = new AutoLoader;
+$loader = new biwi\edit\AutoLoader;
 
 // Register the autoloader
 $loader->register();

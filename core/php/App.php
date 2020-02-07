@@ -7,6 +7,8 @@ use Sabre\HTTP;
 use Sabre\Event\EventEmitter;
 use biwi\edit;
 
+require_once 'Session.php';
+
 class App {
     /**
      * @var string
@@ -46,6 +48,14 @@ class App {
      * @var Request
      */
     private $request;
+    /**
+     * @var Session
+     */
+    private $session;
+    /**
+     * @var SessionHandler
+     */
+    private $sessionHandler;
 
     // -------------------------------------------------------------------
     // Public Functions
@@ -96,18 +106,17 @@ class App {
             die($msg . PHP_EOL);echo $msg;
         }
 
-        require_once 'Session.php';
-
         // Eigener SessionHandler: Sessions werden in DB gespeichert
-        $sessionHandler = new SessionHandler($this);
+        $this->sessionHandler = new SessionHandler($this);
 
         // Session auslesen
         $this->session = null;
+
         session_start();
-        if (\array_key_exists("biwi", $_SESSION) && ($_SESSION["biwi"])) {
+        if (\array_key_exists("biwi", $_SESSION) && $_SESSION["biwi"]) {
             $this->session = $_SESSION["biwi"];
         } else {
-            $this->session = new \Session();
+            $this->session = new Session();
         }
 
         // Sprache herausfinden
@@ -259,6 +268,27 @@ class App {
         return $this->modules;
     }
 
+    /**
+     * Gibt die CLient IP zurück
+     *
+     * @return string
+     */
+    public function getClientIp(): string {
+
+        // check ip from share internet
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+          $ip=$_SERVER['HTTP_CLIENT_IP'];
+
+          // to check ip is pass from proxy
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+          $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+          $ip=$_SERVER['REMOTE_ADDR'];
+        }
+
+        return $ip;
+    }
+
 
     /**
      * @return Session
@@ -382,17 +412,17 @@ class App {
 
 
     /**
-     * Gibt die UserType des eingeloggten Benutzers zurück
+     * Gibt die userRole des eingeloggten Benutzers zurück
      *
      * @return int
      */
     public function getLoggedInUserRole(): int {
-        $userType = $this->getSession()->userRole;
-        if (!$userType) {
+        $userRole = $this->getSession()->userRole;
+        if (!$userRole) {
             return 0;
         }
 
-        return $userType;
+        return $userRole;
     }
 
 
@@ -551,6 +581,57 @@ class App {
 
 
     /**
+     * Schreibt einen Eintrag in den Action Log
+     * @param int $categoryId
+     * @param int $entryId
+     * @param string $action
+     * @return void
+     */
+    public function writeToActionLog(int $categoryId, int $entryId, string $action): void {
+        try {
+            $formPacket= [];
+            $formPacket['categoryId'] = $categoryId;
+            $formPacket['entryId'] = $entryId;
+            $formPacket['action'] = $action;
+
+            $saveData = new SaveData($this, $this->getLoggedInUserId(), 'actionLog');
+            $saveData->save($formPacket);
+            unset($saveData);
+
+        } catch (\Throwable $e) {}
+    }
+
+
+    /**
+     * Schreibt einen Eintrag in den Event Log
+     * @param string $table
+     * @param array $request
+     * @return void
+     * @throws \Throwable
+     */
+    public function writeToEventLog(string $table, array $request): void {
+        try {
+            $st = $this->getDb()->prepare('
+                INSERT INTO eventLog (clientIp, userId, client, targetTable, request)
+                VALUES (:clientIp, :userId, :client, :table, :request)
+            ');
+
+            $st->bindParam(':clientIp', $this->getClientIp(), \PDO::PARAM_STR);
+            $st->bindParam(':userId', $this->getLoggedInUserId(), \PDO::PARAM_INT);
+            $st->bindParam(':client', $_SERVER['HTTP_USER_AGENT'], \PDO::PARAM_STR);
+            $st->bindParam(':table', $table, \PDO::PARAM_STR);
+            $st->bindParam(':request', json_encode($request), \PDO::PARAM_STR);
+
+            $st->execute();
+            unset($st);
+
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+    }
+
+
+    /**
      * Schreibt einen Eintrag in das Log File
      * @param int $code
      * @param string $table
@@ -559,7 +640,7 @@ class App {
      * @param string $msg
      * @param string $logName
      */
-    public function writeToLogFile(int $code, string $table, int $entryId, string $action, string $msg, string $logName = 'action') {
+    public function writeToLogFile(int $code, string $table, int $entryId, string $action, string $msg, string $logName = 'action'): void {
 
         $path = ($this->getConfig('paths, log') ?: 'log') . DIRECTORY_SEPARATOR;
         $userName = $this->getUserName($this->getLoggedInUserId());

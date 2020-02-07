@@ -190,7 +190,7 @@ biwi.default.DefaultGridField = class biwi_default_DefaultGridField extends kijs
             this._app.rpc.do(this._getForGridAddFnLoad, this._getForGridAddFnArgs, function(response) {
 
                 kijs.Object.each(response.data, function(key, value) {
-                    //Daten hinzufügen
+                    // Daten hinzufügen
                     data.values[key] = value;
                 }, this);
 
