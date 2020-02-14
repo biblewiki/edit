@@ -82,6 +82,7 @@ class Html implements RouterInterface {
         $html = str_replace("#CSS#", $this->getCssFiles($useMinify), $html);
         $html = str_replace("#JS#", $this->getJsFiles($useMinify), $html);
         $html = str_replace("#CONFIG#", $this->getGuiData(), $html);
+        $html = str_replace("#REFERER#", $_SERVER['HTTP_REFERER'], $html);
 
         return $html;
     }
@@ -137,14 +138,14 @@ class Html implements RouterInterface {
         $data->loggedInUserId = $this->app->getLoggedInUserId();
 
         // Rechte
-        $data->loggedInuserRole = $this->app->getLoggedInUserRole();
+        $data->loggedInUserRole = $this->app->getLoggedInUserRole();
 
         // LieferantId
         //$data->loggedInLieferantId = $this->app->getLoggedInLieferantId();
 
         // Sprachen
         //$userCnf = kg\user\User::getUserConfig($this->app);
-        //$data->guiLanguageId = empty($userCnf['languageId']) ? $this->app->getLanguageId() : $userCnf['languageId'];
+        $data->guiLanguageId = empty($userCnf['languageId']) ? $this->app->getLanguageId() : $userCnf['languageId'];
 
         return json_encode($data);
     }

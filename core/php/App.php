@@ -116,7 +116,7 @@ class App {
         if (\array_key_exists("biwi", $_SESSION) && $_SESSION["biwi"]) {
             $this->session = $_SESSION["biwi"];
         } else {
-            $this->session = new Session();
+            $this->session = new \biwi\Session();
         }
 
         // Sprache herausfinden
@@ -127,7 +127,7 @@ class App {
         $router = $router->handleRequest($this->request, $this->response);
 
         // Exit
-        $this->kiExit();
+        $this->biwiExit();
     }
 
 
@@ -509,7 +509,7 @@ class App {
      * @param bool $error           -> Gibt an ob es sich bei der msg um eine Fehlermeldung handelt
      * @param bool $deleteSession   -> Löscht die aktive Session
      */
-    public function kiExit(string $msg = "", bool $error = true, bool $deleteSession = false): void {
+    public function biwiExit(string $msg = "", bool $error = true, bool $deleteSession = false): void {
 
         // Session wieder schreiben
         $_SESSION["biwi"] = $this->session;
@@ -605,22 +605,24 @@ class App {
     /**
      * Schreibt einen Eintrag in den Event Log
      * @param string $table
-     * @param array $request
+     * @param string $command
+     * @param array $formPacket
      * @return void
      * @throws \Throwable
      */
-    public function writeToEventLog(string $table, array $request): void {
+    public function writeToEventLog(string $table, string $command, ?array $formPacket = null): void {
         try {
             $st = $this->getDb()->prepare('
-                INSERT INTO eventLog (clientIp, userId, client, targetTable, request)
-                VALUES (:clientIp, :userId, :client, :table, :request)
+                INSERT INTO eventLog (clientIp, userId, client, targetTable, command, formPacket)
+                VALUES (:clientIp, :userId, :client, :table, :command, :formPacket)
             ');
 
             $st->bindParam(':clientIp', $this->getClientIp(), \PDO::PARAM_STR);
             $st->bindParam(':userId', $this->getLoggedInUserId(), \PDO::PARAM_INT);
             $st->bindParam(':client', $_SERVER['HTTP_USER_AGENT'], \PDO::PARAM_STR);
             $st->bindParam(':table', $table, \PDO::PARAM_STR);
-            $st->bindParam(':request', json_encode($request), \PDO::PARAM_STR);
+            $st->bindParam(':command', trim($command), \PDO::PARAM_STR);
+            $st->bindParam(':formPacket', json_encode($formPacket), \PDO::PARAM_STR);
 
             $st->execute();
             unset($st);

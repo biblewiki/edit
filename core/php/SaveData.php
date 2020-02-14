@@ -177,7 +177,7 @@ class SaveData {
             }
         }
 
-        $this->app->writeToEventLog($this->tableName, $formPacket);
+        $this->app->writeToEventLog($this->tableName, $st->queryString, $formPacket);
     }
 
 
@@ -492,6 +492,6 @@ class SaveData {
         $this->app->getDb()->bindParams($st);
         $st->execute();
 
-        $this->app->writeToEventLog($this->tableName, $formPacket);
+        $this->app->writeToEventLog($this->tableName, $st->queryString, $formPacket);
     }
 }

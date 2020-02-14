@@ -2,6 +2,19 @@
    * Variablen
    ****************** */
 /* ******************
+   * Splashscreen
+   ****************** */
+.splashscreen {
+  height: 100%;
+  width: 100%;
+  background-color: white;
+}
+.splashscreen .kijs-container-inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* ******************
    * Navigation
    ****************** */
 .biwi-app-buttontree .kijs-button {
@@ -173,5 +186,32 @@ span.biwi-logo-header {
    ****************** */
 div.biwi-detail-panel > div.kijs-footer > .kijs-container-inner {
   display: flex;
+}
+/* ******************
+   * Settings
+   ****************** */
+.biwi-settings {
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+}
+.biwi-settings > .kijs-container-inner {
+  overflow-y: auto;
+}
+.biwi-settings .panel .setting {
+  padding: 20px;
+}
+.biwi-settings .panel .setting .caption {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.biwi-settings .panel .setting .setting-value > .kijs-container-inner {
+  display: flex;
+  flex-direction: row;
+}
+.biwi-settings .panel .setting .setting-value .left {
+  width: 400px;
+  margin-right: 60px;
+}
+.biwi-settings .panel .setting .setting-value .left .description {
+  padding-bottom: 30px;
 }
 /*# sourceMappingURL=biwi_app.css.map */

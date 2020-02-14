@@ -70,6 +70,7 @@ biwi.person.GroupWindow = class biwi_person_GroupWindow extends biwi.default.Def
                     rpc: this._app.rpc,
                     autoLoad: true,
                     facadeFnLoad: 'group.getForCombo',
+                    facadeFnArgs: { personId: this._personId },
                     elements: [
                         {
                             xtype: 'kijs.gui.Button',

@@ -104,5 +104,4 @@ biwi.relationship.Relationship = class biwi_relationship_Relationship extends bi
     destruct() {
         super.destruct();
     }
-
 };

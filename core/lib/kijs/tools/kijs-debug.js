@@ -220,7 +220,7 @@ window.kijs = class kijs {
      */
     static getText(key, variant='', args=null, comment='', languageId=null) {
         if (kijs.isFunction(kijs.__getTextFn)) {
-            return kijs.__getTextFn.call(kijs.__getTextFnScope || this, key, variant, args, languageId);
+            return kijs.__getTextFn.call(kijs.__getTextFnScope || this, key, variant, args, comment, languageId);
         }
 
         // keine getText-Fn definiert: Argumente ersetzen
@@ -357,7 +357,7 @@ window.kijs = class kijs {
      * @returns {Boolean}
      */
     static isNumeric(value) {
-        return this.isNumber(value) || (this.isString(value) && value.match(/^[0-9]+\.{0,1}[0-9]*$/));
+        return this.isNumber(value) || !!(this.isString(value) && value.match(/^-{0,1}[0-9]+(\.[0-9]+){0,1}$/));
     }
 
     /**
@@ -376,7 +376,7 @@ window.kijs = class kijs {
      * @returns {undefined}
      */
     static isReady(fn, context) {
-        document.addEventListener('DOMContentLoaded', this.createDelegate(fn, context||this), false);
+        document.addEventListener('DOMContentLoaded', this.createDelegate(fn, context || this), false);
     }
 
     /**
@@ -411,7 +411,8 @@ window.kijs = class kijs {
     }
 
     /**
-     * Setzt eine individuelle getText-Funktion
+     * Setzt eine individuelle getText-Funktion.
+     * Die fn erhält folgende Variablen: key, variant, args, comment, languageId
      * @param {Function} fn
      * @param {Object} scope
      * @returns {undefined}
@@ -434,6 +435,7 @@ window.kijs = class kijs {
         return 'kijs-' + (prefix ? prefix + '-' : '') + window.kijs.__uniqId;
     }
 };
+
 /* global kijs */
 
 // --------------------------------------------------------------
@@ -557,17 +559,17 @@ kijs.Ajax = class kijs_Ajax {
             } else {
                 let error = '';
                 if (xmlhttp.status > 0) {
-                    error = kijs.getText('Der Server hat mit einem Fehler geantwortet:') + ' ' + xmlhttp.statusText + ' (Code ' + xmlhttp.status + ')';
+                    error = kijs.getText('Der Server hat mit einem Fehler geantwortet') + ': ' + xmlhttp.statusText + ' (Code ' + xmlhttp.status + ')';
 
                 } else if (config.abortHappened) {
-                    error = kijs.getText('Die Verbindung wurde abgebrochen.');
+                    error = kijs.getText('Die Verbindung wurde abgebrochen') + '.';
 
                 } else if (config.timeoutHappened) {
-                    error = kijs.getText('Der Server brauchte zu lange, um eine Antwort zu senden.') + ' ' +
-                            kijs.getText('Die Verbindung wurde abgebrochen.');
+                    error = kijs.getText('Der Server brauchte zu lange, um eine Antwort zu senden') + '. ' +
+                            kijs.getText('Die Verbindung wurde abgebrochen') + '.';
 
                 } else {
-                    error = kijs.getText('Die Verbindung konnte nicht aufgebaut werden.');
+                    error = kijs.getText('Die Verbindung konnte nicht aufgebaut werden') + '.';
                 }
                 config.fn.call(config.context || this, val, config, error);
             }
@@ -4116,7 +4118,7 @@ kijs.Number = class kijs_String {
      * @returns {Number}
      */
     static round(number, precision=0) {
-        return window.parseFloat(number.toFixed(precision));
+        return Number(Math.round(number + 'e' + precision) + 'e-' + precision);
     }
 
     /**
@@ -5866,6 +5868,7 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
                         name: 'field',
                         label: config.label,
                         value: config.value,
+                        required: !!config.required,
                         labelStyle: {
                             marginRight: '4px'
                         },
@@ -5891,7 +5894,6 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
                 htmlDisplayType: 'html',
                 cls: 'kijs-msgbox-inner'
             });
-
         }
 
         // Buttons
@@ -5906,7 +5908,12 @@ kijs.gui.MsgBox = class kijs_gui_MsgBox {
                         btn = button.name;
                         if (config.fieldXtype) {
                             value = this.upX('kijs.gui.Window').down('field').value;
+
+                            if (!this.upX('kijs.gui.Window').down('field').validate()) {
+                                return;
+                            }
                         }
+
                         this.upX('kijs.gui.Window').destruct();
                     };
                 }
@@ -6073,6 +6080,7 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
         this._currentUploadIds = [];
         this._directory = false;
         this._dropZones = [];
+        this._fileExtensions = [];
         this._maxFilesize = null;
         this._multiple = true;
         this._sanitizeFilename = false;
@@ -6104,6 +6112,7 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
             ajaxUrl: true,
             directory: { target: 'directory' },
             multiple: { target: 'multiple' },
+            fileExtensions:  { target: 'fileExtensions' },
             filenameHeader: true,
             pathnameHeader: true,
             maxFilesize: true,
@@ -6130,11 +6139,16 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
             val = [val];
         }
 
+        this._contentTypes = [];
+
         // prüfen, ob der media-type gültig ist.
         kijs.Array.each(val, function(contentType) {
             let parts = contentType.toLowerCase().split('/', 2);
             if (!kijs.Array.contains(this._validMediaTypes, parts[0])) {
-                throw new kijs.Error('invalid media type "' + contentType + '"');
+                throw new kijs.Error('invalid content type "' + contentType + '"');
+            }
+            if (parts.length === 1) {
+                parts.push('*');
             }
             this._contentTypes.push(parts.join('/'));
         }, this);
@@ -6145,6 +6159,23 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
 
     get directory() { return this._directory; }
     set directory(val) { this._directory = !!val && this._browserSupportsDirectoryUpload(); }
+
+    get fileExtensions() { return this._fileExtensions; }
+    set fileExtensions(val) {
+        if (!kijs.isArray(val)) {
+            val = [val];
+        }
+
+        this._fileExtensions = [];
+
+        kijs.Array.each(val, function(type) {
+            if (type.charAt(0) !== '.') {
+                type = '.' + type;
+            }
+
+            this._fileExtensions.push(type);
+        }, this);
+    }
 
     get multiple() { return this._multiple; }
     set multiple(val) { this._multiple = !!val; }
@@ -6209,8 +6240,11 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
             input.setAttribute('webkitdirectory', 'webkitdirectory');
             input.setAttribute('mozdirectory', 'mozdirectory');
         }
-        if (this._contentTypes.length > 0) {
-            input.setAttribute('accept', this._contentTypes.join(','));
+
+        let acceptTypes = kijs.Array.concat(this._contentTypes, this._fileExtensions);
+
+        if (acceptTypes.length > 0) {
+            input.setAttribute('accept', acceptTypes.join(','));
         }
 
         kijs.Dom.addEventListener('change', input, function(e) {
@@ -6240,14 +6274,36 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
         return support;
     }
 
-    _checkMime(filetype) {
-        if (filetype && this._contentTypes.length > 0) {
-            let parts = filetype.split('/', 2);
-            if (!kijs.Array.contains(this._contentTypes, parts[0]) && !kijs.Array.contains(this._contentTypes, parts.join('/'))) {
-                return false;
+    /**
+     * Prüft, ob der übergebene MIME type einem der erlaubten MIME entspricht
+     * @param {String} mime
+     * @returns {Boolean}
+     */
+    _checkMime(mime) {
+        let match=false;
+        if (mime.type && this._contentTypes.length > 0) {
+            mime = mime.type.toLowerCase();
+            let mimeParts = mime.split('/', 2);
+
+            kijs.Array.each(this._contentTypes, function(contentType) {
+                if (mime === contentType || contentType === mimeParts[0] + '/*') {
+                    match = true;
+                }
+            }, this);
+        } else {
+
+            let extension = mime.name.split('.').pop();
+
+            if (extension && this._fileExtensions.length > 0) {
+                kijs.Array.each(this._fileExtensions, function(ext) {
+                    if (ext === '.' + extension) {
+                        match = true;
+                    }
+                }, this);
             }
         }
-        return true;
+
+        return match;
     }
 
     _getFilename(filename) {
@@ -6275,7 +6331,7 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
         this._uploadResponses = {};
         if (fileList) {
             for (let i=0; i<fileList.length; i++) {
-                if (this._checkMime(fileList[i].type)) {
+                if (this._checkMime(fileList[i])) {
                     this._uploadFile(fileList[i]);
                 } else {
                     this.raiseEvent('failUpload', this, this._getFilename(fileList[i].name), fileList[i].type);
@@ -6316,7 +6372,7 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
 
         // Fehlermeldung vom server
         if (!val || !val.success) {
-            error = error || val.msg || kijs.getText('Es ist ein unbekannter Fehler aufgetreten.');
+            error = error || val.msg || kijs.getText('Es ist ein unbekannter Fehler aufgetreten') + '.';
         }
 
         // Antwort vom Server
@@ -6368,10 +6424,24 @@ kijs.UploadDialog = class kijs_UploadDialog extends kijs.Observable {
 
     destruct() {
         this._dropZones = null;
-//        this._contentTypes = null;
+        this._contentTypes = null;
+        this._contentTypes = null;
+        this._currentUploadIds = null;
+        this._directory = null;
+        this._dropZones = null;
+        this._fileExtensions = null;
+        this._maxFilesize = null;
+        this._multiple = null;
+        this._sanitizeFilename = null;
+        this._uploadId = null;
+        this._uploadResponses = null;
+        this._filenameHeader = null;
+        this._pathnameHeader = null;
+        this._validMediaTypes = null;
         super.destruct();
     }
 };
+
 /* global kijs, this, HTMLElement */
 
 // --------------------------------------------------------------
@@ -7553,7 +7623,7 @@ kijs.gui.Dom = class kijs_gui_Dom extends kijs.Observable {
 
         if (this._node) {
             this._node[name] = value;
-            // Kleiner murgs, weil obige Zeiele nicht zum Entfernen der Eigenschaft 'tabIndex' funktioniert
+            // Kleiner murgs, weil obige Zeile nicht zum Entfernen der Eigenschaft 'tabIndex' funktioniert
             if (kijs.isEmpty(value)) {
                 this._node.removeAttribute(name);
             }
@@ -11371,6 +11441,7 @@ kijs.gui.Icon = class kijs_gui_Icon extends kijs.gui.Element {
 // als target dient, wird nichts angegeben, so dient das ganze Element als target.
 // Es kann z.B. bei einem kijs.gui.Panel nur der innere Teil als target angegeben werden.
 // Dazu kann die Eigenschaft targetDomProperty="innerDom" definiert werden.
+// Mit dem Attribut "text" kann ein Text unterhalb des icons angezeigt werden.
 // --------------------------------------------------------------
 kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
 
@@ -11382,6 +11453,7 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
         super(false);
 
         this._iconEl = new kijs.gui.Icon({ parent: this });
+        this._textEl = new kijs.gui.Dom({cls:'kijs-mask-text'});
 
         this._targetX = null;           // Zielelement (kijs.gui.Element) oder Body (HTMLElement)
         this._targetDomProperty = 'dom'; // Dom-Eigenschaft im Zielelement (String) (Spielt bei Body als target keine Rolle)
@@ -11401,6 +11473,7 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
             iconCls: { target: 'iconCls', context: this._iconEl },
             iconColor: { target: 'iconColor', context: this._iconEl },
             target: { target: 'target' },
+            text: { target: 'html', context: this._textEl },
             targetDomProperty: true
         });
 
@@ -11496,7 +11569,13 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
      */
     get parentNode() {
         if (this._targetX instanceof kijs.gui.Element) {
-            return this._targetX[this._targetDomProperty].node.parentNode;
+            if (this._targetX[this._targetDomProperty].node.parentNode) {
+                return this._targetX[this._targetDomProperty].node.parentNode;
+            } else {
+                // Vielleicht ist es besser wenigstens auf dem Node eine Maske anzuzeigen falls es keinen Parent gibt (Window).
+                // Falls nicht halt gar keine Maske anzeigen.
+                return this._targetX[this._targetDomProperty].node;
+            }
         } else {
             return this._targetX;
         }
@@ -11549,6 +11628,10 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
     }
 
 
+    get text() { return this._textEl.html; }
+    set text(val) { this._textEl.html = val; }
+
+
 
 
     // --------------------------------------------------------------
@@ -11568,6 +11651,8 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
             this._iconEl.unrender();
         }
 
+        this._textEl.renderTo(this._dom.node);
+
         // Event afterRender auslösen
         if (!superCall) {
             this.raiseEvent('afterRender');
@@ -11582,6 +11667,7 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
         }
 
         this._iconEl.unrender();
+        this._textEl.unrender();
         super.unrender(true);
     }
 
@@ -11645,6 +11731,10 @@ kijs.gui.Mask = class kijs_gui_Mask extends kijs.gui.Element {
         // Elemente/DOM-Objekte entladen
         if (this._iconEl) {
             this._iconEl.destruct();
+        }
+
+        if (this._textEl) {
+            this._textEl.destruct();
         }
 
         // Basisklasse entladen
@@ -13357,7 +13447,9 @@ kijs.gui.grid.Filter = class kijs_gui_grid_Filter extends kijs.gui.Element {
 
         // Variablen (Objekte/Arrays) leeren
         this._filters = null;
-        this._dataRow = null;
+        if (this._dataRow) {
+            this._dataRow = null;
+        }
 
         // Basisklasse entladen
         super.destruct(true);
@@ -13395,7 +13487,10 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
         this._facadeFnSave = null;
         this._facadeFnArgs = null;
         this._facadeFnBeforeMsgFn = null;
+        this._waitMaskTarget = null;
+        this._waitMaskTargetDomProperty = null;
 
+        this._autoLoad = true;        // Datensätze nach dem Rendern automatisch vom Server laden
         this._remoteDataLoaded = 0;   // Anzahl geladene Datensätze
         this._remoteDataLimit = 50;   // Anzahl Datensätze, die geladen werden
         this._remoteDataStep = 50;    // Anzahl Datensätze, die pro request hinzugefügt werden.
@@ -13410,7 +13505,6 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
         this._focusable = true;       // ob das grid focusiert weden kann
         this._editable = false;       // editierbare zeilen?
         this._filterable = false;
-        this._autoLoad = true;
 
         // Intersection Observer (endless grid loader)
         this._intersectionObserver = null;
@@ -13459,17 +13553,20 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
 
         // Standard-config-Eigenschaften mergen
         Object.assign(this._defaultConfig, {
-            // keine
+            waitMaskTarget           : this,
+            waitMaskTargetDomProperty: 'dom'
         });
 
         // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            rpc                 : true,
-            facadeFnLoad        : true,
-            facadeFnSave        : true,
-            facadeFnArgs        : true,
-            facadeFnBeforeMsgFn : true,
-            autoLoad: true,
+            autoLoad                  : true,
+            rpc                       : true,
+            facadeFnLoad              : true,
+            facadeFnSave              : true,
+            facadeFnArgs              : true,
+            facadeFnBeforeMsgFn       : true,
+            waitMaskTarget            : true,
+            waitMaskTargetDomProperty : true,
 
             columnConfigs:  { fn: 'function', target: this.columnConfigAdd, context: this },
             primaryKeys:    { target: 'primaryKeys' },
@@ -14165,16 +14262,23 @@ kijs.gui.grid.Grid = class kijs_gui_grid_Grid extends kijs.gui.Element {
 
                 // Lademaske wird angezeigt, wenn das erste mal geladen  wird, oder
                 // wenn sämtliche Datensätze neu geladen werden.
-                let showWaitMask = this.dom.node && this.dom.node.parentNode && (force || this._remoteDataLoaded === 0); // !TODO bei Windows gibt es zum Teil keinen Parent-Node
+                let showWaitMask = force || this._remoteDataLoaded === 0;
 
                 // RPC ausführen
                 this._rpc.do(this._facadeFnLoad, args, function(response) {
-                    this._remoteProcess(response, args, force);
+                        this._remoteProcess(response, args, force);
 
-                    // Promise auflösen
-                    resolve(response);
+                        // Promise auflösen
+                        resolve(response);
 
-                }, this, true, showWaitMask ? this : 'none', 'dom', false, this._facadeFnBeforeMsgFn);
+                    },
+                    this,                                           // Context
+                    true,                                           // Cancel running
+                    showWaitMask ? this._waitMaskTarget : 'none',   // Wait Mask Target
+                    this._waitMaskTargetDomProperty,                // Wait Mask Target Dom Property
+                    false,                                          // Ignore Warnings
+                    this._facadeFnBeforeMsgFn
+                );
             }
         });
     }
@@ -14851,7 +14955,9 @@ kijs.gui.grid.Header = class kijs_gui_grid_Header extends kijs.gui.Element {
 
         // Variablen (Objekte/Arrays) leeren
         this._cells = null;
-        this._dataRow = null;
+        if (this._dataRow) {
+            this._dataRow = null;
+        }
 
         // Basisklasse entladen
         super.destruct(true);
@@ -17288,31 +17394,35 @@ kijs.gui.DataView = class kijs_gui_DataView extends kijs.gui.Container {
     /**
      * Füllt das Dataview mit Daten vom Server
      * @param {Array} args Array mit Argumenten, die an die Facade übergeben werden
-     * @returns {undefined}
+     * @returns {Promise}
      */
     load(args) {
+        return new Promise((resolve) => {
+            // Standardargumente anhängen
+            if (kijs.isObject(this._facadeFnArgs) && !kijs.isEmpty(this._facadeFnArgs)) {
+                if (kijs.isObject(args)) {
+                    Object.assign(args, this._facadeFnArgs);
 
-        // Standardargumente anhängen
-        if (kijs.isObject(this._facadeFnArgs) && !kijs.isEmpty(this._facadeFnArgs)) {
-            if (kijs.isObject(args)) {
-                Object.assign(args, this._facadeFnArgs);
+                } else if (kijs.isArray(args)) {
+                    args.push(kijs.Object.clone(this._facadeFnArgs));
 
-            } else if (kijs.isArray(args)) {
-                args.push(kijs.Object.clone(this._facadeFnArgs));
-
-            } else {
-                args = kijs.Object.clone(this._facadeFnArgs);
-            }
-        }
-
-        this._rpc.do(this._facadeFnLoad, args, function(response) {
-            this.data = response.rows;
-            if (!kijs.isEmpty(response.selectFilters)) {
-                this.selectByFilters(response.selectFilters);
+                } else {
+                    args = kijs.Object.clone(this._facadeFnArgs);
+                }
             }
 
-            this.raiseEvent('afterLoad', {response: response});
-        }, this, true, this, 'dom', false);
+            this._rpc.do(this._facadeFnLoad, args, function(response) {
+                this.data = response.rows;
+                if (!kijs.isEmpty(response.selectFilters)) {
+                    this.selectByFilters(response.selectFilters);
+                }
+
+                // Promise ausführen
+                resolve(this.data);
+
+                this.raiseEvent('afterLoad', {response: response});
+            }, this, true, this, 'dom', false);
+        });
     }
 
     /**
@@ -18734,7 +18844,15 @@ kijs.gui.Panel = class kijs_gui_Panel extends kijs.gui.Container {
     }
     set collapsed(val) {
         if (val) {
-            this.collapse();
+            if (val === 'toggle') {
+                if (this.collapsed) {
+                    this.expand();
+                } else {
+                    this.collapse();
+                }
+            } else {
+                this.collapse();
+            }
         } else {
             this.expand();
         }
@@ -21798,7 +21916,7 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
         this._fields = null;        // Array mit kijs.gui.field.Fields-Elementen
         this._rpc = null;           // Instanz von kijs.gui.Rpc
         this._rpcArgs = {};         // Standard RPC-Argumente
-        this._errorMsg = kijs.getText('Es wurden noch nicht alle Felder richtig ausgefüllt.');
+        this._errorMsg = kijs.getText('Es wurden noch nicht alle Felder richtig ausgefüllt') + '.';
 
         // Standard-config-Eigenschaften mergen
         Object.assign(this._defaultConfig, {
@@ -21844,7 +21962,7 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
     get data() {
         let data = {};
 
-        if (this._fields === null) {
+        if (kijs.isEmpty(this._fields)) {
             this.searchFields();
         }
 
@@ -21914,6 +22032,7 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
         if (kijs.isEmpty(this._fields)) {
             this.searchFields();
         }
+
         return this._fields;
     }
 
@@ -21928,7 +22047,7 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
             this.searchFields();
         }
 
-        for (let i=0; i<this._fields.length; i++) {
+        for (let i = 0; i < this._fields.length; i++) {
             if (this._fields[i].isDirty) {
                 return true;
             }
@@ -21936,6 +22055,7 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
 
         return false;
     }
+
     set isDirty(val) {
         if (kijs.isEmpty(this._fields)) {
             this.searchFields();
@@ -21948,14 +22068,16 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
 
     get isEmpty() {
         let empty = true;
-        kijs.Array.each(this.fields, function(element) {
-            if (element instanceof kijs.gui.field.Field) {
-                if (!kijs.isEmpty(element.value)){
-                    empty = false;
-                    return;
-                }
+
+        if (kijs.isEmpty(this._fields)) {
+            this.searchFields();
+        }
+
+        for (let i = 0; i < this._fields.length; i++) {
+            if (!this._fields[i].isEmpty) {
+                empty = false;
             }
-        }, this);
+        }
 
         return empty;
     }
@@ -22026,8 +22148,10 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
             this.searchFields();
         }
 
-        for (let i=0; i<this._fields.length; i++) {
-            this._fields[i].value = null;
+        for (let i = 0; i < this._fields.length; i++) {
+            if (this._fields[i].xtype !== 'kijs.gui.field.Display') {
+                this._fields[i].value = null;
+            }
         }
 
         this._data = {};
@@ -22120,14 +22244,19 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
 
     /**
      * Sendet die Formulardaten an den Server
-     * @param {Boolean} [searchFields=false] Sollen die Formularfelder neu gesucht werden?
-     * @param {Object|null} [args=null] Argumente für den RPC
+     * @param {type} searchFields
+     * @param {type} args
+     * @param {type} waitMaskTarget
      * @returns {Promise}
      */
-    save(searchFields=false, args=null) {
+    save(searchFields=false, args=null, waitMaskTarget=null) {
         return new Promise((resolve, reject) => {
             if (!kijs.isObject(args)) {
                 args = {};
+            }
+
+            if (!waitMaskTarget) {
+                waitMaskTarget = this;
             }
 
             if (searchFields || kijs.isEmpty(this._fields)) {
@@ -22151,9 +22280,9 @@ kijs.gui.FormPanel = class kijs_gui_FormPanel extends kijs.gui.Panel {
                     this.raiseEvent('afterSave', {response: response});
                     resolve(response);
 
-                }, this, false, this, 'dom', false, this._onRpcBeforeMessages);
+                }, this, false, waitMaskTarget, 'dom', false, this._onRpcBeforeMessages);
             } else {
-                kijs.gui.MsgBox.error(kijs.getText('Fehler'), kijs.getText('Es wurden noch nicht alle Felder richtig ausgefüllt.'));
+                kijs.gui.MsgBox.error(kijs.getText('Fehler'), kijs.getText('Es wurden noch nicht alle Felder richtig ausgefüllt') + '.');
             }
         });
     }
@@ -23403,6 +23532,17 @@ kijs.gui.field.Checkbox = class kijs_gui_field_Checkbox extends kijs.gui.field.F
         this._checkboxIconEl.iconCls = iconCls;
     }
 
+    // overwrite
+    _validationRules(value) {
+
+        // Eingabe erforderlich
+        if (this._required) {
+            if (!value) {
+                this._errors.push(kijs.getText('Dieses Checkbox muss bestätigt werden'));
+            }
+        }
+    }
+
 
     // LISTENERS
     _onClick(e) {
@@ -23515,6 +23655,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
         this._keyUpDefer = null;
         this._remoteSort = false;
         this._forceSelection = true;
+        this._firstLoaded = false;
         this._showPlaceholder = true;
         this._selectFirst = false;
 
@@ -23591,6 +23732,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
         this._eventForwardsAdd('input', this._inputDom);
         this._eventForwardsAdd('blur', this._inputDom);
         this._eventForwardsAdd('keyDown', this._inputDom);
+        this._eventForwardsAdd('afterLoad', this._listViewEl);
 
 //        this._eventForwardsRemove('enterPress', this._dom);
 //        this._eventForwardsRemove('enterEscPress', this._dom);
@@ -23652,10 +23794,10 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('disabled', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('disabled', false);
         }
 
         this._listViewEl.disabled = !!val;
@@ -23695,8 +23837,8 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        this._listViewEl.disabled = val || this._dom.clsHas('kijs-disabled');
-        if (val || this._dom.clsHas('kijs-disabled')) {
+        this._listViewEl.disabled = !!val;
+        if (val) {
             this._inputDom.nodeAttributeSet('readOnly', true);
         } else {
             this._inputDom.nodeAttributeSet('readOnly', false);
@@ -23709,11 +23851,24 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     // overwrite
     get value() { return this._value; }
     set value(val) {
+        let valueIsInStore = val === '' || val === null || this._isValueInStore(val);
         this._oldCaption = this._caption;
         this._oldValue = this._value;
         this._caption  = this._getCaptionFromValue(val);
         this._value = val;
         this._listViewEl.value = val;
+
+        // falls das value nicht im store ist, vom server laden
+        if (this._remoteSort) {
+            if (!valueIsInStore && this._firstLoaded) {
+                this.load(null, true);
+            }
+            // store leeren, wenn value gelöscht wird.
+            if (this._value === '' || this._value === null) {
+//                this._listViewEl.data = [];
+            }
+        }
+
         this._inputDom.nodeAttributeSet('value', this._caption);
     }
 
@@ -23726,26 +23881,35 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     /**
      * Füllt das Combo mit Daten vom Server
      * @param {Array} args Array mit Argumenten, die an die Facade übergeben werden
-     * @param {Boolean} firstLoad true, wenn es das erste Laden ist
+     * @param {Boolean} forceLoad true, wenn immer geladen werden soll
+     * @param {String} query Suchstring
      * @returns {undefined}
      */
-    load(args, firstLoad) {
-        args = args ? args : {};
+    load(args=null, forceLoad=false, query=null) {
+        args = kijs.isObject(args) ? args : {};
         args.remoteSort = !!this._remoteSort;
 
+        // Flag setzen
+        this._firstLoaded = true;
+
         if (this._remoteSort) {
-            let query = this._inputDom.nodeAttributeGet('value');
-            args.query = kijs.isString(query) ? query : '';
+            args.query = kijs.toString(query);
             args.value = this.value;
 
-            // Wenn eine Eingabe erfolgt, laden
-            // Beim ersten laden auch laden, wenn ein value vorhanden ist, damit das displayField geladen wird.
-            if (args.query.length >= this._minChars || (firstLoad && this._value !== '' && this._value !== null)) {
-                this._listViewEl.load(args);
+            // Wenn eine Eingabe erfolgt, oder bei forceLoad, laden
+            if (forceLoad || args.query.length >= this._minChars) {
+                this._listViewEl.load(args).then(() => {
+
+                    // Nach dem Laden das value neu setzen,
+                    // damit das Label erscheint
+                    if (query === null && this._isValueInStore(this.value)) {
+                        this.value = this._value;
+                    }
+                });
 
             } else {
-                this._listViewEl.removeAll();
-                this._addPlaceholder(kijs.getText('Schreiben Sie mindestens %1 Zeichen, um die Suche zu starten.', '', this._minChars));
+                this._listViewEl.data = [];
+                this._addPlaceholder(kijs.getText('Schreiben Sie mindestens %1 Zeichen, um die Suche zu starten', '', this._minChars) + '.');
             }
 
         } else {
@@ -23788,12 +23952,19 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
      */
     _addPlaceholder(text) {
         if (this._showPlaceholder) {
-            this._listViewEl.add({
-                xtype: 'kijs.gui.Container',
-                cls: 'kijs-placeholder',
-                html: text,
-                htmlDisplayType: 'code'
-            });
+
+            if (this._listViewEl.down('kijs-gui-field-combo-placeholder')) {
+                this._listViewEl.down('kijs-gui-field-combo-placeholder').html = text;
+
+            } else {
+                this._listViewEl.add({
+                    xtype: 'kijs.gui.Container',
+                    name: 'kijs-gui-field-combo-placeholder',
+                    cls: 'kijs-placeholder',
+                    html: text,
+                    htmlDisplayType: 'code'
+                });
+            }
         }
     }
 
@@ -23818,7 +23989,25 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
             caption = val;
         }
 
-        return caption;
+        return kijs.toString(caption);
+    }
+
+    /**
+     * Prüft, ob ein value im Store ist.
+     * @param {String|Number|null} val
+     * @returns {Boolean}
+     */
+    _isValueInStore(val) {
+        let found = false;
+
+        kijs.Array.each(this._listViewEl.data, function(row) {
+            if (row[this.valueField] === val) {
+                found = true;
+                return false;
+            }
+        }, this);
+
+        return found;
     }
 
     /**
@@ -23917,7 +24106,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
             }, this);
 
             if (!match) {
-                this._errors.push(kijs.getText('Der Wert "%1" ist nicht in der Liste enthalten.', '', value));
+                this._errors.push(kijs.getText('Der Wert "%1" ist nicht in der Liste enthalten', '', value) + '.');
             }
         }
 
@@ -23943,7 +24132,8 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
 
     // LISTENERS
     _onAfterFirstRenderTo(e) {
-        this.load(null, true);
+        // forceLoad, wenn value vorhanden ist (damit label geladen wird)
+        this.load(null, this.value !== '');
     }
 
     _onInputKeyDown(e) {
@@ -23971,7 +24161,13 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
             this._spinBoxEl.close();
 
             if (dataViewElement && dataViewElement instanceof kijs.gui.DataViewElement) {
-                this.value = dataViewElement.dataRow[this.valueField];
+                let newVal = dataViewElement.dataRow[this.valueField];
+                let changed = newVal !== this.value;
+                this.value = newVal;
+
+                if (changed) {
+                    this.raiseEvent('change');
+                }
             }
 
             // event stoppen
@@ -24010,7 +24206,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
         // neues Defer schreiben
         this._keyUpDefer = kijs.defer(function() {
             if (this._remoteSort) {
-                this.load();
+                this.load(null, false, this._inputDom.nodeAttributeGet('value'));
 
             } else {
                 this._setProposal(e.nodeEvent.key);
@@ -24020,6 +24216,13 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     }
 
     _onInputChange(e) {
+
+        // change event nicht berücksichtigen, wenn die spinbox
+        // offen ist.
+        if (this._spinBoxEl.isRendered) {
+            return;
+        }
+
         let inputVal = this._inputDom.nodeAttributeGet('value'), match=false, matchVal='', changed=false;
         inputVal = kijs.toString(inputVal).trim();
 
@@ -24105,6 +24308,10 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
     _onSpinButtonClick(e) {
         super._onSpinButtonClick(e);
         this._listViewEl.applyFilters();
+
+        if (this._remoteSort && this._listViewEl.data.length === 0) {
+            this._addPlaceholder(kijs.getText('Schreiben Sie mindestens %1 Zeichen, um die Suche zu starten', '', this._minChars) + '.');
+        }
     }
 
 
@@ -24134,6 +24341,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
         super.destruct(true);
     }
 };
+
 /* global kijs, this */
 
 // --------------------------------------------------------------
@@ -24323,10 +24531,10 @@ kijs.gui.field.DateTime = class kijs_gui_field_DateTime extends kijs.gui.field.F
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('disabled', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('disabled', false);
         }
     }
 
@@ -24348,10 +24556,10 @@ kijs.gui.field.DateTime = class kijs_gui_field_DateTime extends kijs.gui.field.F
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        if (val || this._dom.clsHas('kijs-disabled')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('readonly', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('readonly', false);
         }
     }
 
@@ -24816,10 +25024,10 @@ kijs.gui.field.Display = class kijs_gui_field_Display extends kijs.gui.field.Fie
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('disabled', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('disabled', false);
         }
     }
 
@@ -24835,10 +25043,10 @@ kijs.gui.field.Display = class kijs_gui_field_Display extends kijs.gui.field.Fie
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        if (val || this._dom.clsHas('kijs-disabled')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('readonly', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('readonly', false);
         }
     }
 
@@ -24917,12 +25125,12 @@ kijs.gui.field.Display = class kijs_gui_field_Display extends kijs.gui.field.Fie
         }
 
         // Email
-        if (value.match(/^[^@]+@[^@\.]+\.[a-z]+$/i)) {
+        if (value.match(/^[^@]+@[\w\-\.àáâãäåæçèéêëìíîïðñòóôõöøœùúûüýÿ]+\.[a-z]{2,}$/i)) {
             return 'mail';
         }
 
         // Webseite
-        if (value.match(/^[\w0-9-öüäéèà\.]+\.[a-z]{2,}$/i)) {
+        if (value.match(/^[\w\-\.àáâãäåæçèéêëìíîïðñòóôõöøœùúûüýÿ]+\.[a-z]{2,}$/i)) {
             return 'web';
         }
 
@@ -24937,21 +25145,21 @@ kijs.gui.field.Display = class kijs_gui_field_Display extends kijs.gui.field.Fie
      */
     _openLink(link, type) {
         if (type === 'tel') {
-            window.open('tel:' + link.replace(/[^\+0-9]/i, ''));
+            window.open('tel:' + link.replace(/[^\+0-9]/i, ''), '_self');
 
         } else if (type === 'mail') {
-            window.open('mailto:' + link, '');
+            window.open('mailto:' + link, '_self');
 
-        }  else if (type === 'web' && link.substr(0,4) === 'http') {
-            window.open(link, '');
+        }  else if (type === 'web' && link.match(/^(http|ftp)s?:\/\//i)) {
+            window.open(link, '_blank');
 
         }  else if (type === 'web') {
-            window.open('http://' + link, '');
+            window.open('http://' + link, '_blank');
         }
     }
 
     _onDomClick() {
-        if (this._link) {
+        if (this._link && !this.disabled && !this.readOnly) {
             let linkType = this._linkType === 'auto' ? this._getLinkType(this.value) : this._linkType;
             this._openLink(kijs.toString(this.value), linkType);
         }
@@ -24998,7 +25206,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
         this._aceEditor = null;
         this._aceEditorNode = null;
-        this._mode = null;
+        this._mode = 'javascript';
         this._theme = null;
         this._value = null;
 
@@ -25006,7 +25214,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
        // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
-            mode: true,          // 'javascript', 'json', 'css', 'html', 'php', 'mysql', 'plain_text' (weitere siehe Ordner kijs\lib\ace)
+            mode: true,          // 'javascript' (Default), 'json', 'css', 'html', 'php', 'mysql', 'plain_text' (weitere siehe Ordner kijs\lib\ace)
             theme: true          // (siehe Ordner kijs\lib\ace)
         });
 
@@ -25092,11 +25300,14 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
             // Zeitverzögert den Listener erstellen
             kijs.defer(function() {
-                var _this = this;
-                this._aceEditor.getSession().on('change', function() {
-                    _this.raiseEvent(['input', 'change']);
+                this._aceEditor.session.on('change', () => {
+                    this.raiseEvent('input');
                 });
+
+                kijs.Dom.addEventListener('change', inputNode, this._onInputNodeChange, this);
             }, 200, this);
+        } else {
+            this._inputWrapperDom.node.appendChild(this._aceEditorNode);
         }
 
         this._aceEditor.setHighlightActiveLine(false);
@@ -25109,7 +25320,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
             this._aceEditor.session.setMode('ace/mode/' + this._mode);
         }
 
-        this.value = this._value;
+        this.value = this._value ? this._value : '';
 
         // Event afterRender auslösen
         if (!superCall) {
@@ -25119,8 +25330,12 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
 
     // LISTENERS
-    _onInput(e) {
+    _onInput() {
         this.validate();
+    }
+
+    _onInputNodeChange() {
+        this.raiseEvent('change');
     }
 
     // PROTECTED
@@ -25152,11 +25367,18 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
             this.raiseEvent('destruct');
         }
 
+        kijs.Dom.removeEventListener('change', this._aceEditorNode.firstChild, this);
+
         // Elemente/DOM-Objekte entladen
+        this._aceEditor.destroy();
+        this._aceEditor.container.remove();
 
         // Variablen (Objekte/Arrays) leeren
         this._aceEditor = null;
         this._aceEditorNode = null;
+        this._mode = null;
+        this._theme = null;
+        this._value = null;
 
         // Basisklasse entladen
         super.destruct(true);
@@ -25639,7 +25861,7 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
 
         // Evtl. eigenes Passwort-Feld ohne Sicherheitswarnung erstellen
         if (val) {
-            this._inputDom.nodeAttributeSet('type', undefined);
+            this._inputDom.nodeAttributeSet('type', 'text');
 
             // DOM-Events
             this._inputDom.on('keyUp', this._onKeyUp, this);
@@ -25662,10 +25884,10 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('disabled', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('disabled', false);
         }
     }
 
@@ -25684,10 +25906,10 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        if (val || this._dom.clsHas('kijs-disabled')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val) {
+            this._inputDom.nodeAttributeSet('readonly', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('readonly', false);
         }
     }
 
@@ -25852,6 +26074,227 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
     }
 };
 
+/* global kijs, this, quill */
+
+// --------------------------------------------------------------
+// kijs.gui.field.QuillEditor
+// --------------------------------------------------------------
+/**
+ * TextEditor
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+kijs.gui.field.QuillEditor = class kijs_gui_field_QuillEditor extends kijs.gui.field.Field {
+
+    // --------------------------------------------------------------
+    // CONSTRUCTOR
+    // --------------------------------------------------------------
+    constructor(config={}) {
+        super(false);
+
+        this._disabled = false;
+        this._quillEditor = null;
+        this._quillEditorNode = null;
+        this._readOnly = false;
+        this._theme = 'snow';
+        this._value = null;
+        this._toolbarOptions = [
+            ['bold',  'underline', 'strike'],              // toggled buttons
+            ['blockquote', 'code-block'],
+
+            [{ header: 1 }, { header: 2 }],                // custom button values
+            [{ list: 'ordered'}, { list: 'bullet' }],
+            [{ script: 'sub'}, { script: 'super' }],       // superscript/subscript
+            [{ indent: '-1'}, { indent: '+1' }],           // outdent/indent
+            [{ direction: 'rtl' }],                        // text direction
+
+            [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+            [{ color: [] }, { background: [] }],           // dropdown with defaults from theme
+            [{ font: [] }],
+            [{ align: [] }],
+
+            ['clean']                                      // remove formatting button
+          ];
+
+        // Standard-config-Eigenschaften mergen
+        Object.assign(this._defaultConfig, {
+            cls: 'kijs-field-quilleditor'
+        });
+
+       // Mapping für die Zuweisung der Config-Eigenschaften
+        Object.assign(this._configMap, {
+            disabled: true,
+            readOnly: true,
+            theme: true,          // snow (default), bubble
+            toolbarOptions : true
+        });
+
+        // Listeners
+        this.on('input', this._onInput, this);
+
+        // Config anwenden
+        if (kijs.isObject(config)) {
+            config = Object.assign({}, this._defaultConfig, config);
+            this.applyConfig(config, true);
+        }
+    }
+
+
+    // --------------------------------------------------------------
+    // GETTERS / SETTERS
+    // --------------------------------------------------------------
+    // overwrite
+    get disabled() { return super.disabled; }
+    set disabled(val) {
+        this._disabled = val;
+        super.disabled = !!val;
+
+        if (val || this._dom.clsHas('kijs-disabled')) {
+            this._quillEditor.disable(true);
+        } else {
+            this._quillEditor.enable(true);
+        }
+    }
+
+    // overwrite
+    get isEmpty() { return kijs.isEmpty(this.value); }
+
+    // overwrite
+    get readOnly() { return this._readOnly; }
+    set readOnly(val) {
+        this._readOnly = val;
+        super.readOnly = !!val;
+
+        if (val || this._dom.clsHas('kijs-readonly')) {
+            this._quillEditor.disable(true);
+        } else {
+            this._quillEditor.enable(true);
+        }
+    }
+
+    get theme() { return this._theme; }
+    set theme(val) { this._theme = val; }
+
+    get trimValue() { return this._trimValue; }
+    set trimValue(val) { this._trimValue = val; }
+
+    // overwrite
+    get value() {
+        if (this._quillEditor) {
+            return this._quillEditor.getText();
+        } else {
+            return this._value;
+        }
+    }
+    set value(val) {
+        this._value = val;
+        if (this._quillEditor) {
+            this._quillEditor.setText(val);
+        }
+    }
+
+
+    // --------------------------------------------------------------
+    // MEMBERS
+    // --------------------------------------------------------------
+    // overwrite
+    render(superCall) {
+        super.render(true);
+
+        // quillEditor erstellen
+        if (!this._quillEditor) {
+
+            // Container erstellen und dem Node anhängen
+            let containerDiv = document.createElement('div');
+            containerDiv.className = 'quilleditor';
+            this._inputWrapperDom.node.appendChild(containerDiv);
+
+            // DIV für Editor erstellen
+            this._quillEditorNode = document.createElement('div');
+
+            // Editor DIV anhängen
+            containerDiv.appendChild(this._quillEditorNode);
+
+            // Editor erstellen
+            this._quillEditor = new Quill(this._quillEditorNode, {
+                theme: this._theme,
+                readOnly: this._readOnly || this._disabled,
+                modules: {
+                    toolbar: this._toolbarOptions
+                }
+            });
+            let inputNode = this._quillEditorNode.firstChild;
+            inputNode.id = this._inputId;
+
+            // Listener setzen und Event weiterleiten
+            this._quillEditor.on('text-change', function() { this.raiseEvent(['input', 'change']); }, this);
+        }
+
+        // Inhalt einfügen
+        this.value = this._value ? this._value : '';
+
+        // Event afterRender auslösen
+        if (!superCall) {
+            this.raiseEvent('afterRender');
+        }
+    }
+
+
+    // LISTENERS
+    _onInput(e) {
+        this.validate();
+    }
+
+    // PROTECTED
+//    // overwrite
+//    _validationRules(value) {
+//        super._validationRules(value);
+//
+//        // Fehler des Editors auch übernehmen
+//        if (this._quillEditor) {
+//            const annot = this._quillEditor.getSession().getAnnotations();
+//            for (let key in annot) {
+//                if (annot.hasOwnProperty(key)) {
+//                    this._errors.push("'" + annot[key].text + "'" + ' in Zeile ' + (annot[key].row+1));
+//                }
+//            }
+//        }
+//    }
+
+
+    // --------------------------------------------------------------
+    // DESTRUCTOR
+    // --------------------------------------------------------------
+    destruct(superCall) {
+        if (!superCall) {
+            // unrendern
+            this.unrender(superCall);
+
+            // Event auslösen.
+            this.raiseEvent('destruct');
+        }
+
+        // Elemente/DOM-Objekte entladen
+
+        // Variablen (Objekte/Arrays) leeren
+        this._disabled = false;
+        this._readOnly = null;
+        this._quillEditor = null;
+        this._quillEditorNode = null;
+        this._theme = null;
+        this._toolbarOptions = null;
+        this._value = null;
+
+        // Basisklasse entladen
+        super.destruct(true);
+    }
+};
 /* global kijs, this */
 
 // --------------------------------------------------------------
@@ -25952,10 +26395,10 @@ kijs.gui.field.Text = class kijs_gui_field_Text extends kijs.gui.field.Field {
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._inputDom.nodeAttributeSet('readOnly', true);
+        if (val || this._dom.clsHas('kijs-disabled')) {
+            this._inputDom.nodeAttributeSet('disabled', true);
         } else {
-            this._inputDom.nodeAttributeSet('readOnly', false);
+            this._inputDom.nodeAttributeSet('disabled', false);
         }
     }
 
@@ -25971,7 +26414,7 @@ kijs.gui.field.Text = class kijs_gui_field_Text extends kijs.gui.field.Field {
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        if (val || this._dom.clsHas('kijs-disabled')) {
+        if (val) {
             this._inputDom.nodeAttributeSet('readOnly', true);
         } else {
             this._inputDom.nodeAttributeSet('readOnly', false);
@@ -26707,6 +27150,106 @@ kijs.gui.field.OptionGroup = class kijs_gui_field_OptionGroup extends kijs.gui.f
         }
     }
 };
+/* global kijs, this */
+
+// --------------------------------------------------------------
+// kijs.gui.field.Range
+// --------------------------------------------------------------
+/**
+ * EVENTS
+ * ----------
+ * blur
+ * input
+ *
+ * // Geerbte Events
+ * add
+ * afterFirstRenderTo
+ * afterRender
+ * afterResize
+ * beforeAdd
+ * beforeRemove
+ * changeVisibility
+ * childElementAfterResize
+ * dblClick
+ * destruct
+ * drag
+ * dragEnd
+ * dragLeave
+ * dragOver
+ * dragStart
+ * drop
+ * focus
+ * mouseDown
+ * mouseLeave
+ * mouseMove
+ * mouseUp
+ * remove
+ * wheel
+ *
+ * // key events
+ * keyDown
+ * enterPress
+ * enterEscPress
+ * escPress
+ * spacePress
+ */
+kijs.gui.field.Range = class kijs_gui_field_Range extends kijs.gui.field.Text {
+
+    // --------------------------------------------------------------
+    // CONSTRUCTOR
+    // --------------------------------------------------------------
+    constructor(config={}) {
+        super(false);
+
+        this._inputDom.nodeAttributeSet('type', 'range');
+        this._dom.clsRemove('kijs-field-text');
+        this._dom.clsAdd('kijs-field-range');
+
+       // Mapping für die Zuweisung der Config-Eigenschaften
+        Object.assign(this._configMap, {
+            min: { target: 'min' },
+            max: { target: 'max' },
+            step: { target: 'step' }
+        });
+
+        // Config anwenden
+        if (kijs.isObject(config)) {
+            config = Object.assign({}, this._defaultConfig, config);
+            this.applyConfig(config, true);
+        }
+    }
+
+
+    // --------------------------------------------------------------
+    // GETTERS / SETTERS
+    // --------------------------------------------------------------
+
+    // overwrite
+    get isEmpty() { return false; }
+
+    set min(val) { this._inputDom.nodeAttributeSet('min', val); }
+    get min() { return this._inputDom.nodeAttributeGet('min'); }
+
+    set max(val) { this._inputDom.nodeAttributeSet('max', val); }
+    get max() { return this._inputDom.nodeAttributeGet('max'); }
+
+    set step(val) { this._inputDom.nodeAttributeSet('step', val); }
+    get step() { return this._inputDom.nodeAttributeGet('step'); }
+
+    // overwrite
+    // 'range' kennt das HTML-Attribut readOnly nicht,
+    // darum disabled benutzen.
+    get readOnly() { return super.readOnly; }
+    set readOnly(val) {
+        super.readOnly = !!val;
+        if (val) {
+            this._inputDom.nodeAttributeSet('disabled', true);
+        } else {
+            this._inputDom.nodeAttributeSet('disabled', false);
+        }
+    }
+};
+
 /* global kijs, this, HTMLElement */
 
 // --------------------------------------------------------------

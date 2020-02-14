@@ -50,22 +50,22 @@
 
         if (window.kijs) {
             kijs.isReady(function(){
-                new biwi.app.App(#CONFIG#).run();
+                new biwi.app.App(#CONFIG#).run("#REFERER#");
             });
         }
     </script>
         <!-- Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-        // Register a service worker hosted at the root of the
-        // site using the default scope.
-        navigator.serviceWorker.register('serviceworker.js').then(function(registration) {
-            //console.log('Service worker registration succeeded:', registration);
-        }, /*catch*/ function(error) {
-            console.log('Service worker registration failed:', error);
-        });
+            // Register a service worker hosted at the root of the
+            // site using the default scope.
+            navigator.serviceWorker.register('serviceworker.js').then(function(registration) {
+                //console.log('Service worker registration succeeded:', registration);
+            }, /*catch*/ function(error) {
+                console.log('Service worker registration failed:', error);
+            });
         } else {
-        console.log('Service workers are not supported.');
+            console.log('Service workers are not supported.');
         }
     </script>
 

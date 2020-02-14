@@ -259,6 +259,11 @@ class Facade {
             $administration->elements[] = $btn;
 
             $btn = new \stdClass();
+            $btn->caption = $this->app->getText('Einstellungen');
+            $btn->name = 'biwi_setting_Setting';
+            $administration->elements[] = $btn;
+
+            $btn = new \stdClass();
             $btn->caption = $this->app->getText('Mitteilungen');
             $btn->name = 'biwi_message_Message';
             $administration->elements[] = $btn;
@@ -311,7 +316,10 @@ class Facade {
      */
     public function logout(): edit\Rpc\ResponseDefault {
         session_destroy();
-        return new edit\Rpc\ResponseDefault();
+        $response = new edit\Rpc\ResponseDefault();
+        $response->success = true;
+
+        return $response;
     }
 
 

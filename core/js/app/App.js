@@ -36,9 +36,6 @@ biwi.app.App = class biwi_app_App {
             }
             this._rpc = new kijs.gui.Rpc(rpcConfig);
 
-            // Auth-token von URL entfernen
-            this._authToken = this._removeParameterFromUrl('authToken');
-
             // Variablen
             this._texts = null;
 
@@ -68,7 +65,7 @@ biwi.app.App = class biwi_app_App {
         return isDirty;
     }
 
-    get languageId() { return 'de'; }//return this._config.guiLanguageId; }
+    get languageId() { return this._config.guiLanguageId; }
     set languageId(val) { this._config.guiLanguageId = val; }
 
     get mainPanel() {
@@ -152,13 +149,10 @@ biwi.app.App = class biwi_app_App {
 
     /**
      * Startet die App. Hauptstartpunkt, wird von index aufgerufen.
+     * @param {type} url
      * @returns {undefined}
      */
-    run() {
-
-        // TODO
-        this._config.isUser = true;
-        this._config.isAdmin = true;
+    run(url) {
 
         // load translations
         this._rpc.do('app.getTexts', this.languageId, function(ret) {
@@ -177,11 +171,11 @@ biwi.app.App = class biwi_app_App {
                 });
                 this._viewport.render();
 
-                this._startApp(false);
+                this._startApp(!!url);
             }
         }, this);
-
     }
+
 
     /**
      * Zeigt eine Meldung an, wenn die Seite verlassen wird, und noch ungespeicherte
@@ -222,35 +216,6 @@ biwi.app.App = class biwi_app_App {
         }
     }
 
-    /**
-     * Beim Login
-     * @param {Object} e
-     * @returns {undefined}
-     */
-    _onLogin(e) {
-        e.element.destruct();
-        this._config.isLoggedIn = true;
-        this._config.isUser = e.response.isUser;
-        this._config.isFachbereich = e.response.isFachbereich;
-        this._config.isAdmin = e.response.isAdmin;
-
-        if (e.response.guiLanguageId === this.languageId) {
-            this._startApp(false);
-
-        } else {
-
-        // Sprache ist nicht mehr die selbe,  texte laden
-        this.languageId = e.response.guiLanguageId;
-
-        // load translations
-        this._rpc.do('app.getTexts', this.languageId, function(ret) {
-                this._texts = ret.texts;
-
-                this._startApp(true);
-
-            }, this);
-        }
-    }
 
     /**
      * Entfernt einen GET-Parameter aus der URL und gibt dessen Wert zurück
@@ -298,24 +263,18 @@ biwi.app.App = class biwi_app_App {
      * @returns {undefined}
      */
     _startApp(showSplashscreen) {
-        if (this._config.isLoggedIn && this._config.isUser) {
-//            this._splashScreen(showSplashscreen, function() {
-//                this._viewport.add(new biwi.app.MainPanel());
-//            });
-
-            this._viewport.add(new biwi.app.MainPanel());
+        if (this._config.isLoggedIn && this._config.loggedInUserRole) {
+            this._splashScreen(showSplashscreen, function() {
+                this._viewport.add(new biwi.app.MainPanel());
+            });
 
         // Benutzer ist eingeloggt, hat aber keine Rechte auf das App.
         // An Suissetec Kontakt weiterleiten.
         } else {
-            kijs.gui.MsgBox.error(
-                this.getText('Fehler'),
-                this.getText('Ihr Benutzer verfügt über keine Rechte zum Ausführen von kgweb. Bitte wenden Sie sich an suissetec.'),
-                function() {
-                    window.location.href = 'https://www.suissetec.ch/kontakt';
-                }, this);
+            kijs.gui.MsgBox.error(this.getText('Fehler'),this.getText('Ihr Benutzer verfügt über keine Rechte. Bitte wenden Sie sich an den Administrator.'));
         }
     }
+
 
     /**
      * Zeigt den Splashscreen an und startet danach das callback.
@@ -339,7 +298,6 @@ biwi.app.App = class biwi_app_App {
         } else {
             callbackFn.call(this);
         }
-
     }
 
     // --------------------------------------------------------------
@@ -352,5 +310,4 @@ biwi.app.App = class biwi_app_App {
         // Variablen
         this._rpc = null;
     }
-
 };

@@ -10,6 +10,8 @@ namespace biwi\edit\setting;
  */
 class Config {
     public $cssFiles = [];
-    public $jsFiles = [];
+    public $jsFiles = [
+        'setting/Setting.js'
+    ];
     public $isAutoLoadJavaScriptModule = false;
 }

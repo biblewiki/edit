@@ -49,6 +49,7 @@ biwi.person.GroupGridPanel = class biwi_person_GroupGridPanel extends biwi.defau
 
             // Eintrags ID aus der Zuweisungstabelle
             id: data.personGroupId,
+            personId: this._personId,
             version: this._version,
             dataRow: data
         });

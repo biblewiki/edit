@@ -41,16 +41,16 @@ class Kijs implements RouterInterface {
         // Der Content-Type muss "application/json" und die Method POST sein,
         // damit Cross Site Attacken (Cross-Origin Resource Sharing [CORS]) verhindert werden.
         if ($request->getHeader("Content-Type") !== "application/json") {
-            $this->app->kiExit("Invalid Content-Type.");
+            $this->app->biwiExit("Invalid Content-Type.");
         }
         if (mb_strtoupper($request->getMethod()) !== "POST") {
-            $this->app->kiExit("Invalid http request method: " . $request->getMethod());
+            $this->app->biwiExit("Invalid http request method: " . $request->getMethod());
         }
 
         // Request holen
         $dataJson = $request->getBodyAsString();
         if (!$dataJson) {
-            $this->app->kiExit("Invalid request.");
+            $this->app->biwiExit("Invalid request.");
         }
 
         $data = json_decode($dataJson);
@@ -58,7 +58,7 @@ class Kijs implements RouterInterface {
             $this->app->handleJsonError();
         } catch (\Throwable $e) {
             $response->addHeader("Content-Type", "application/json");
-            $this->app->kiExit($this->app->getExceptionHandler()->handleException($e, "json"));
+            $this->app->biwiExit($this->app->getExceptionHandler()->handleException($e, "json"));
         }
 
         // Funktion aufrufen

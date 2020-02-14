@@ -56,6 +56,11 @@ class Facade {
                 `group` AS groupVersion
             WHERE `group`.groupId = groupVersion.groupId)');
 
+        if (property_exists($args, 'personId') && $args->personId) {
+            $loader->getQueryBuilder()->addWhereElement('group.groupId NOT IN (SELECT groupId FROM personGroup WHERE personGroup.personId = :personId AND state = 10)');
+            $loader->getQueryBuilder()->addParam(':personId', $args->personId);
+        }
+
         return $loader->execute();
     }
 }

@@ -23,6 +23,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._primaryKey = null;
 
         this._id = null;
+        this._personId = null;
         this._version = null;
 
         this._formRemoteParams = {};
@@ -68,6 +69,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
             assignTable: true,
             dataRow: true,
             id: true,
+            personId: true,
             version: true,
             primaryKey: true
         });
@@ -258,6 +260,7 @@ biwi.default.DefaultFormWindow = class biwi_default_DefaultFormWindow extends ki
         this._primaryKey = null;
 
         this._id = null;
+        this._personId = null;
         this._version = null;
 
         this._formRemoteParams = null;

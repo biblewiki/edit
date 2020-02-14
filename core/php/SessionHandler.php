@@ -247,15 +247,17 @@ class SessionHandler {
      * @return string
      */
     public function read(string $sessionId): string {
+        $maxLifetime = ini_get("session.gc_maxlifetime");
         $st = $this->app->getDb()->prepare("
             SELECT
                 `data`
             FROM
                 `session`
             WHERE
-                `sessionId` = :sessionId
+                `sessionId` = :sessionId AND `lastAccess` + INTERVAL :maxLifetime SECOND > NOW()
         ");
         $st->bindParam(":sessionId", $sessionId, \PDO::PARAM_STR);
+        $st->bindParam(":maxLifetime", $maxLifetime, \PDO::PARAM_INT);
         $st->execute();
         $row = $st->fetch(\PDO::FETCH_ASSOC);
         unset($st);
@@ -336,13 +338,15 @@ class SessionHandler {
             $offset = $value[1];
             if ($lastOffset !== null) {
                 $valueText = mb_substr($data, (int)$lastOffset, $offset - $lastOffset);
-                $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
+                //$returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
+                $returnArray[$currentKey] = unserialize($valueText);
             }
             $currentKey = $value[0];
             $lastOffset = $offset + mb_strlen($currentKey) + 1;
         }
         $valueText = mb_substr($data, (int)$lastOffset);
-        $returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
+        //$returnArray[$currentKey] = unserialize($valueText, ["allowed_classes" => [biwi\Session::class]]);
+        $returnArray[$currentKey] = unserialize($valueText);
         return $returnArray;
     }
 }

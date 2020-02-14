@@ -26,70 +26,7 @@ class Facade {
         $this->app = $app;
     }
 
-
-    /**
-     * Personengrupp (en) löschen
-     *
-     * @param \stdClass $args
-     * @return \biwi\edit\Rpc\ResponseDefault
-     * @throws \Throwable
-     * @throws edit\ExceptionNotice
-     * @throws edit\Rpc\Warning
-     */
-        public function deletePersonGroup(\stdClass $args): edit\Rpc\ResponseDefault {
-        try {
-            $ids = \property_exists($args, 'selection') ? $args->selection : [];
-
-            // Rechte überprüfen
-            if (!$this->app->getLoggedInUserRole()) {
-                throw new edit\ExceptionNotice($this->app->getText("Sie verfügen nicht über die benötigten Berechtigungen für diesen Vorgang."));
-            }
-
-            if (!$ids) {
-                throw new edit\ExceptionNotice($this->app->getText('Es wurde kein Datensatz ausgewählt.'));
-            }
-
-            if (!$this->app->isIgnoreWarnings()) {
-                throw new edit\Rpc\Warning($this->app->getText('Möchten Sie die ausgewählten Datensätze wirklich löschen?'), $this->app->getText('Löschen') . '?');
-            }
-
-            // Transaktion starten
-            $this->app->getDb()->beginTransaction();
-
-            // sql
-            $st = $this->app->getDb()->prepare('DELETE FROM personGroup WHERE personGroupId = :personGroupId');
-
-            foreach ($ids as $id) {
-                $st->bindValue(':personGroupId', $id, \PDO::PARAM_INT);
-                $st->execute();
-
-            }
-            unset ($st);
-
-            // Kategorie holen
-            $category = edit\app\App::getCategoryByName($this->app, 'person');
-
-            // Quellen aus DB löschen
-            $deleteSources = new edit\DeleteSource($this->app, $category, 'personGroup');
-            $deleteSources->delete($ids);
-
-            // Transaktion beenden
-            $this->app->getDb()->commit();
-
-            $response = new edit\Rpc\ResponseDefault();
-            $response->return = $ids;
-            return $response;
-
-        } catch (\Throwable $e) {
-
-            // Rollback
-            $this->app->getDb()->rollBackIfTransaction();
-
-            throw $e;
-        }
-    }
-
-
+    
     /**
      * Beziehung(en) löschen
      *
