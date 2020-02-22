@@ -5,8 +5,6 @@ namespace biwi\edit\person;
 
 /**
  * Class Config
- *
- * @package ki\kgweb\kg\app
  */
 class Config {
     public $cssFiles = [];

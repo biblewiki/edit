@@ -5,11 +5,12 @@ namespace biwi\edit\group;
 
 /**
  * Class Config
- *
- * @package biwi\edit\group
  */
 class Config {
     public $cssFiles = [];
-    public $jsFiles = [];
+    public $jsFiles = [
+            'group/Overview.js',
+            'group/Group.js'
+        ];
     public $isAutoLoadJavaScriptModule = false;
 }

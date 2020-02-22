@@ -117,6 +117,7 @@ class Facade {
         $comboLoader = new edit\ComboLoader($this->app, $args, 'otherSource');
         $comboLoader->setCaptionSql('otherSource.type');
         $comboLoader->setValueSql('otherSource.type');
+        $comboLoader->setDistinct(true);
 
         return $comboLoader->execute();
 

@@ -26,7 +26,7 @@ class Facade {
         $this->app = $app;
     }
 
-    
+
     /**
      * Beziehung(en) löschen
      *
@@ -191,14 +191,14 @@ class Facade {
                 )
             )';
 
-        $loader->getQueryBuilderForSelect()->addParam(':status_10', $this->app->getText('Privater Entwurf'), \PDO::PARAM_STR);
-        $loader->getCntQueryBuilderForSelect()->addParam(':status_10', $this->app->getText('Privater Entwurf'), \PDO::PARAM_STR);
-        $loader->getQueryBuilderForSelect()->addParam(':status_20', $this->app->getText('Freigegebener Entwurf'), \PDO::PARAM_STR);
-        $loader->getCntQueryBuilderForSelect()->addParam(':status_20', $this->app->getText('Freigegebener Entwurf'), \PDO::PARAM_STR);
-        $loader->getQueryBuilderForSelect()->addParam(':status_30', $this->app->getText('Unveröffentlichter Eintrag'), \PDO::PARAM_STR);
-        $loader->getCntQueryBuilderForSelect()->addParam(':status_30', $this->app->getText('Unveröffentlichter Eintrag'), \PDO::PARAM_STR);
-        $loader->getQueryBuilderForSelect()->addParam(':status_40', $this->app->getText('Veröffentlichter Eintrag'), \PDO::PARAM_STR);
-        $loader->getCntQueryBuilderForSelect()->addParam(':status_40', $this->app->getText('Veröffentlichter Eintrag'), \PDO::PARAM_STR);
+        $loader->getQueryBuilderForSelect()->addParam(':status_10', $this->app->getSetting('state10'), \PDO::PARAM_STR);
+        $loader->getCntQueryBuilderForSelect()->addParam(':status_10', $this->app->getSetting('state10'), \PDO::PARAM_STR);
+        $loader->getQueryBuilderForSelect()->addParam(':status_20', $this->app->getSetting('state20'), \PDO::PARAM_STR);
+        $loader->getCntQueryBuilderForSelect()->addParam(':status_20', $this->app->getSetting('state20'), \PDO::PARAM_STR);
+        $loader->getQueryBuilderForSelect()->addParam(':status_30', $this->app->getSetting('state30'), \PDO::PARAM_STR);
+        $loader->getCntQueryBuilderForSelect()->addParam(':status_30', $this->app->getSetting('state30'), \PDO::PARAM_STR);
+        $loader->getQueryBuilderForSelect()->addParam(':status_40', $this->app->getSetting('state40'), \PDO::PARAM_STR);
+        $loader->getCntQueryBuilderForSelect()->addParam(':status_40', $this->app->getSetting('state40'), \PDO::PARAM_STR);
         $loader->getQueryBuilderForSelect()->addParam(':status_ukn', $this->app->getText('Unbekannt'), \PDO::PARAM_STR);
         $loader->getCntQueryBuilderForSelect()->addParam(':status_ukn', $this->app->getText('Unbekannt'), \PDO::PARAM_STR);
 
@@ -316,7 +316,7 @@ class Facade {
 
         // neuer Datensatz?
         if (\property_exists($args, 'create') && $args->create === true) {
-            unset($row['mitteilungId']);
+            unset($row['personId']);
         }
 
         $row['openTS'] = date('Y-m-d H:i:s');
@@ -676,6 +676,13 @@ class Facade {
     }
 
 
+    /**
+     * Gibt die Quellen zurück
+     * @param \stdClass $args
+     * @return object
+     * @throws edit\ExceptionNotice
+     * @throws ExceptionNotice
+     */
     public function getSources(\stdClass $args): object {
 
         $personId = null;
@@ -755,6 +762,7 @@ class Facade {
             $formPacket['personId'] = $personId;
             $formPacket['version'] = $version;
 
+            // Beruf(e) in separater Tabelle speichern
             if ($formPacket['proficiency']) {
                 $saveProfeciency = new edit\SaveData($this->app, $this->app->getLoggedInUserId(), 'personProficiency');
                 $saveProfeciency->save($formPacket);
