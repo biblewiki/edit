@@ -24309,7 +24309,7 @@ kijs.gui.field.Combo = class kijs_gui_field_Combo extends kijs.gui.field.Field {
         super._onSpinButtonClick(e);
         this._listViewEl.applyFilters();
 
-        if (this._remoteSort && this._listViewEl.data.length === 0) {
+        if (this._listViewEl.data.length === 0) {
             this._addPlaceholder(kijs.getText('Schreiben Sie mindestens %1 Zeichen, um die Suche zu starten', '', this._minChars) + '.');
         }
     }
@@ -24548,7 +24548,7 @@ kijs.gui.field.DateTime = class kijs_gui_field_DateTime extends kijs.gui.field.F
     set hasTime(val) { this._hasTime = !!val; }
 
     // overwrite
-    get isEmpty() { return kijs.isEmpty(this._inputDom.value); }
+    get isEmpty() { return kijs.isEmpty(this.value); }
 
     get inputDom() { return this._inputDom; }
 
@@ -25209,6 +25209,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
         this._mode = 'javascript';
         this._theme = null;
         this._value = null;
+        this._oldValue = null;
 
         this._dom.clsAdd('kijs-field-editor');
 
@@ -25236,10 +25237,12 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
     get disabled() { return super.disabled; }
     set disabled(val) {
         super.disabled = !!val;
-        if (val || this._dom.clsHas('kijs-readonly')) {
-            this._aceEditor.setReadOnly(true);
-        } else {
-            this._aceEditor.setReadOnly(false);
+        if (this._aceEditor) {
+            if (val || this._dom.clsHas('kijs-disabled')) {
+                this._aceEditor.setReadOnly(true);
+            } else {
+                this._aceEditor.setReadOnly(false);
+            }
         }
     }
 
@@ -25253,18 +25256,13 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
     get readOnly() { return super.readOnly; }
     set readOnly(val) {
         super.readOnly = !!val;
-        if (val || this._dom.clsHas('kijs-disabled')) {
-            this._aceEditor.setReadOnly(true);
-        } else {
-            this._aceEditor.setReadOnly(false);
+        if (this._aceEditor) {
+            this._aceEditor.setReadOnly(!!val);
         }
     }
 
     get theme() { return this._theme; }
     set theme(val) { this._theme = val; }
-
-    get trimValue() { return this._trimValue; }
-    set trimValue(val) { this._trimValue = val; }
 
     // overwrite
     get value() {
@@ -25277,6 +25275,9 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
     set value(val) {
         this._value = val;
         if (this._aceEditor) {
+            if (val === null) {
+                val = '';
+            }
             this._aceEditor.setValue(val, 1);
         }
     }
@@ -25300,11 +25301,11 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
             // Zeitverzögert den Listener erstellen
             kijs.defer(function() {
-                this._aceEditor.session.on('change', () => {
-                    this.raiseEvent('input');
-                });
+                this._aceEditor.on('change', () => { this.raiseEvent('input'); });
+                this._aceEditor.getSession().on('changeAnnotation', () => { this._onAnnotationChange() });
 
-                kijs.Dom.addEventListener('change', inputNode, this._onInputNodeChange, this);
+                kijs.Dom.addEventListener('focus', inputNode, this._onInputNodeFocus, this);
+                kijs.Dom.addEventListener('blur', inputNode, this._onInputNodeBlur, this);
             }, 200, this);
         } else {
             this._inputWrapperDom.node.appendChild(this._aceEditorNode);
@@ -25321,6 +25322,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
         }
 
         this.value = this._value ? this._value : '';
+        this._aceEditor.setReadOnly(this.readOnly || this.disabled);
 
         // Event afterRender auslösen
         if (!superCall) {
@@ -25330,12 +25332,25 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
 
     // LISTENERS
+    _onAnnotationChange() {
+        if (this._value) {
+            this.validate();
+        }
+    }
+
     _onInput() {
         this.validate();
     }
 
-    _onInputNodeChange() {
-        this.raiseEvent('change');
+    _onInputNodeFocus() {
+        this._oldValue = this._value;
+    }
+
+    _onInputNodeBlur() {
+        if (this.value !== this._oldValue) {
+            this._oldValue = this.value;
+            this.raiseEvent('change');
+        }
     }
 
     // PROTECTED
@@ -25345,7 +25360,7 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
 
         // Fehler des Editors auch übernehmen
         if (this._aceEditor) {
-            const annot = this._aceEditor.getSession().getAnnotations();
+            const annot = this._aceEditor.session.getAnnotations();
             for (let key in annot) {
                 if (annot.hasOwnProperty(key)) {
                     this._errors.push("'" + annot[key].text + "'" + ' in Zeile ' + (annot[key].row+1));
@@ -25379,11 +25394,13 @@ kijs.gui.field.Editor = class kijs_gui_field_Editor extends kijs.gui.field.Field
         this._mode = null;
         this._theme = null;
         this._value = null;
+        this._oldValue = null;
 
         // Basisklasse entladen
         super.destruct(true);
     }
 };
+
 /* global kijs, this */
 
 // --------------------------------------------------------------
@@ -25685,7 +25702,7 @@ kijs.gui.field.Memo = class kijs_gui_field_Memo extends kijs.gui.field.Field {
     }
 
     // overwrite
-    get isEmpty() { return kijs.isEmpty(this._inputDom.value); }
+    get isEmpty() { return kijs.isEmpty(this.value); }
 
     get inputDom() { return this._inputDom; }
 
@@ -25892,7 +25909,7 @@ kijs.gui.field.Password = class kijs_gui_field_Password extends kijs.gui.field.F
     }
 
     // overwrite
-    get isEmpty() { return kijs.isEmpty(this._inputDom.value); }
+    get isEmpty() { return kijs.isEmpty(this.value); }
 
     get inputDom() { return this._inputDom; }
 
@@ -26120,14 +26137,14 @@ kijs.gui.field.QuillEditor = class kijs_gui_field_QuillEditor extends kijs.gui.f
             [{ align: [] }],
 
             ['clean']                                      // remove formatting button
-          ];
+        ];
 
         // Standard-config-Eigenschaften mergen
         Object.assign(this._defaultConfig, {
             cls: 'kijs-field-quilleditor'
         });
 
-       // Mapping für die Zuweisung der Config-Eigenschaften
+        // Mapping für die Zuweisung der Config-Eigenschaften
         Object.assign(this._configMap, {
             disabled: true,
             readOnly: true,
@@ -26187,7 +26204,7 @@ kijs.gui.field.QuillEditor = class kijs_gui_field_QuillEditor extends kijs.gui.f
     // overwrite
     get value() {
         if (this._quillEditor) {
-            return this._quillEditor.getText();
+            return this._quillEditor.root.innerHTML;
         } else {
             return this._value;
         }
@@ -26403,7 +26420,7 @@ kijs.gui.field.Text = class kijs_gui_field_Text extends kijs.gui.field.Field {
     }
 
     // overwrite
-    get isEmpty() { return kijs.isEmpty(this._inputDom.value); }
+    get isEmpty() { return kijs.isEmpty(this.value); }
 
     get inputDom() { return this._inputDom; }
 

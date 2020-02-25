@@ -2293,29 +2293,30 @@ _openLink(link,type){if(type==='tel'){window.open('tel:'+link.replace(/[^\+0-9]/
 _onDomClick(){if(this._link&&!this.disabled&&!this.readOnly){let linkType=this._linkType==='auto'?this._getLinkType(this.value):this._linkType;this._openLink(kijs.toString(this.value),linkType);}}
 destruct(superCall){if(!superCall){this.unrender(superCall);this.raiseEvent('destruct');}
 if(this._inputDom){this._inputDom.destruct();}
-this._inputDom=null;super.destruct(true);}};kijs.gui.field.Editor=class kijs_gui_field_Editor extends kijs.gui.field.Field{constructor(config={}){super(false);this._aceEditor=null;this._aceEditorNode=null;this._mode='javascript';this._theme=null;this._value=null;this._dom.clsAdd('kijs-field-editor');Object.assign(this._configMap,{mode:true,theme:true});this.on('input',this._onInput,this);if(kijs.isObject(config)){config=Object.assign({},this._defaultConfig,config);this.applyConfig(config,true);}}
+this._inputDom=null;super.destruct(true);}};kijs.gui.field.Editor=class kijs_gui_field_Editor extends kijs.gui.field.Field{constructor(config={}){super(false);this._aceEditor=null;this._aceEditorNode=null;this._mode='javascript';this._theme=null;this._value=null;this._oldValue=null;this._dom.clsAdd('kijs-field-editor');Object.assign(this._configMap,{mode:true,theme:true});this.on('input',this._onInput,this);if(kijs.isObject(config)){config=Object.assign({},this._defaultConfig,config);this.applyConfig(config,true);}}
 get disabled(){return super.disabled;}
-set disabled(val){super.disabled=!!val;if(val||this._dom.clsHas('kijs-readonly')){this._aceEditor.setReadOnly(true);}else{this._aceEditor.setReadOnly(false);}}
+set disabled(val){super.disabled=!!val;if(this._aceEditor){if(val||this._dom.clsHas('kijs-disabled')){this._aceEditor.setReadOnly(true);}else{this._aceEditor.setReadOnly(false);}}}
 get isEmpty(){return kijs.isEmpty(this.value);}
 get mode(){return this._mode;}
 set mode(val){this._mode=val;}
 get readOnly(){return super.readOnly;}
-set readOnly(val){super.readOnly=!!val;if(val||this._dom.clsHas('kijs-disabled')){this._aceEditor.setReadOnly(true);}else{this._aceEditor.setReadOnly(false);}}
+set readOnly(val){super.readOnly=!!val;if(this._aceEditor){this._aceEditor.setReadOnly(!!val);}}
 get theme(){return this._theme;}
 set theme(val){this._theme=val;}
-get trimValue(){return this._trimValue;}
-set trimValue(val){this._trimValue=val;}
 get value(){if(this._aceEditor){return this._aceEditor.getValue();}else{return this._value;}}
-set value(val){this._value=val;if(this._aceEditor){this._aceEditor.setValue(val,1);}}
-render(superCall){super.render(true);if(!this._aceEditor){this._aceEditorNode=document.createElement('div');this._inputWrapperDom.node.appendChild(this._aceEditorNode);this._aceEditor=ace.edit(this._aceEditorNode);let inputNode=this._aceEditorNode.firstChild;inputNode.id=this._inputId;kijs.defer(function(){this._aceEditor.session.on('change',()=>{this.raiseEvent('input');});kijs.Dom.addEventListener('change',inputNode,this._onInputNodeChange,this);},200,this);}else{this._inputWrapperDom.node.appendChild(this._aceEditorNode);}
+set value(val){this._value=val;if(this._aceEditor){if(val===null){val='';}
+this._aceEditor.setValue(val,1);}}
+render(superCall){super.render(true);if(!this._aceEditor){this._aceEditorNode=document.createElement('div');this._inputWrapperDom.node.appendChild(this._aceEditorNode);this._aceEditor=ace.edit(this._aceEditorNode);let inputNode=this._aceEditorNode.firstChild;inputNode.id=this._inputId;kijs.defer(function(){this._aceEditor.on('change',()=>{this.raiseEvent('input');});this._aceEditor.getSession().on('changeAnnotation',()=>{this._onAnnotationChange()});kijs.Dom.addEventListener('focus',inputNode,this._onInputNodeFocus,this);kijs.Dom.addEventListener('blur',inputNode,this._onInputNodeBlur,this);},200,this);}else{this._inputWrapperDom.node.appendChild(this._aceEditorNode);}
 this._aceEditor.setHighlightActiveLine(false);if(this._theme){this._aceEditor.setTheme('ace/theme/'+this._theme);}
 if(this._mode){this._aceEditor.session.setMode('ace/mode/'+this._mode);}
-this.value=this._value?this._value:'';if(!superCall){this.raiseEvent('afterRender');}}
+this.value=this._value?this._value:'';this._aceEditor.setReadOnly(this.readOnly||this.disabled);if(!superCall){this.raiseEvent('afterRender');}}
+_onAnnotationChange(){if(this._value){this.validate();}}
 _onInput(){this.validate();}
-_onInputNodeChange(){this.raiseEvent('change');}
-_validationRules(value){super._validationRules(value);if(this._aceEditor){const annot=this._aceEditor.getSession().getAnnotations();for(let key in annot){if(annot.hasOwnProperty(key)){this._errors.push("'"+annot[key].text+"'"+' in Zeile '+(annot[key].row+1));}}}}
+_onInputNodeFocus(){this._oldValue=this._value;}
+_onInputNodeBlur(){if(this.value!==this._oldValue){this._oldValue=this.value;this.raiseEvent('change');}}
+_validationRules(value){super._validationRules(value);if(this._aceEditor){const annot=this._aceEditor.session.getAnnotations();for(let key in annot){if(annot.hasOwnProperty(key)){this._errors.push("'"+annot[key].text+"'"+' in Zeile '+(annot[key].row+1));}}}}
 destruct(superCall){if(!superCall){this.unrender(superCall);this.raiseEvent('destruct');}
-kijs.Dom.removeEventListener('change',this._aceEditorNode.firstChild,this);this._aceEditor.destroy();this._aceEditor.container.remove();this._aceEditor=null;this._aceEditorNode=null;this._mode=null;this._theme=null;this._value=null;super.destruct(true);}};kijs.gui.field.ListView=class kijs_gui_field_ListView extends kijs.gui.field.Field{constructor(config={}){super(false);this._minSelectCount=null;this._maxSelectCount=null;this._oldValue=[];this._listView=new kijs.gui.ListView({});this._dom.clsAdd('kijs-field-listview');Object.assign(this._configMap,{autoLoad:{target:'autoLoad',context:this._listView},ddSort:{target:'ddSort',context:this._listView},showCheckBoxes:{target:'showCheckBoxes',context:this._listView},selectType:{target:'selectType',context:this._listView},facadeFnLoad:{target:'facadeFnLoad',context:this._listView},rpc:{target:'rpc',context:this._listView},captionField:{target:'captionField',context:this._listView},iconCharField:{target:'iconCharField',context:this._listView},iconClsField:{target:'iconClsField',context:this._listView},iconColorField:{target:'iconColorField',context:this._listView},toolTipField:{target:'toolTipField',context:this._listView},valueField:{target:'valueField',context:this._listView},minSelectCount:true,maxSelectCount:true,data:{prio:1000,target:'data',context:this._listView},value:{prio:1001,target:'value'}});this._listView.on('selectionChange',this._onListViewSelectionChange,this);this._eventForwardsAdd('ddOver',this._listView);this._eventForwardsAdd('ddDrop',this._listView.dom);if(kijs.isObject(config)){config=Object.assign({},this._defaultConfig,config);this.applyConfig(config,true);}}
+kijs.Dom.removeEventListener('change',this._aceEditorNode.firstChild,this);this._aceEditor.destroy();this._aceEditor.container.remove();this._aceEditor=null;this._aceEditorNode=null;this._mode=null;this._theme=null;this._value=null;this._oldValue=null;super.destruct(true);}};kijs.gui.field.ListView=class kijs_gui_field_ListView extends kijs.gui.field.Field{constructor(config={}){super(false);this._minSelectCount=null;this._maxSelectCount=null;this._oldValue=[];this._listView=new kijs.gui.ListView({});this._dom.clsAdd('kijs-field-listview');Object.assign(this._configMap,{autoLoad:{target:'autoLoad',context:this._listView},ddSort:{target:'ddSort',context:this._listView},showCheckBoxes:{target:'showCheckBoxes',context:this._listView},selectType:{target:'selectType',context:this._listView},facadeFnLoad:{target:'facadeFnLoad',context:this._listView},rpc:{target:'rpc',context:this._listView},captionField:{target:'captionField',context:this._listView},iconCharField:{target:'iconCharField',context:this._listView},iconClsField:{target:'iconClsField',context:this._listView},iconColorField:{target:'iconColorField',context:this._listView},toolTipField:{target:'toolTipField',context:this._listView},valueField:{target:'valueField',context:this._listView},minSelectCount:true,maxSelectCount:true,data:{prio:1000,target:'data',context:this._listView},value:{prio:1001,target:'value'}});this._listView.on('selectionChange',this._onListViewSelectionChange,this);this._eventForwardsAdd('ddOver',this._listView);this._eventForwardsAdd('ddDrop',this._listView.dom);if(kijs.isObject(config)){config=Object.assign({},this._defaultConfig,config);this.applyConfig(config,true);}}
 get autoLoad(){return this._listView.autoLoad;}
 set autoLoad(val){this._listView.autoLoad=val;}
 get data(){return this._listView.data;}
@@ -2410,7 +2411,7 @@ get theme(){return this._theme;}
 set theme(val){this._theme=val;}
 get trimValue(){return this._trimValue;}
 set trimValue(val){this._trimValue=val;}
-get value(){if(this._quillEditor){return this._quillEditor.getText();}else{return this._value;}}
+get value(){if(this._quillEditor){return this._quillEditor.root.innerHTML;}else{return this._value;}}
 set value(val){this._value=val;if(this._quillEditor){this._quillEditor.setText(val);}}
 render(superCall){super.render(true);if(!this._quillEditor){let containerDiv=document.createElement('div');containerDiv.className='quilleditor';this._inputWrapperDom.node.appendChild(containerDiv);this._quillEditorNode=document.createElement('div');containerDiv.appendChild(this._quillEditorNode);this._quillEditor=new Quill(this._quillEditorNode,{theme:this._theme,readOnly:this._readOnly||this._disabled,modules:{toolbar:this._toolbarOptions}});let inputNode=this._quillEditorNode.firstChild;inputNode.id=this._inputId;this._quillEditor.on('text-change',function(){this.raiseEvent(['input','change']);},this);}
 this.value=this._value?this._value:'';if(!superCall){this.raiseEvent('afterRender');}}

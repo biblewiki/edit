@@ -206,7 +206,7 @@ biwi.default.DefaultFormPanel = class biwi_default_DefaultFormPanel extends kijs
             rpc: this._app.rpc,
             facadeFnLoad: this._formFnLoad,
             facadeFnSave: this._formFnSave,
-            cls: 'biwi-default-from-panel'
+            cls: 'biwi-default-form-panel'
         });
 
         // FormPanel mit Elementen füllen

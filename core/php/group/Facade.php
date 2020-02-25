@@ -85,7 +85,7 @@ class Facade {
         $html .= '<table>';
         $html .= '<tr>';
         $html .= '<td><b>Erstellt</b></td>';
-        $html .= '<td>' . $createRow['createId'] . '</td>';
+        $html .= '<td>' . $this->app->getUserName($createRow['createId']) . '</td>';
         $html .= '<td>' . gmdate('d.m.Y H:i', $createRow['createDate']) . '</td>';
         $html .= '</tr>';
 
@@ -97,7 +97,7 @@ class Facade {
         foreach ($changeRows as $changeRow) {
             $html .= '<tr>';
             $html .= '<td></td>';
-            $html .= '<td>' . $changeRow['changeId'] . '</td>';
+            $html .= '<td>' . $this->app->getUserName($changeRow['changeId']) . '</td>';
             $html .= '<td>' . gmdate('d.m.Y H:i', $changeRow['changeDate']) . '</td>';
             $html .= '</tr>';
         }
@@ -159,7 +159,13 @@ class Facade {
                 `group` AS groupVersion
             WHERE `group`.groupId = groupVersion.groupId)');
 
-        return $loader->load();
+        $result = $loader->load();
+
+        foreach ($result->rows as &$row) {
+            $row['createId'] = $this->app->getUserName($row['createId']);
+        }
+
+        return $result;
     }
 
 
@@ -230,8 +236,18 @@ class Facade {
         } else {
             $row['groupId'] = null;
             $row['version'] = null;
+            $row['level'] = null;
             $row['name'] = null;
-            $row['description'] = null;
+            $row['groupType'] = null;
+            $row['dayFounding'] = null;
+            $row['monthFounding'] = null;
+            $row['yearFounding'] = null;
+            $row['beforeChristFounding'] = null;
+            $row['dayResolution'] = null;
+            $row['monthResolution'] = null;
+            $row['yearResolution'] = null;
+            $row['beforeChristResolution'] = null;
+            $row['text'] = null;
         }
 
         // neuer Datensatz?
@@ -306,7 +322,7 @@ class Facade {
 
 
     /**
-     * GIbt die QUellen zurück
+     * Gibt die Quellen zurück
      * @param \stdClass $args
      * @return object
      * @throws edit\ExceptionNotice

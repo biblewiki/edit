@@ -97,6 +97,32 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
                     cls: 'biwi-form-row',
                     elements: [
                         {
+                            xtype: 'kijs.gui.field.Range',
+                            name: 'level',
+                            label: this._app.getText('Sichtbarkeitslevel'),
+                            labelWidth: 110,
+                            min: 1,
+                            max: 10,
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Element',
+                                    name: 'levelValue',
+                                    cls: 'rangeValue'
+                                }
+                            ],
+                            on: {
+                                change: function(e) {
+                                    e.element.down('levelValue').html = e.element.value;
+                                },
+                                context: this
+                            }
+                        }
+                    ]
+                },{
+                    xtype: 'kijs.gui.Container',
+                    cls: 'biwi-form-row',
+                    elements: [
+                        {
                             xtype: 'kijs.gui.field.OptionGroup',
                             name: 'sex',
                             label: this._app.getText('Geschlecht'),
@@ -296,6 +322,8 @@ biwi.person.Person = class biwi_person_Person extends biwi.default.DefaultFormPa
     }
 
     _onAfterFormLoad() {
+        this.down('levelValue').html = this.down('level').value;
+
         this.down('relationshipGrid').personId = this._id;
         this.down('relationshipGrid').version = this._version;
         this.down('relationshipGrid').reload();

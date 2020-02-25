@@ -1,12 +1,12 @@
 /* global kijs, biwi */
 
 // --------------------------------------------------------------
-// biwi.group.Group
+// biwi.epoch.Epoch
 // --------------------------------------------------------------
 
-kijs.createNamespace('biwi.group');
+kijs.createNamespace('biwi.epoch');
 
-biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel {
+biwi.epoch.Epoch = class biwi_epoch_Epoch extends biwi.default.DefaultFormPanel {
 
     // --------------------------------------------------------------
     // CONSTRUCTOR
@@ -16,11 +16,11 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
 
         // Standard-config-Eigenschaften
         Object.assign(this._defaultConfig, {
-            formFnLoad: 'group.getFormData',
-            formFnSave: 'group.saveDetailForm',
-            detailFnLoad: 'group.getDetailHtml',
-            sourceFnLoad: 'group.getSources',
-            formCaption: this._app.getText('Group')
+            formFnLoad: 'epoch.getFormData',
+            formFnSave: 'epoch.saveDetailForm',
+            detailFnLoad: 'epoch.getDetailHtml',
+            sourceFnLoad: 'epoch.getSources',
+            formCaption: this._app.getText('Epochen')
         });
 
          // Mapping für die Zuweisung der Config-Eigenschaften
@@ -42,6 +42,8 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
 
     // overwrite
     _populateFormPanel(formPanel) {
+
+        formPanel.on('afterLoad', this._onAfterFormLoad, this);
 
         // Felder hinzufügen
         formPanel.add(
@@ -66,14 +68,25 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
                                 }
                             ]
                         },{
-                            xtype: 'kijs.gui.field.Combo',
-                            name: 'groupType',
-                            label: this._app.getText('Typ'),
-                            remoteSort: true,
-                            forceSelection: false,
-                            rpc: this._app.rpc,
-                            facadeFnLoad: 'group.getOtherType',
-                            minChars: 1
+                            xtype: 'kijs.gui.field.Range',
+                            name: 'level',
+                            label: this._app.getText('Sichtbarkeitslevel'),
+                            labelWidth: 110,
+                            min: 1,
+                            max: 10,
+                            elements: [
+                                {
+                                    xtype: 'kijs.gui.Element',
+                                    name: 'levelValue',
+                                    cls: 'rangeValue'
+                                }
+                            ],
+                            on: {
+                                change: function(e) {
+                                    e.element.down('levelValue').html = e.element.value;
+                                },
+                                context: this
+                            }
                         }
                     ]
                 },{
@@ -82,23 +95,23 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
                     elements: [
                         {
                             xtype: 'kijs.gui.field.Number',
-                            name: 'dayFounding',
-                            label: this._app.getText('Gründung Tag'),
+                            name: 'dayStart',
+                            label: this._app.getText('Start Tag'),
                             minValue: 1,
                             maxValue: 31
                         },{
                             xtype: 'kijs.gui.field.Number',
-                            name: 'monthFounding',
+                            name: 'monthStart',
                             label: this._app.getText('Monat'),
                             minValue: 1,
                             maxValue: 12
                         },{
                             xtype: 'kijs.gui.field.Number',
-                            name: 'yearFounding',
+                            name: 'yearStart',
                             label: this._app.getText('Jahr')
                         },{
                             xtype: 'kijs.gui.field.Checkbox',
-                            name: 'beforeChristFounding',
+                            name: 'beforeChristStart',
                             label: this._app.getText('vor Christus'),
                             elements: [
                                 {
@@ -113,23 +126,23 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
                             ]
                         },{
                             xtype: 'kijs.gui.field.Number',
-                            name: 'dayResolution',
-                            label: this._app.getText('Auflösung Tag'),
+                            name: 'dayEnd',
+                            label: this._app.getText('End Tag'),
                             minValue: 1,
                             maxValue: 31
                         },{
                             xtype: 'kijs.gui.field.Number',
-                            name: 'monthResolution',
+                            name: 'monthEnd',
                             label: this._app.getText('Monat'),
                             minValue: 1,
                             maxValue: 12
                         },{
                             xtype: 'kijs.gui.field.Number',
-                            name: 'yearResolution',
+                            name: 'yearEnd',
                             label: this._app.getText('Jahr')
                         },{
                             xtype: 'kijs.gui.field.Checkbox',
-                            name: 'beforeChristResolution',
+                            name: 'beforeChristEnd',
                             label: this._app.getText('vor Christus'),
                             elements: [
                                 {
@@ -160,6 +173,12 @@ biwi.group.Group = class biwi_group_Group extends biwi.default.DefaultFormPanel 
             ]
         );
     }
+
+    // Events
+    _onAfterFormLoad() {
+        this.down('levelValue').html = this.down('level').value;
+    }
+
 
     // --------------------------------------------------------------
     // DESTRUCTOR

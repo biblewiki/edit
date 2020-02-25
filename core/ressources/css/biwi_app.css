@@ -162,13 +162,17 @@ span.biwi-logo-header {
 /* ******************
    * Formular
    ****************** */
-.biwi-default-from-panel {
+.biwi-default-form-panel {
   flex: 1;
   min-width: 50%;
 }
-.biwi-default-from-panel > .kijs-container-inner {
+.biwi-default-form-panel > .kijs-container-inner {
   padding: 10px;
   overflow-y: auto;
+}
+.biwi-default-form-panel .rangeValue {
+  width: 50px;
+  text-align: center;
 }
 .biwi-form-row > .kijs-container-inner {
   display: flex;

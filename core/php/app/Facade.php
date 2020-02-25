@@ -225,6 +225,26 @@ class Facade {
         $btn->name = 'biwi_animal_Overview';
         $elements[] = $btn;
 
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Themen');
+        $btn->name = 'biwi_subject_Overview';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Listen');
+        $btn->name = 'biwi_lists_Overview';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Epochen');
+        $btn->name = 'biwi_epoch_Overview';
+        $elements[] = $btn;
+
+        $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Ereignisse');
+        $btn->name = 'biwi_event_Overview';
+        $elements[] = $btn;
+
         // ****************************
         // Personen
         // ****************************

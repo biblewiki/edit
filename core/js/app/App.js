@@ -171,9 +171,7 @@ biwi.app.App = class biwi_app_App {
                 });
                 this._viewport.render();
 
-                // TODO: @joel Change
-                //this._startApp(!!url);
-                this._startApp(false);
+                this._startApp(!!url);
             }
         }, this);
     }

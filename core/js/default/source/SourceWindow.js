@@ -185,7 +185,7 @@ biwi.default.source.SourceWindow = class biwi_default_source_SourceWindow extend
 
                 }, this);
             } else {
-                kijs.gui.MsgBox.error('Kein Primary Key oder ID angegeben um die Quellen zu laden');
+                kijs.gui.MsgBox.error(this._app.getText('Fehler'), this._app.getText('Kein Primary Key oder ID angegeben um die Quellen zu laden'));
                 resolve();
             }
         });

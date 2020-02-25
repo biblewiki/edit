@@ -147,7 +147,7 @@ class Facade {
         $html .= '<table>';
         $html .= '<tr>';
         $html .= '<td><b>Erstellt</b></td>';
-        $html .= '<td>' . $createRow['createId'] . '</td>';
+        $html .= '<td>' . $this->app->getUserName($createRow['createId']) . '</td>';
         $html .= '<td>' . gmdate('d.m.Y H:i', $createRow['createDate']) . '</td>';
         $html .= '</tr>';
 
@@ -159,7 +159,7 @@ class Facade {
         foreach ($changeRows as $changeRow) {
             $html .= '<tr>';
             $html .= '<td></td>';
-            $html .= '<td>' . $changeRow['changeId'] . '</td>';
+            $html .= '<td>' . $this->app->getUserName($changeRow['changeId']) . '</td>';
             $html .= '<td>' . gmdate('d.m.Y H:i', $changeRow['changeDate']) . '</td>';
             $html .= '</tr>';
         }
@@ -222,7 +222,13 @@ class Facade {
             WHERE person.personId = personVersion.personId)
         ');
 
-        return $loader->load();
+        $result = $loader->load();
+
+        foreach ($result->rows as &$row) {
+            $row['createId'] = $this->app->getUserName($row['createId']);
+        }
+
+        return $result;
     }
 
 
@@ -256,6 +262,7 @@ class Facade {
             $qryBld = new edit\SqlSelector('person');
             $qryBld->addSelectElement('person.personId');
             $qryBld->addSelectElement('person.version');
+            $qryBld->addSelectElement('person.level');
             $qryBld->addSelectElement('person.name');
             $qryBld->addSelectElement('person.description');
             $qryBld->addSelectElement('person.sex');
@@ -298,6 +305,7 @@ class Facade {
         } else {
             $row['personId'] = null;
             $row['version'] = null;
+            $row['name'] = null;
             $row['name'] = null;
             $row['description'] = null;
             $row['sex'] = null;
