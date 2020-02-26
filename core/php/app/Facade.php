@@ -221,6 +221,12 @@ class Facade {
         $elements[] = $btn;
 
         $btn = new \stdClass();
+        $btn->caption = $this->app->getText('Regionen');
+        $btn->name = 'biwi_region_Overview';
+        $elements[] = $btn;
+        
+
+        $btn = new \stdClass();
         $btn->caption = $this->app->getText('Tiere');
         $btn->name = 'biwi_animal_Overview';
         $elements[] = $btn;
